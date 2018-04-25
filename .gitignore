@@ -1,0 +1,8 @@
+
+/target/
+/results/
+/inputs/
+/figs/
+Archive.zip
+**/*.rs.bk
+*.out

@@ -1,0 +1,11 @@
+[package]
+name = "parLGP"
+version = "0.1.0"
+authors = ["Kyle Nickerson <kln870@mun.ca>"]
+
+[dependencies]
+rand = "0.4"
+time = "*"
+csv = "1.0.0-beta.5"
+serde = "1"
+indexmap = "1.0.1"
