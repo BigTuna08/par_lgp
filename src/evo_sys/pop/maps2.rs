@@ -1,8 +1,8 @@
 use dataMgmt::dataset::ValidationSet;
 use dataMgmt::message::Message;
+use evo_sys;
+use evo_sys::prog::prog::Program;
 use params;
-use progSystem;
-use progSystem::prog::Program;
 use rand;
 use rand::Rng;
 use std;
@@ -252,7 +252,7 @@ impl ResultMap {
             for col_i in 0.. params::MAP_COLS{
                 if self.cv_map[row_i][col_i] == params::MIN_FIT{ //new since last, or doesnt exist
                     if let Some(ref genome) = self.geno_map[row_i][col_i] { //does exist
-                        let fit = progSystem::eval::eval_program_cv(genome, &data);
+                        let fit = evo_sys::prog::eval::eval_program_cv(genome, &data);
                         self.cv_map[row_i][col_i] = fit;
                         ave += fit;
                         count += 1.0;

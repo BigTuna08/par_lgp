@@ -6,3 +6,8 @@
 Archive.zip
 **/*.rs.bk
 *.out
+
+
+.idea/misc.xml
+.idea/modules.xml
+.idea/workspace.xml
