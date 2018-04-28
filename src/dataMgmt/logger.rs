@@ -56,7 +56,7 @@ impl FileSet{
 
 }
 
-pub struct Logger<'a>{
+pub struct Logger{
     pub freq: u32,
     pub root_dir: String,
 
@@ -64,15 +64,15 @@ pub struct Logger<'a>{
     cv_output_files: Option<FileSet>,
     geno_output_files: Vec<FileSet>,
 
-    pub geno_functions: Vec<&'a GenoEval>,
+    pub geno_functions: Vec<&'static GenoEval>,
 
     current_iter: u16,
     current_fold: u8, //assumes 5 fold
 }
 
 
-impl<'a> Logger<'a>{
-    pub fn new(freq: u32, root_dir: &str) -> Logger<'a> {
+impl Logger{
+    pub fn new(freq: u32, root_dir: &str) -> Logger {
         create_dir(format!("{}/genos", root_dir));
         create_dir(format!("{}/cv_fit_maps", root_dir));
         create_dir(format!("{}/test_fit_maps", root_dir));
@@ -131,7 +131,7 @@ impl<'a> Logger<'a>{
 
 
 // for tracking
-impl<'a> Logger<'a>{
+impl Logger{
 
     pub fn full_tracking(&mut self){
         self.track_both_fits();
@@ -179,7 +179,7 @@ impl<'a> Logger<'a>{
 
 
 // for writing
-impl<'a> Logger<'a>{
+impl Logger{
     pub fn log_test_fits(&mut self, stats: MapStats){
         match self.test_output_files {
             Some(ref mut out_f) => out_f.write(stats),

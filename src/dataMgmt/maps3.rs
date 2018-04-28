@@ -356,6 +356,7 @@ fn get_adjusted_fit(prog: &Program, trial_no: u64)->f32{
 
 fn get_adjusted_fit_config_n(prog: &Program, trial_no: u64, config: &Config, n: u8)->f32{
     match n {
+        0 => prog.fitness.unwrap(),
         1 => get_adjusted_fit_config1(prog, trial_no, config),
         2 => get_adjusted_fit_config2(prog, trial_no, config),
         3 => get_adjusted_fit_config3(prog, trial_no, config),
