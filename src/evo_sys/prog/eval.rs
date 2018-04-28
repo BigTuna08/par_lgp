@@ -33,6 +33,8 @@ pub static EVALS_DESC: &'static [&'static str] =
         "14 big square (n_eff_feat, eff_len) small (n_eff_comp, rand), squares all resolution 1",
         "15 like 13 but rands get noise",
         "16 like 13 but rands get diff penalites",
+        "17 place with (comp res, abs len)",
+        "18 place with (eff comp regs, eff len)",
 //        "17 like 0 but vary pens (-1,1) long period ",
 //        "18 like 0 but vary pens (-2,2) long period ",
 //        "19 like 0 but vary pens (-1,1) short period ",
@@ -64,8 +66,8 @@ pub fn get_fn(n: usize) -> &'static Fn(EvalResult, &TestDataSet) -> EvalResult {
         14 => &ev_four_effective_small,
         15 => &ev_four_abs_len_noise,
         16 => &ev_four_abs_len_pen,
-//        17 => &ev_f_c_varpen1,
-//        18 => &ev_f_c_varpen2,
+        17 => &ev_17,
+        18 => &ev_18,
 //        19 => &ev_f_c_varpen3,
 //        20 => &ev_f_c_varpen4,
 //        21 => &ev_f_c_varpen5,
@@ -75,6 +77,31 @@ pub fn get_fn(n: usize) -> &'static Fn(EvalResult, &TestDataSet) -> EvalResult {
 //        25 => &ev_f_c_varpen9,
         _ => panic!("bad spot!!"),
     }
+}
+
+//(comp_regs, abs_len)
+fn ev_17(mut request: EvalResult, data: &TestDataSet) -> EvalResult {
+    let row = request.genome.n_calc_regs;
+    let col = request.genome.get_abs_len();
+
+    let correct = eval_program_corrects(&request.genome, data);
+
+    request.genome.test_fit = Some(correct/data.size() as f32);
+    request.map_location = Some((row as usize, col as usize));
+    request
+}
+
+
+//(effective comp_regs, eff_len)
+fn ev_18(mut request: EvalResult, data: &TestDataSet) -> EvalResult {
+    let row = request.genome.get_n_effective_comp_regs(0);
+    let col = request.genome.get_effective_len(0);
+
+    let correct = eval_program_corrects(&request.genome, data);
+
+    request.genome.test_fit = Some(correct/data.size() as f32);
+    request.map_location = Some((row as usize, col as usize));
+    request
 }
 
 

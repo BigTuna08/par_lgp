@@ -27,6 +27,14 @@ pub struct Program{
 
 impl Program{
 
+    pub fn new_default_range() -> Program{
+        Program::new_random_range(1, 40,
+                                  1, 40,
+                                  params::N_OPS, params::N_OPS+1,
+                                  1, 156)
+    }
+
+
     pub fn new_random_range(instr_min: usize, instr_max: usize, calc_regs_min: u8,
                             calc_reg_max: u8, ops_min: u8, ops_max: u8, feats_min: u8, feats_max: u8) -> Program {
 
@@ -170,12 +178,7 @@ impl Program{
     }
 
 
-    pub fn new_default_range() -> Program{
-        Program::new_random_range(2, 20,
-                                  2, 8,
-                                  params::N_OPS, params::N_OPS+1,
-                                  2, 10)
-    }
+
 
     //return a new empty program
     pub fn new_empty() -> Program{
@@ -384,6 +387,10 @@ impl Program{
         let mut rng = rand::thread_rng();
         let mut features = self.features.clone();
 
+        if self.features.len() == params::N_FEATURES as usize{ //just do micro mutation
+            return self.mut_instr_copy()
+        }
+
         let mut new_feat = rng.gen_range(0, params::N_FEATURES);
         let mut tries = 0;
         while features.contains(&new_feat) {
@@ -407,8 +414,8 @@ impl Program{
 
     //very simple now, just rm instr if it has deleted reg
     pub fn del_feat_copy(&self) -> Program{
-        if self.features.len() == 1 {
-            return Program::new_random(self.instructions.len(), self.n_calc_regs, params::N_OPS, 5)
+        if self.features.len() == 1 { //do micro instead
+            return self.mut_instr_copy()
         }
 
         let mut rng = rand::thread_rng();
@@ -431,8 +438,11 @@ impl Program{
     }
 
     pub fn swap_feat_copy(&self) -> Program{
-        if self.features.len() == 1 {
-            return Program::new_random(self.instructions.len(), self.n_calc_regs, params::N_OPS, 5)
+//        if self.features.len() == 1 {
+//            return Program::new_random(self.instructions.len(), self.n_calc_regs, params::N_OPS, 5)
+//        }
+        if self.features.len() == params::N_FEATURES as usize { //just do micro mutation
+            return self.mut_instr_copy()
         }
 
         let mut rng = rand::thread_rng();

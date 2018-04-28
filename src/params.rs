@@ -10,7 +10,7 @@ pub const N_THREADS: usize = 4;
 pub const WORKER_QUEUE_SIZE: usize = 15;
 pub const THREAD_POOL_MAX: u64 = 10000;
 
-pub const MAX_REGS: usize = 128;
+pub const MAX_REGS: usize = 200; //was 128, risk of crashing if less than N_FEATURES, during feature loading
 
 pub const EPS: f32 = 1e-6;
 
@@ -49,7 +49,7 @@ pub const MIN_FIT: f32 = -1.0f32;
 
 // Rates are expressed as 1 in RATE chance (eg RATE = 20 => 1/20 = 4% chance)
 
-pub const REPLACE_EQ_FIT: u32 = 100; //rate to replace best when fitness is eq
+pub const REPLACE_EQ_FIT: u32 = 2; //rate to replace best when fitness is eq
 
 pub const INSTR_INSERT_RATE: u32 = 50; //rate to insert new instruction after copying instruction
 //pub const INSTR_DUPL_RATE: u32 = 50; //rate to duplicate new instruction after copying instruction

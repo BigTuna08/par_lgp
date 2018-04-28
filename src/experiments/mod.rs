@@ -58,7 +58,7 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
     let mut sent_count: u64 = 0;
     let mut recieved_count: u64 = 0;
     let mut res_map = ResultMap::new();
-    let mut pool = ThreadPool::new(params::N_THREADS, test_data, config.get_current_eval_code());
+    let mut pool = ThreadPool::new(params::N_THREADS, test_data, 17);  //fix here!! no 17!
 
     while sent_count < config.initial_pop as u64{  //initilize pop: Programs are randomly created
         if sent_count - recieved_count < params::THREAD_POOL_MAX {

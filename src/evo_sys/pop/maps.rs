@@ -23,6 +23,9 @@ impl ResultMap {
 
     pub fn try_put(&mut self, new_entry: EvalResult) -> PutResult {
         let inds = &new_entry.map_location.unwrap();
+
+        if !self.is_in_bounds(inds) {return PutResult::Failed}
+
         let new_fit = new_entry.genome.test_fit.unwrap();
         let old_fit = self.get_test_fit(inds);
 
@@ -176,6 +179,9 @@ impl ResultMap {
         self.prog_map[inds.0][inds.1] = Some(val.genome);
     }
 
+    fn is_in_bounds(&self, inds: &(usize, usize))-> bool{
+        (inds.0 < params::MAP_ROWS) && (inds.1 < params::MAP_COLS)
+    }
 
 }
 

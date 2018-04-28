@@ -12,21 +12,15 @@ use time::PreciseTime;
 fn main() {
 
 //    test();
+    println!("WARNING!! need to fix run_single_fold_tracking so that it takes the given arg for eval code!!");
     let start = PreciseTime::now();
 
-//    let mut args: Vec<String> = env::args().collect();
-//    println!("ARGS {:?}", args);
-//    let config = Config::new(args);
+    let mut args: Vec<String> = env::args().collect();
+    println!("ARGS {:?}", args);
+    let config = Config::new(args);
 
-//    parLGP::multi_trial_five_fold_tracking(config);
+    parLGP::experiments::multi_trial_five_fold_tracking(config);
 
-
-//    compare_initial_sizes();
-
-//    var_pen_test();
-
-//    var_pen_test_big();
-    parLGP::heads();
     let end = PreciseTime::now();
     println!("{} seconds full program execution.", start.to(end));
 }
