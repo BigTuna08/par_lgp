@@ -1,12 +1,11 @@
-
 use dataMgmt::dataset::TestDataSet;
 use dataMgmt::message::{EvalResult, Message};
+use evo_sys;
+use params;
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc;
 use std::thread;
-use progSystem;
-use params;
 
 
 pub struct ThreadPool {
@@ -82,7 +81,7 @@ impl ThreadPool{
 
 fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<EvalResult>>>, result_sender: mpsc::Sender<EvalResult>, data_ref: &TestDataSet, evaluator_ind: usize){
     let mut queue = VecDeque::with_capacity(params::WORKER_QUEUE_SIZE);
-    let evaluator = progSystem::eval::get_fn(evaluator_ind);
+    let evaluator = evo_sys::prog::eval::get_fn(evaluator_ind);
 
     const refill_after: usize = params::WORKER_QUEUE_SIZE/3 + 1;
 

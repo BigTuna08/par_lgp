@@ -1,11 +1,11 @@
-use progSystem::pop::maps3::{MapStats, ResultMap};
-use progSystem::prog::Program;
+use dataMgmt::trackers;
+use evo_sys::pop::maps::{ResultMap};
+use evo_sys::pop::{PopStats, PopEval};
+use evo_sys::prog::prog::Program;
 use params;
 use std::fs::create_dir;
 use std::fs::File;
 use std::io::Write;
-use dataMgmt::trackers;
-use progSystem::pop::maps3::PopEval;
 
 pub type GenoEval = Fn(&Program) -> f32 + 'static;
 
@@ -28,7 +28,7 @@ impl FileSet{
         FileSet{best, worst, ave, sd}
     }
 
-    pub fn write(&mut self, stat: MapStats){
+    pub fn write(&mut self, stat: PopStats){
         self.best.write(stat.best.to_string().as_bytes());
         self.worst.write(stat.worst.to_string().as_bytes());
         self.ave.write(stat.ave.to_string().as_bytes());
@@ -92,24 +92,22 @@ impl Logger{
     //assumes full tracking !!
     pub fn update(&mut self, res_map: &ResultMap){
 
-        self.log_test_fits(res_map.get_map_stats(PopEval::TestFit));
-        self.log_cv_fits(res_map.get_map_stats(PopEval::CV));
+        self.log_test_fits(res_map.get_pop_stats(PopEval::TestFit));
+        self.log_cv_fits(res_map.get_pop_stats(PopEval::CV));
 
         for i in 0..self.geno_functions.len(){
-            let stats = res_map.get_map_stats(PopEval::Geno(&self.geno_functions[i]));
+            let stats = res_map.get_pop_stats(PopEval::Geno(&self.geno_functions[i]));
             self.log_geno_stat(stats,i);
         }
     }
 
 
     pub fn finish_fold(&mut self, final_results: ResultMap){
+        let file_name = format!("{}/genos/iter{}-fold{}.txt", self.root_dir, self.current_iter, self.current_fold);
 
-        final_results.write_genos(
-            &format!("{}/genos/iter{}-fold{}.txt", self.root_dir, self.current_iter, self.current_fold));
-        final_results.write_cv_fits(
-            &format!("{}/cv_fit_maps/iter{}-fold{}.txt", self.root_dir, self.current_iter, self.current_fold));
-        final_results.write_test_fits(
-            &format!("{}/test_fit_maps/iter{}-fold{}.txt", self.root_dir, self.current_iter, self.current_fold));
+        final_results.write_genos(&file_name);
+        final_results.write_pop_info(&file_name, PopEval::TestFit);
+        final_results.write_pop_info(&file_name, PopEval::CV);
 
         self.new_line();
         self.update_fold_iter();
@@ -180,21 +178,21 @@ impl Logger{
 
 // for writing
 impl Logger{
-    pub fn log_test_fits(&mut self, stats: MapStats){
+    pub fn log_test_fits(&mut self, stats: PopStats){
         match self.test_output_files {
             Some(ref mut out_f) => out_f.write(stats),
             None => panic!("No test out file!!")
         };
     }
 
-    pub fn log_cv_fits(&mut self, stats: MapStats){
+    pub fn log_cv_fits(&mut self, stats: PopStats){
         match self.cv_output_files {
             Some(ref mut out_f) => out_f.write(stats),
             None => panic!("No cv out file!!")
         };
     }
 
-    pub fn log_geno_stat(&mut self, stats: MapStats, stat_ind: usize){
+    pub fn log_geno_stat(&mut self, stats: PopStats, stat_ind: usize){
         self.geno_output_files[stat_ind].write(stats);
     }
 

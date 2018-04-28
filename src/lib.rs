@@ -3,13 +3,14 @@ extern crate indexmap;
 extern crate rand;
 extern crate serde;
 extern crate time;
+
 //
 //use config::Config;
 //use dataMgmt::dataset::{FullDataSet, TestDataSet, ValidationSet};
 //use dataMgmt::logger::Logger;
-//use progSystem::pop::maps::{MapStats, PutResult, ResultMap};
+//use evo_sys::pop::maps::{MapStats, PutResult, ResultMap};
 //use dataMgmt::message::EvalResult;
-//use progSystem::prog::Program;
+//use evo_sys::prog::prog::Program;
 //use self::rand::{seq, thread_rng};
 //use self::rand::distributions::Range;
 //use self::rand::distributions::Sample;
@@ -29,7 +30,7 @@ extern crate time;
 ////#![feature(associated_consts)]
 pub mod params;
 pub mod config;
-pub mod progSystem;
+pub mod evo_sys;
 pub mod threading;
 pub mod dataMgmt;
 pub mod experiments;
@@ -45,7 +46,7 @@ pub fn heads(){
 }
 //
 //
-////use progSystem::eval;
+////use evo_sys::eval;
 //
 //
 //pub const n: u32 = 10_000;

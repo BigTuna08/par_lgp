@@ -89,15 +89,15 @@ fn main() {
 //
 //fn test(){
 //    for i in 0..60{
-//        println!("{}-{}",i, parLGP::progSystem::eval::get_mapped_index(i));
+//        println!("{}-{}",i, parLGP::evo_sys::prog::eval::get_mapped_index(i));
 //    }
 ////    let i = 60;
-////    println!("{}-{}",i, parLGP::progSystem::eval::get_mapped_index(i));
+////    println!("{}-{}",i, parLGP::evo_sys::prog::eval::get_mapped_index(i));
 //}
 
 //fn multi(big_config: Config){
 //    create_dir(format!("results/{}", big_config.out_folder));
-//    for (i, desc) in parLGP::progSystem::eval::EVALS_DESC.iter().enumerate(){
+//    for (i, desc) in parLGP::evo_sys::prog::eval::EVALS_DESC.iter().enumerate(){
 //        let config = Config{
 //            initial_pop: big_config.initial_pop,
 //            total_evals: big_config.total_evals,

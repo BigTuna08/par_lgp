@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/parLGP.iml" filepath="$PROJECT_DIR$/.idea/parLGP.iml" />
+      <module fileurl="file://$PROJECT_DIR$/parLGP.iml" filepath="$PROJECT_DIR$/parLGP.iml" />
     </modules>
   </component>
 </project>

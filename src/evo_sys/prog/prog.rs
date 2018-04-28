@@ -1,7 +1,7 @@
 //extern crate rand;
 
-use params;
 use dataMgmt;
+use params;
 use rand;
 use rand::{Rng, seq, thread_rng, ThreadRng};
 use rand::distributions::Range;
@@ -9,6 +9,7 @@ use rand::distributions::Sample;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::Write;
+use super::instr::Instruction;
 use super::ops;
 
 
@@ -21,13 +22,7 @@ pub struct Program{
     pub cv_fit: Option<f32>,
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct Instruction{
-    pub dest: u8,
-    pub op: u8,
-    pub src1: u8,
-    pub src2: u8,
-}
+
 
 
 impl Program{
@@ -269,55 +264,7 @@ impl Program{
 }
 
 
-impl Instruction{
-    pub fn new_random(n_calc_regs: u8, n_feats: u8, n_ops:u8, rng: &mut ThreadRng) -> Instruction{
-        let mut op_range = Range::new(0, n_ops);
-        let mut dest_rng = Range::new(0, n_calc_regs);
 
-        let dest = dest_rng.sample(rng);
-        let op = op_range.sample(rng);
-        let src1 = get_src(n_calc_regs, n_feats, rng);
-        let src2 = get_src(n_calc_regs, n_feats, rng);
-
-        Instruction{dest, op, src1, src2}
-    }
-
-
-    pub fn mutate_copy(&self, prog: &Program, rng: &mut ThreadRng) -> Instruction{
-
-        let &Instruction{ mut dest, mut op, mut src1, mut src2} = self;
-
-        match rng.gen_range(0, 4) {
-            0 => dest = prog.rand_dest_exclude(rng, dest),
-            1 => op = prog.rand_op_exclude(rng, op),
-            2 => src1 = prog.rand_src_exclude(rng, src1),
-            3 => src2 = prog.rand_src_exclude(rng, src2),
-            _ => panic!("Should never be here!")
-        }
-
-        Instruction{dest, op, src1, src2}
-    }
-
-    pub fn contains(&self, x: u8) -> bool {
-        self.dest == x || self.op == x || self.src1 == x || self.src2 == x
-    }
-
-    pub fn contains_dest(&self, x: u8) -> bool {
-        self.dest == x
-    }
-
-    pub fn contains_op(&self, x: u8) -> bool {
-        self.op == x
-    }
-
-    pub fn contains_src(&self, x: u8) -> bool {
-        self.src1 == x || self.src2 == x
-    }
-
-    pub fn contains_reg(&self, x: u8) -> bool {
-        self.dest == x || self.src1 == x || self.src2 == x
-    }
-}
 
 
 impl Program{
@@ -517,7 +464,7 @@ impl Program{
 
 
 impl Program{
-    fn rand_instr(&self, rng: &mut ThreadRng) -> Instruction{
+    pub fn rand_instr(&self, rng: &mut ThreadRng) -> Instruction{
         Instruction{
             dest: Program::rand_dest(self, rng),
             op: Program::rand_op(self, rng),
@@ -526,11 +473,11 @@ impl Program{
         }
     }
 
-    fn rand_dest(&self, rng: &mut ThreadRng) -> u8{
+    pub fn rand_dest(&self, rng: &mut ThreadRng) -> u8{
         rng.gen_range(0, self.n_calc_regs)
     }
 
-    fn rand_dest_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
+    pub fn rand_dest_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
         if self.n_calc_regs == 1 {return 0}
 
         let mut n = rng.gen_range(0, self.n_calc_regs);
@@ -543,11 +490,11 @@ impl Program{
         n
     }
 
-    fn rand_src(&self, rng: &mut ThreadRng) -> u8{
+    pub fn rand_src(&self, rng: &mut ThreadRng) -> u8{
         get_src(self.n_calc_regs, self.features.len() as u8, rng)
     }
 
-    fn rand_src_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
+    pub fn rand_src_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
         let mut n = get_src(self.n_calc_regs, self.features.len() as u8, rng);
         let mut tries = 0;
         while n == exclude {
@@ -558,11 +505,11 @@ impl Program{
         n
     }
 
-    fn rand_op(&self, rng: &mut ThreadRng) -> u8{
+    pub fn rand_op(&self, rng: &mut ThreadRng) -> u8{
         rng.gen_range(0, params::N_OPS)
     }
 
-    fn rand_op_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
+    pub fn rand_op_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
         let mut tries = 0;
         let mut n = rng.gen_range(0, params::N_OPS);
         while n == exclude {
@@ -575,13 +522,12 @@ impl Program{
 }
 
 
-
-
 //returns random number in [0,n_small)U[MAX_REGS-n_big, MAX_REGS)
-fn get_src(n_small: u8, n_big: u8, rng: &mut ThreadRng) ->u8 {
+pub fn get_src(n_small: u8, n_big: u8, rng: &mut ThreadRng) ->u8 {
     let mut val = rng.gen_range(0, n_small + n_big);
 
     if val >= n_small {val = params::MAX_REGS as u8 - val + n_small-1 }
 
     val
 }
+

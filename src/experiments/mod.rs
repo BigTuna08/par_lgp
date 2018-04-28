@@ -1,11 +1,12 @@
 use config::Config;
-use params;
-use threading::threadpool::ThreadPool;
-use dataMgmt::dataset::{FullDataSet, TestDataSet, ValidationSet, DataSetManager};
+use dataMgmt;
+use dataMgmt::dataset::{DataSetManager, FullDataSet, TestDataSet, ValidationSet};
 use dataMgmt::logger::Logger;
-use progSystem::pop::maps3::{MapStats, PutResult, ResultMap};
 use dataMgmt::message::EvalResult;
-use progSystem::prog::Program;
+use evo_sys::pop::maps::{ResultMap};
+use evo_sys::pop::{PopStats, PutResult};
+use evo_sys::prog::prog::Program;
+use params;
 use rand::{seq, thread_rng};
 use rand::distributions::Range;
 use rand::distributions::Sample;
@@ -17,8 +18,7 @@ use std::io::Write;
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use dataMgmt;
-
+use threading::threadpool::ThreadPool;
 
 
 pub fn multi_trial_five_fold_tracking(mut config: Config){
@@ -66,12 +66,12 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
             sent_count += 1;
         }
         else {
-            res_map.try_put_trial_based_config(pool.next_result_wait(), recieved_count, &config, 1);
+            res_map.try_put(pool.next_result_wait());
             recieved_count += 1;
         }
 
         if sent_count % logger.freq as u64 == 0 && recieved_count > 0{  // update log
-            res_map.update_cross_validation(&cv_data);
+            res_map.update_cv(&cv_data);
             logger.update(&res_map);
         }
 
@@ -89,7 +89,7 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
         }
 
         if sent_count % logger.freq as u64 == 0 && recieved_count > 0{ // update log
-            res_map.update_cross_validation(&cv_data);
+            res_map.update_cv(&cv_data);
             logger.update(&res_map);
         }
     }

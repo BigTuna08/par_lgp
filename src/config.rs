@@ -1,4 +1,4 @@
-use progSystem;
+use evo_sys;
 
 
 #[derive(Debug)]
@@ -46,7 +46,7 @@ impl Config{
     }
 
     pub fn get_current_eval_desc(&self)-> String{
-        String::from(progSystem::eval::EVALS_DESC[self.get_current_eval_code()])
+        String::from(evo_sys::prog::eval::EVALS_DESC[self.get_current_eval_code()])
     }
 
 }
@@ -65,7 +65,7 @@ impl Config{
 //    for arg in arg_iter {
 //        let eval_code = arg.clone().parse::<usize>().unwrap();
 //        eval_codes.push(eval_code);
-//        eval_descs.push(String::from(progSystem::eval::EVALS_DESC[eval_code]))
+//        eval_descs.push(String::from(evo_sys::prog::eval::EVALS_DESC[eval_code]))
 //    }
 //
 //    Config {initial_pop, total_evals, out_folder, n_iter, comment, eval_codes, eval_descs,}
