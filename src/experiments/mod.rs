@@ -1,4 +1,9 @@
-use config::Config;
+pub mod config;
+
+//use config::Config;
+use self::config::Config;
+use self::config::FiveFoldMultiTrial;
+use self::config::MapConfig;
 use dataMgmt;
 use dataMgmt::dataset::{DataSetManager, FullDataSet, TestDataSet, ValidationSet};
 use dataMgmt::logger::Logger;
@@ -22,7 +27,8 @@ use threading::threadpool::ThreadPool;
 use evo_sys::pop::Population;
 
 
-pub fn multi_trial_five_fold_tracking(mut config: Config){
+
+pub fn multi_trial_five_fold_tracking(mut config: FiveFoldMultiTrial){
 
     let root_out_dir = format!("results/{}/raw", config.out_folder);
     match create_dir_all(&root_out_dir) {
@@ -42,7 +48,7 @@ pub fn multi_trial_five_fold_tracking(mut config: Config){
 }
 
 
-pub fn five_fold_cv_tracking(logger: &mut Logger, config: &Config) {
+pub fn five_fold_cv_tracking(logger: &mut Logger, config: &FiveFoldMultiTrial) {
 
     //manages the data set by creating partitions, and shifting them after each fold
     let mut data_manager = DataSetManager::new_rand_partition();
@@ -54,48 +60,27 @@ pub fn five_fold_cv_tracking(logger: &mut Logger, config: &Config) {
 
 
 
-
-fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, config: &Config, logger: &mut Logger) {
-    let mut sent_count: u64 = 0;
-    let mut recieved_count: u64 = 0;
-    let mut res_map = ResultMap::new();
+fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, config: &FiveFoldMultiTrial, logger: &mut Logger) {
+    let mut res_map = ResultMap::new(config.get_map_config());
     let mut pool = ThreadPool::new(params::N_THREADS, test_data, 17);  //fix here!! no 17!
 
-    while sent_count < config.initial_pop as u64{  //initilize pop: Programs are randomly created
-        if sent_count - recieved_count < params::THREAD_POOL_MAX {
-            pool.add_task(EvalResult::new(Program::new_default_range()));
-            sent_count += 1;
+
+    while !res_map.is_finished() {
+        if res_map.can_send() {
+            pool.add_task(EvalResult::new(res_map.get_new_prog()))
         }
         else {
             res_map.try_put(pool.next_result_wait());
-            recieved_count += 1;
         }
 
         if sent_count % logger.freq as u64 == 0 && recieved_count > 0{  // update log
             res_map.update_cv(&cv_data);
             logger.update(&res_map);
         }
-
     }
 
 
-    while recieved_count < config.total_evals { //continue until finished: new programs are offspring of old
-        if (sent_count - recieved_count < params::THREAD_POOL_MAX) && (recieved_count > 0) {
-            pool.add_task(EvalResult::new(res_map.get_simple_mutated_genome_rand()));
-            sent_count += 1;
-        }
-        else {
-            res_map.try_put(pool.next_result_wait());
-            recieved_count += 1;
-        }
-
-        if sent_count % logger.freq as u64 == 0 && recieved_count > 0{ // update log
-            res_map.update_cv(&cv_data);
-            logger.update(&res_map);
-        }
-    }
     pool.terminate();
+    res_map.update_cv(&cv_data);
     logger.finish_fold(res_map);
 }
-
-

@@ -29,7 +29,7 @@ extern crate time;
 //
 ////#![feature(associated_consts)]
 pub mod params;
-pub mod config;
+
 pub mod evo_sys;
 pub mod threading;
 pub mod dataMgmt;

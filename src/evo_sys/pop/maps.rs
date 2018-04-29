@@ -10,18 +10,29 @@ use std::fs::File;
 use std::io::Write;
 use super::{PutResult, PopStats, PopEval, Population};
 use dataMgmt::message::EvalResult;
+use experiments::config::Config;
+use experiments::config::{MapConfig};
 
 
 
 
 pub struct ResultMap{
     prog_map: [[Option<Program>; params::MAP_COLS]; params::MAP_ROWS],
+//    select_cell_method: u8,
+//    compare_prog_method: u8,
+    config: MapConfig,
+    sent_count: u64,
+    recieved_count: u64,
+    finished: bool,
 }
 
 
 impl Population for ResultMap {
 
     fn try_put(&mut self, new_entry: EvalResult) -> PutResult {
+        self.recieved_count += 1;
+        if self.recieved_count >= self.config.total_evals {self.finished=true;}
+
         let inds = &new_entry.map_location.unwrap();
 
         if !self.is_in_bounds(inds) {return PutResult::Failed}
@@ -30,7 +41,10 @@ impl Population for ResultMap {
         let old_fit = self.get_test_fit(inds);
 
         let result =
-            if inds.0 >= params::MAP_ROWS || inds.1 >= params::MAP_COLS || new_fit < old_fit { PutResult::Failed } else if new_fit > old_fit { PutResult::Improvement } else if rand::thread_rng().gen_weighted_bool(params::REPLACE_EQ_FIT) { PutResult::Equal } else { PutResult::Failed }; //eq but not replaced
+            if inds.0 >= params::MAP_ROWS || inds.1 >= params::MAP_COLS || new_fit < old_fit { PutResult::Failed }
+            else if new_fit > old_fit { PutResult::Improvement }
+            else if rand::thread_rng().gen_weighted_bool(params::REPLACE_EQ_FIT) { PutResult::Equal }
+            else { PutResult::Failed }; //eq but not replaced
 
         match result {
             PutResult::Failed => (),
@@ -161,6 +175,39 @@ impl Population for ResultMap {
 
 
 impl ResultMap {
+
+    pub fn is_finished(&self) -> bool{
+        self.finished
+    }
+
+
+    pub fn get_new_prog(&mut self) -> Program{
+        self.sent_count += 1;
+        if self.sent_count <= self.config.initial_pop as u64{
+            Program::new_default_range()
+        }
+        else {
+            self.get_simple_mutated_genome_rand()
+        }
+    }
+
+
+    pub fn pending_evals(&self)-> u64{
+        self.sent_count - self.recieved_count
+    }
+
+    pub fn is_empty(&self)-> bool{
+        self.recieved_count == 0
+    }
+
+
+    pub fn can_send(&self)->bool{
+        if !self.pending_evals() < params::THREAD_POOL_MAX{
+            return false;
+        }
+        (self.recieved_count > 0) || (self.sent_count < self.config.initial_pop as u64)
+    }
+
     fn get_test_fit(&self, inds: &(usize, usize)) -> f32 {
         match self.prog_map[inds.0][inds.1] {
             Some(ref prog) => prog.test_fit.unwrap(),
@@ -187,7 +234,7 @@ impl ResultMap {
 
 
 impl ResultMap {
-    pub fn new() -> ResultMap {
+    pub fn new( config: MapConfig) -> ResultMap {
         ResultMap {
             prog_map:
             [[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
@@ -239,7 +286,13 @@ impl ResultMap {
                 [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
                 [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
                 [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-                [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], ]
+                [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], ],
+//            select_cell_method,
+//            compare_prog_method,
+            config,
+            sent_count: 0,
+            recieved_count: 0,
+            finished: false,
         }
     }
 }
