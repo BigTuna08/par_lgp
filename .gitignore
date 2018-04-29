@@ -12,3 +12,6 @@ Archive.zip
 .idea/modules.xml
 .idea/workspace.xml
 .idea/dictionaries/
+.idea/*
+.idea/**
+.idea/**.*
