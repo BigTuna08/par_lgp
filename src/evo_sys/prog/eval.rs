@@ -192,7 +192,7 @@ pub fn ev_three(mut request: EvalResult, data: &TestDataSet) -> EvalResult {
     let y = if thread_rng().gen_weighted_bool(2) {
         abs_len
     }else {
-        params::MAP_ROWS/2 + n_comp_regs as usize
+        params::params::MAP_ROWS/2 + n_comp_regs as usize
     };
 
     request.genome.test_fit = Some(correct/data.size() as f32);
@@ -210,7 +210,7 @@ pub fn ev_three2(mut request: EvalResult, data: &TestDataSet) -> EvalResult {
     let y = if thread_rng().gen_weighted_bool(2) {
         abs_len
     }else {
-        params::MAP_ROWS/2 + n_feats as usize
+        params::params::MAP_ROWS/2 + n_feats as usize
     };
 
     request.genome.test_fit = Some(correct/data.size() as f32);
@@ -638,7 +638,7 @@ pub fn eval_program_corrects(genome: &super::prog::Program, data: &DataSet) -> f
 
     for (sample_i, record) in data.record_iter().enumerate() {
 
-        let mut regs = [0.0f32; params::MAX_REGS];
+        let mut regs = [0.0f32; params::params::MAX_REGS];
 
         let mut reg_val = 0.1;
         for reg in regs.iter_mut() { //semi random initilize regs
@@ -647,7 +647,7 @@ pub fn eval_program_corrects(genome: &super::prog::Program, data: &DataSet) -> f
         }
 
         for (i, feature) in genome.features.iter().enumerate() { //load features
-            regs[params::MAX_REGS - 1 - i] = record.features[*feature as usize]
+            regs[params::params::MAX_REGS - 1 - i] = record.features[*feature as usize]
         }
 
         let prog_output = genome.execute_instructions(regs);

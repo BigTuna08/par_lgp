@@ -7,14 +7,14 @@ use std::slice::Iter;
 
 #[derive(Copy, Clone)]
 pub struct DataRecord{
-    pub features: [f32; params::N_FEATURES as usize],
+    pub features: [f32; params::dataset::N_FEATURES as usize],
     pub class: bool,
 }
 
 impl DataRecord{
     fn new_blank()->DataRecord{
         DataRecord{
-            features: [0.0; params::N_FEATURES as usize],
+            features: [0.0; params::dataset::N_FEATURES as usize],
             class: false,
         }
     }
@@ -27,7 +27,7 @@ pub trait DataSet{
 }
 
 pub struct FullDataSet{
-    pub records: [DataRecord; params::N_SAMPLES],
+    pub records: [DataRecord; params::dataset::N_SAMPLES],
     pub partitions: Option<Vec<Partition>>,
 }
 
@@ -39,12 +39,12 @@ pub struct PartitionedDataSet{
 
 
 pub struct TestDataSet {
-    pub records: [DataRecord; params::TEST_DATA_SET_SIZE],
+    pub records: [DataRecord; params::params::TEST_DATA_SET_SIZE],
 }
 
 
 pub struct ValidationSet{
-    pub records: [DataRecord; params::FOLD_SIZE],
+    pub records: [DataRecord; params::params::FOLD_SIZE],
 }
 
 
@@ -81,7 +81,7 @@ impl PartitionedDataSet{ //test these methods!!
 
     pub fn next(&mut self) ->bool{
         self.current_partition += 1;
-        if self.current_partition >= params::N_FOLDS {return false}
+        if self.current_partition >= params::params::N_FOLDS {return false}
 
         else {
             self.next_partition();
@@ -90,15 +90,15 @@ impl PartitionedDataSet{ //test these methods!!
     }
 
     fn next_partition(&mut self){
-        let mut new_cv = [DataRecord::new_blank(); params::FOLD_SIZE];
-        for i in 0..params::FOLD_SIZE{
+        let mut new_cv = [DataRecord::new_blank(); params::params::FOLD_SIZE];
+        for i in 0..params::params::FOLD_SIZE{
             new_cv[i] = self.test.records[i];
         }
 
 
-        for i in 0..params::TEST_DATA_SET_SIZE {
-            if i+params::FOLD_SIZE < self.test.size(){
-                self.test.records[i] = self.test.records[i+params::FOLD_SIZE];
+        for i in 0..params::params::TEST_DATA_SET_SIZE {
+            if i+params::params::FOLD_SIZE < self.test.size(){
+                self.test.records[i] = self.test.records[i+params::params::FOLD_SIZE];
             }
             else {
                 self.test.records[i] = self.cv.records[i - self.test.size()];
@@ -114,8 +114,8 @@ impl FullDataSet{
 
     pub fn to_partioned_set(&self, trial_n: usize) -> PartitionedDataSet {
 
-        let mut test_records = [DataRecord::new_blank(); params::TEST_DATA_SET_SIZE];
-        let mut cv_records = [DataRecord::new_blank(); params::FOLD_SIZE];
+        let mut test_records = [DataRecord::new_blank(); params::params::TEST_DATA_SET_SIZE];
+        let mut cv_records = [DataRecord::new_blank(); params::params::FOLD_SIZE];
 
         let mut test_dataset_i = 0;
         let mut cv_dataset_i = 0;
@@ -148,8 +148,8 @@ impl FullDataSet{
                 }
             }
         }
-        assert_eq!(test_dataset_i, params::TEST_DATA_SET_SIZE);
-        assert_eq!(cv_dataset_i, params::FOLD_SIZE);
+        assert_eq!(test_dataset_i, params::params::TEST_DATA_SET_SIZE);
+        assert_eq!(cv_dataset_i, params::params::FOLD_SIZE);
 
         PartitionedDataSet{
             test: TestDataSet { records:test_records,},
@@ -160,8 +160,8 @@ impl FullDataSet{
 
 
     pub fn get_parts(&self, trial_n: usize) -> (TestDataSet, ValidationSet) {
-        let mut test_records = [DataRecord::new_blank(); params::TEST_DATA_SET_SIZE];
-        let mut cv_records = [DataRecord::new_blank(); params::FOLD_SIZE];
+        let mut test_records = [DataRecord::new_blank(); params::params::TEST_DATA_SET_SIZE];
+        let mut cv_records = [DataRecord::new_blank(); params::params::FOLD_SIZE];
 
         let mut test_dataset_i = 0;
         let mut cv_dataset_i = 0;
@@ -194,8 +194,8 @@ impl FullDataSet{
                 }
             }
         }
-        assert_eq!(test_dataset_i, params::TEST_DATA_SET_SIZE);
-        assert_eq!(cv_dataset_i, params::FOLD_SIZE);
+        assert_eq!(test_dataset_i, params::params::TEST_DATA_SET_SIZE);
+        assert_eq!(cv_dataset_i, params::params::FOLD_SIZE);
 
         (TestDataSet { records:test_records,},
             ValidationSet{ records:cv_records,})
@@ -204,7 +204,7 @@ impl FullDataSet{
 
     pub fn new(data_file: &str) -> FullDataSet{
 
-        let mut records = [DataRecord::new_blank(); params::N_SAMPLES];
+        let mut records = [DataRecord::new_blank(); params::dataset::N_SAMPLES];
         let f = File::open(data_file).unwrap();
         let mut csv_rdr = csv::Reader::from_reader(f);
 
@@ -221,12 +221,12 @@ impl FullDataSet{
                     _ => panic!("Invalid classification field!!")
                 };
 
-                let mut features = [0.0f32; params::N_FEATURES as usize];
+                let mut features = [0.0f32; params::dataset::N_FEATURES as usize];
 
                 for (j, next_entry) in result_iter.enumerate() {
                     match next_entry.parse::<f32>() {
                         Ok(entry) => features[j] = entry,
-                        Err(_) => features[j] = params::NA_TOKEN
+                        Err(_) => features[j] = params::params::NA_TOKEN
                     }
                 }
                 records[i] = DataRecord{features, class};
@@ -256,34 +256,34 @@ pub fn gen_partitions() -> Vec<Partition> {
     let n_fold = 5;
     let mut rng = rand::thread_rng();
 
-    let mut chosen = Vec::with_capacity(params::N_SAMPLES);
+    let mut chosen = Vec::with_capacity(params::dataset::N_SAMPLES);
     let mut partitions = Vec::with_capacity(n_fold);
 
     for _ in 0..n_fold{
-        let mut cases = Vec::with_capacity(params::N_POS_FOLD);
-        let mut controls = Vec::with_capacity(params::N_NEG_FOLD);
+        let mut cases = Vec::with_capacity(params::dataset::N_POS_FOLD);
+        let mut controls = Vec::with_capacity(params::dataset::N_NEG_FOLD);
         let mut tries = 0;
 
-        while (cases.len() < params::N_POS_FOLD || controls.len() < params::N_NEG_FOLD){
-            let chioce = rng.gen_range(0, params::N_SAMPLES);
+        while (cases.len() < params::dataset::N_POS_FOLD || controls.len() < params::dataset::N_NEG_FOLD){
+            let chioce = rng.gen_range(0, params::dataset::N_SAMPLES);
             tries += 1;
 
             if !chosen.contains(&chioce){  //selected a sample not yet chosen
                 let is_case = is_case(chioce);
 
-                if is_case && cases.len() < params::N_POS_FOLD{
+                if is_case && cases.len() < params::dataset::N_POS_FOLD{
                     cases.push(chioce.clone());
                     chosen.push(chioce);
                     tries = 0;
                 }
-                else if !is_case && controls.len() < params::N_NEG_FOLD{
+                else if !is_case && controls.len() < params::dataset::N_NEG_FOLD{
                     controls.push(chioce.clone());
                     chosen.push(chioce);
                     tries = 0;
                 }
             }
 
-            if tries >= params::DUPLICATE_TIME_OUT*2{
+            if tries >= params::params::DUPLICATE_TIME_OUT*2{
                 panic!("Error generating data set!");
             }
         }
@@ -313,8 +313,8 @@ pub fn get_headers(data_file: &str) -> Vec<String> {
 
 
 fn is_case(n: usize)->bool{
-    if n >= params::POS_SAMPLE_RNG.start && n < params::POS_SAMPLE_RNG.end {true}
-    else if n >= params::NEG_SAMPLE_RNG.start && n < params::NEG_SAMPLE_RNG.end {false}
+    if n >= params::params::POS_SAMPLE_RNG.start && n < params::params::POS_SAMPLE_RNG.end {true}
+    else if n >= params::params::NEG_SAMPLE_RNG.start && n < params::params::NEG_SAMPLE_RNG.end {false}
     else {panic!("outside data range! {}", n)}
 }
 

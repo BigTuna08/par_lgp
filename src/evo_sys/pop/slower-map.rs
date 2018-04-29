@@ -36,14 +36,14 @@ impl ResultMap {
     pub fn get_test_fit(&self, inds: &(usize, usize)) -> f32 {
         match self.prog_map.get(inds) {
             Some(prog) => prog.test_fit.unwrap(),
-            None => params::MIN_FIT,
+            None => params::params::MIN_FIT,
         }
         }
 
     pub fn get_cv_fit(&self, inds: &(usize, usize))-> f32 {
         match self.prog_map.get(inds) {
             Some(prog) => prog.cv_fit.unwrap(),
-            None => params::MIN_FIT,
+            None => params::params::MIN_FIT,
         }
     }
 
@@ -59,9 +59,9 @@ impl ResultMap {
         let old_fit = self.get_test_fit(inds);
 
         let result =
-            if inds.0 >= params::MAP_ROWS || inds.1 >= params::MAP_COLS || new_fit < old_fit { PutResult::Failed }
+            if inds.0 >= params::params::MAP_ROWS || inds.1 >= params::params::MAP_COLS || new_fit < old_fit { PutResult::Failed }
             else if new_fit > old_fit { PutResult::Improvement }
-            else if rand::thread_rng().gen_weighted_bool(params::REPLACE_EQ_FIT) { PutResult::Equal }
+            else if rand::thread_rng().gen_weighted_bool(params::params::REPLACE_EQ_FIT) { PutResult::Equal }
             else { PutResult::Failed }; //eq but not replaced
 
         match result {
@@ -81,8 +81,8 @@ impl ResultMap {
     pub fn write_pop_info(&self, file_name: &str, eval: PopEval){
         let mut f = File::create(file_name).unwrap();
 
-        for row_i in 0.. params::MAP_ROWS{
-            for col_i in 0.. params::MAP_COLS{
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
 
                 let value =
                     if self.has_prog(&(row_i, col_i)){
@@ -94,7 +94,7 @@ impl ResultMap {
 
                     }
                     else {
-                       params::MIN_FIT
+                       params::params::MIN_FIT
                     };
 
                 f.write(value.to_string().as_bytes());
@@ -107,8 +107,8 @@ impl ResultMap {
 
     pub fn write_genos(&self, file_name: &str){
         let mut f = File::create(file_name).unwrap();
-        for row_i in 0..params::MAP_ROWS {
-            for col_i in 0..params::MAP_COLS {
+        for row_i in 0..params::params::MAP_ROWS {
+            for col_i in 0..params::params::MAP_COLS {
                 let geno = self.prog_map.get(&(row_i, col_i));
                 if let Some(ref genome) = geno{
                     f.write(b"(");
@@ -141,8 +141,8 @@ impl ResultMap{
         let mut ave = 0.0f64;
         let mut count = 0.0;
 
-        for row_i in 0.. params::MAP_ROWS{
-            for col_i in 0.. params::MAP_COLS{
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
 
                 if self.has_prog(&(row_i, col_i)){
                     let value = match eval {
@@ -162,8 +162,8 @@ impl ResultMap{
         ave = ave/count;
 
         let mut vari = 0.0;
-        for row_i in 0.. params::MAP_ROWS{
-            for col_i in 0.. params::MAP_COLS{
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
                 if self.has_prog(&(row_i, col_i)){
                     let value = match eval {
                         PopEval::TestFit => self.get_test_fit(&(row_i, col_i)),
@@ -180,8 +180,8 @@ impl ResultMap{
 
 
     pub fn update_cv(&mut self, data: &ValidationSet) {
-        for row_i in 0.. params::MAP_ROWS{
-            for col_i in 0.. params::MAP_COLS{
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
                 if let Some(genome) = self.prog_map.get_mut(&(row_i, col_i)) {
                     match genome.cv_fit {
                         Some(_) => (),
@@ -198,8 +198,8 @@ impl ResultMap{
 //fn get_adjusted_fit(prog: &Program, trial_no: u64)->f32{
 //    let period = 2_000_000.0;
 //
-//    let min = -1.5/params::TEST_DATA_SET_SIZE as f64;
-//    let max = 1.5/params::TEST_DATA_SET_SIZE as f64;
+//    let min = -1.5/params::params::TEST_DATA_SET_SIZE as f64;
+//    let max = 1.5/params::params::TEST_DATA_SET_SIZE as f64;
 //
 //    let ampli = (max - min)/2.0;
 //    let mid = (max+min)/2.0;

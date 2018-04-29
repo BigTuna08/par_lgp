@@ -30,7 +30,7 @@ impl Program{
     pub fn new_default_range() -> Program{
         Program::new_random_range(1, 40,
                                   1, 40,
-                                  params::N_OPS, params::N_OPS+1,
+                                  params::params::N_OPS, params::params::N_OPS+1,
                                   1, 156)
     }
 
@@ -51,7 +51,7 @@ impl Program{
     pub fn new_random(n_instr: usize, n_calc_regs: u8, n_ops: u8, n_feats: u8) -> Program{
         let mut rng = thread_rng();
 
-        let features = seq::sample_iter(&mut rng, 0..params::N_FEATURES, n_feats as usize).unwrap();
+        let features = seq::sample_iter(&mut rng, 0..params::dataset::N_FEATURES, n_feats as usize).unwrap();
         let mut instructions = Vec::with_capacity(n_instr);
 
         for _ in 0..n_instr {
@@ -62,7 +62,7 @@ impl Program{
     }
 
 
-    pub fn execute_instructions(&self, mut regs: [f32; params::MAX_REGS]) ->f32{
+    pub fn execute_instructions(&self, mut regs: [f32; params::params::MAX_REGS]) ->f32{
         let mut skip_count = 0u8; // used to implement branches
 
         for instr in self.instructions.iter() {
@@ -86,8 +86,8 @@ impl Program{
     pub fn string_instr(&self, instr: &Instruction) -> String{
         let n_feats = self.features.len() as u8;
         let src1 =
-            if instr.src1 >= (params::MAX_REGS  as u8- n_feats) {
-                let d = params::MAX_REGS - instr.src1 as usize -1; //0..n_feats
+            if instr.src1 >= (params::params::MAX_REGS  as u8- n_feats) {
+                let d = params::params::MAX_REGS - instr.src1 as usize -1; //0..n_feats
                 let fest_num = self.features[d];
                 format!("{}",&dataMgmt::headers::DATA_HEADERS[fest_num as usize])
             }else {
@@ -95,8 +95,8 @@ impl Program{
             };
 
         let src2 =
-            if instr.src2 >= (params::MAX_REGS as u8 - n_feats) {
-                let d = params::MAX_REGS - instr.src2 as usize - 1; //0..n_feats
+            if instr.src2 >= (params::params::MAX_REGS as u8 - n_feats) {
+                let d = params::params::MAX_REGS - instr.src2 as usize - 1; //0..n_feats
                 let fest_num = self.features[d];
                 format!("{}",&dataMgmt::headers::DATA_HEADERS[fest_num as usize])
             }else {
@@ -174,7 +174,7 @@ impl Program{
 
 
     pub fn new_default() -> Program{
-        Program::new_random(10, 6, params::N_OPS, 3)
+        Program::new_random(10, 6, params::params::N_OPS, 3)
     }
 
 
@@ -235,7 +235,7 @@ impl Program{
                 eff_regs.insert(instr.src2);
             }
         }
-        eff_regs.into_iter().fold(0, |acc, x| if x >= (params::MAX_REGS - self.features.len()) as u8 {acc+1} else {acc})
+        eff_regs.into_iter().fold(0, |acc, x| if x >= (params::params::MAX_REGS - self.features.len()) as u8 {acc+1} else {acc})
     }
 
     pub fn get_effective_feats(&self, return_reg_ind: u8) -> HashSet<u8>{
@@ -247,7 +247,7 @@ impl Program{
                 eff_regs.insert(instr.src2);
             }
         }
-        eff_regs.retain(|&x|  x >= (params::MAX_REGS - self.features.len()) as u8);
+        eff_regs.retain(|&x|  x >= (params::params::MAX_REGS - self.features.len()) as u8);
         eff_regs
     }
 
@@ -296,7 +296,7 @@ impl Program{
         let mut rng = rand::thread_rng();
 
         let instructions = self.instructions.iter().map(|instr| {
-            if rand::thread_rng().gen_weighted_bool(params::MUT_INSTR_COPY_RATE){
+            if rand::thread_rng().gen_weighted_bool(params::evolution::MUT_INSTR_COPY_RATE){
                 instr.mutate_copy(&self, &mut rng)
             }
                 else {
@@ -317,7 +317,7 @@ impl Program{
 
         for instr in self.instructions.iter() {
             instructions.push(instr.clone());
-            if rng.gen_weighted_bool(params::INSTR_INSERT_RATE) {
+            if rng.gen_weighted_bool(params::evolution::INSTR_INSERT_RATE) {
                 instructions.push(self.rand_instr(&mut rng))
             }
         }
@@ -336,7 +336,7 @@ impl Program{
 
         for instr in self.instructions.iter() {
 
-            if !rng.gen_weighted_bool(params::INSTR_DEL_RATE) {
+            if !rng.gen_weighted_bool(params::evolution::INSTR_DEL_RATE) {
                 instructions.push(instr.clone());
             }
         }
@@ -365,7 +365,7 @@ impl Program{
     //very simple now, just rm instr if it has deleted reg
     pub fn del_comp_copy(&self) -> Program{
         if self.n_calc_regs == 1 {
-            return Program::new_random(self.instructions.len(), 5, params::N_OPS, self.features.len() as u8)
+            return Program::new_random(self.instructions.len(), 5, params::params::N_OPS, self.features.len() as u8)
         }
         let features = self.features.clone();
         let n_calc_regs = self.n_calc_regs -1;
@@ -387,16 +387,16 @@ impl Program{
         let mut rng = rand::thread_rng();
         let mut features = self.features.clone();
 
-        if self.features.len() == params::N_FEATURES as usize{ //just do micro mutation
+        if self.features.len() == params::dataset::N_FEATURES as usize{ //just do micro mutation
             return self.mut_instr_copy()
         }
 
-        let mut new_feat = rng.gen_range(0, params::N_FEATURES);
+        let mut new_feat = rng.gen_range(0, params::dataset::N_FEATURES);
         let mut tries = 0;
         while features.contains(&new_feat) {
-            new_feat =  rng.gen_range(0, params::N_FEATURES);
+            new_feat =  rng.gen_range(0, params::dataset::N_FEATURES);
             tries += 1;
-            if tries > params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!, {:?}", &self)}
+            if tries > params::params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!, {:?}", &self)}
         }
         features.push(new_feat);
 
@@ -421,7 +421,7 @@ impl Program{
         let mut rng = rand::thread_rng();
         let mut features = self.features.clone();
         features.pop();
-        let removed_reg = (params::MAX_REGS - 1- features.len()) as u8;
+        let removed_reg = (params::params::MAX_REGS - 1- features.len()) as u8;
 
         let n_calc_regs = self.n_calc_regs;
 
@@ -439,21 +439,21 @@ impl Program{
 
     pub fn swap_feat_copy(&self) -> Program{
 //        if self.features.len() == 1 {
-//            return Program::new_random(self.instructions.len(), self.n_calc_regs, params::N_OPS, 5)
+//            return Program::new_random(self.instructions.len(), self.n_calc_regs, params::params::N_OPS, 5)
 //        }
-        if self.features.len() == params::N_FEATURES as usize { //just do micro mutation
+        if self.features.len() == params::dataset::N_FEATURES as usize { //just do micro mutation
             return self.mut_instr_copy()
         }
 
         let mut rng = rand::thread_rng();
         let mut features = self.features.clone();
 
-        let mut new_feat = rng.gen_range(0, params::N_FEATURES);
+        let mut new_feat = rng.gen_range(0, params::dataset::N_FEATURES);
         let mut tries = 0;
         while features.contains(&new_feat) {
-            new_feat =  rng.gen_range(0, params::N_FEATURES);
+            new_feat =  rng.gen_range(0, params::dataset::N_FEATURES);
             tries += 1;
-            if tries > params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!, {:?}", &self)}
+            if tries > params::params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!, {:?}", &self)}
         }
 
 
@@ -495,7 +495,7 @@ impl Program{
         while n == exclude {
             n = rng.gen_range(0, self.n_calc_regs);
             tries += 1;
-            if tries > params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!, {:?}", &self)}
+            if tries > params::params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!, {:?}", &self)}
         }
         n
     }
@@ -510,22 +510,22 @@ impl Program{
         while n == exclude {
             n = get_src(self.n_calc_regs, self.features.len() as u8, rng);
             tries += 1;
-            if tries > params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!")}
+            if tries > params::params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!")}
         }
         n
     }
 
     pub fn rand_op(&self, rng: &mut ThreadRng) -> u8{
-        rng.gen_range(0, params::N_OPS)
+        rng.gen_range(0, params::params::N_OPS)
     }
 
     pub fn rand_op_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
         let mut tries = 0;
-        let mut n = rng.gen_range(0, params::N_OPS);
+        let mut n = rng.gen_range(0, params::params::N_OPS);
         while n == exclude {
-            n = rng.gen_range(0, params::N_OPS);
+            n = rng.gen_range(0, params::params::N_OPS);
             tries += 1;
-            if tries > params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!")}
+            if tries > params::params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!")}
         }
         n
     }
@@ -536,7 +536,7 @@ impl Program{
 pub fn get_src(n_small: u8, n_big: u8, rng: &mut ThreadRng) ->u8 {
     let mut val = rng.gen_range(0, n_small + n_big);
 
-    if val >= n_small {val = params::MAX_REGS as u8 - val + n_small-1 }
+    if val >= n_small {val = params::params::MAX_REGS as u8 - val + n_small-1 }
 
     val
 }

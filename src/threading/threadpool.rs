@@ -68,7 +68,7 @@ impl ThreadPool{
     }
 
     pub fn terminate(&mut self){
-        for thread in 0..self.handles.len()*params::WORKER_QUEUE_SIZE {  //make sure to issue enough reques
+        for thread in 0..self.handles.len()*params::params::WORKER_QUEUE_SIZE {  //make sure to issue enough reques
             self.job_sender.send(EvalResult::quit());
         }
 
@@ -80,10 +80,10 @@ impl ThreadPool{
 }
 
 fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<EvalResult>>>, result_sender: mpsc::Sender<EvalResult>, data_ref: &TestDataSet, evaluator_ind: usize){
-    let mut queue = VecDeque::with_capacity(params::WORKER_QUEUE_SIZE);
+    let mut queue = VecDeque::with_capacity(params::params::WORKER_QUEUE_SIZE);
     let evaluator = evo_sys::prog::eval::get_fn(evaluator_ind);
 
-    const refill_after: usize = params::WORKER_QUEUE_SIZE/3 + 1;
+    const refill_after: usize = params::params::WORKER_QUEUE_SIZE/3 + 1;
 
     loop {
 //        println!("before matching q len, lenth is {:?}", queue.len());
@@ -96,14 +96,14 @@ fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<EvalResult>>>, result_sender: m
                 while let Ok(job) = job_lock.try_recv() {
 //                    println!(" got job");
                     queue.push_back(job);
-                    if queue.len() >= params::WORKER_QUEUE_SIZE {break;}
+                    if queue.len() >= params::params::WORKER_QUEUE_SIZE {break;}
                 }
             },
             1 ... refill_after => { //get jobs if receiver not locked
                 if let Ok(job_lock) = job_receiver.try_lock(){
                     while let Ok(job) = job_lock.try_recv() {
                         queue.push_back(job);
-                        if queue.len() >= params::WORKER_QUEUE_SIZE {break;}
+                        if queue.len() >= params::params::WORKER_QUEUE_SIZE {break;}
                     }
 
                 }

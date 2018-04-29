@@ -12,26 +12,27 @@ use super::{PutResult, PopStats, PopEval, Population};
 use dataMgmt::message::EvalResult;
 use experiments::config::Config;
 use experiments::config::{MapConfig};
+use dataMgmt::logger::Logger;
 
 
 
 
 pub struct ResultMap{
-    prog_map: [[Option<Program>; params::MAP_COLS]; params::MAP_ROWS],
+    prog_map: [[Option<Program>; params::params::MAP_COLS]; params::params::MAP_ROWS],
 //    select_cell_method: u8,
 //    compare_prog_method: u8,
     config: MapConfig,
+//    logger: &'a mut Logger,
+    cv_data: ValidationSet,
     sent_count: u64,
-    recieved_count: u64,
-    finished: bool,
+    pub recieved_count: u64,
 }
 
 
-impl Population for ResultMap {
+impl<'a> Population for ResultMap {
 
     fn try_put(&mut self, new_entry: EvalResult) -> PutResult {
         self.recieved_count += 1;
-        if self.recieved_count >= self.config.total_evals {self.finished=true;}
 
         let inds = &new_entry.map_location.unwrap();
 
@@ -41,9 +42,9 @@ impl Population for ResultMap {
         let old_fit = self.get_test_fit(inds);
 
         let result =
-            if inds.0 >= params::MAP_ROWS || inds.1 >= params::MAP_COLS || new_fit < old_fit { PutResult::Failed }
+            if inds.0 >= params::params::MAP_ROWS || inds.1 >= params::params::MAP_COLS || new_fit < old_fit { PutResult::Failed }
             else if new_fit > old_fit { PutResult::Improvement }
-            else if rand::thread_rng().gen_weighted_bool(params::REPLACE_EQ_FIT) { PutResult::Equal }
+            else if rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT) { PutResult::Equal }
             else { PutResult::Failed }; //eq but not replaced
 
         match result {
@@ -59,8 +60,8 @@ impl Population for ResultMap {
         let mut tries = 0;
         let mut tr  = rand::thread_rng();
 
-        while tries < params::MAP_COLS*params::MAP_ROWS * 1000 {
-            if let Some(ref parent) = self.prog_map[tr.gen_range(0, params::MAP_ROWS)][tr.gen_range(0, params::MAP_COLS)] {
+        while tries < params::params::MAP_COLS*params::params::MAP_ROWS * 1000 {
+            if let Some(ref parent) = self.prog_map[tr.gen_range(0, params::params::MAP_ROWS)][tr.gen_range(0, params::params::MAP_COLS)] {
                 return parent.test_mutate_copy()
             }
         }
@@ -68,13 +69,13 @@ impl Population for ResultMap {
     }
 
 
-    fn update_cv(&mut self, data: &ValidationSet) {
-        for row_i in 0.. params::MAP_ROWS{
-            for col_i in 0.. params::MAP_COLS{
+    fn update_cv(&mut self) {
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
                 if let Some(ref mut genome) = self.prog_map[row_i][ col_i] {
                     match genome.cv_fit {
                         Some(_) => (),
-                        None => genome.cv_fit = Some(evo_sys::prog::eval::eval_program_cv(&genome, &data)),
+                        None => genome.cv_fit = Some(evo_sys::prog::eval::eval_program_cv(&genome, &self.cv_data)),
                     }
                 }
             }
@@ -88,8 +89,8 @@ impl Population for ResultMap {
         let mut ave = 0.0f64;
         let mut count = 0.0;
 
-        for row_i in 0.. params::MAP_ROWS{
-            for col_i in 0.. params::MAP_COLS{
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
 
                 if let Some(ref prog) = self.prog_map[row_i][ col_i]{
                     let value = match eval {
@@ -109,8 +110,8 @@ impl Population for ResultMap {
         ave = ave/count;
 
         let mut vari = 0.0;
-        for row_i in 0.. params::MAP_ROWS{
-            for col_i in 0.. params::MAP_COLS{
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
 
                 if let Some(ref prog) = self.prog_map[row_i][ col_i]{
                     let value = match eval {
@@ -131,8 +132,8 @@ impl Population for ResultMap {
     fn write_pop_info(&self, file_name: &str, eval: PopEval) {
         let mut f = File::create(file_name).unwrap();
 
-        for row_i in 0..params::MAP_ROWS {
-            for col_i in 0..params::MAP_COLS {
+        for row_i in 0..params::params::MAP_ROWS {
+            for col_i in 0..params::params::MAP_COLS {
 
 
                 let value = if let Some(ref prog) = self.prog_map[row_i][ col_i]{
@@ -143,7 +144,7 @@ impl Population for ResultMap {
                     }
 
                 }else {
-                    params::MIN_FIT
+                    params::params::MIN_FIT
                 };
 
                 f.write(value.to_string().as_bytes());
@@ -156,8 +157,8 @@ impl Population for ResultMap {
 
     fn write_genos(&self, file_name: &str) {
         let mut f = File::create(file_name).unwrap();
-        for row_i in 0..params::MAP_ROWS {
-            for col_i in 0..params::MAP_COLS {
+        for row_i in 0..params::params::MAP_ROWS {
+            for col_i in 0..params::params::MAP_COLS {
                 if let Some(ref genome) = self.prog_map[row_i][ col_i] {
                     f.write(b"(");
                     f.write(row_i.to_string().as_bytes());
@@ -174,10 +175,10 @@ impl Population for ResultMap {
 
 
 
-impl ResultMap {
+impl<'a> ResultMap {
 
     pub fn is_finished(&self) -> bool{
-        self.finished
+        self.recieved_count >= self.config.total_evals
     }
 
 
@@ -202,23 +203,24 @@ impl ResultMap {
 
 
     pub fn can_send(&self)->bool{
-        if !self.pending_evals() < params::THREAD_POOL_MAX{
+        if self.pending_evals() >= params::params::THREAD_POOL_MAX{
             return false;
         }
         (self.recieved_count > 0) || (self.sent_count < self.config.initial_pop as u64)
     }
 
+
     fn get_test_fit(&self, inds: &(usize, usize)) -> f32 {
         match self.prog_map[inds.0][inds.1] {
             Some(ref prog) => prog.test_fit.unwrap(),
-            None => params::MIN_FIT,
+            None => params::params::MIN_FIT,
         }
     }
 
     fn get_cv_fit(&self, inds: &(usize, usize)) -> f32 {
         match self.prog_map[inds.0][inds.1] {
             Some(ref prog) => prog.cv_fit.unwrap(),
-            None => params::MIN_FIT,
+            None => params::params::MIN_FIT,
         }
     }
 
@@ -227,14 +229,14 @@ impl ResultMap {
     }
 
     fn is_in_bounds(&self, inds: &(usize, usize))-> bool{
-        (inds.0 < params::MAP_ROWS) && (inds.1 < params::MAP_COLS)
+        (inds.0 < params::params::MAP_ROWS) && (inds.1 < params::params::MAP_COLS)
     }
 
 }
 
 
-impl ResultMap {
-    pub fn new( config: MapConfig) -> ResultMap {
+impl<'a> ResultMap {
+    pub fn new( config: MapConfig, cv_data: ValidationSet) -> ResultMap {
         ResultMap {
             prog_map:
             [[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
@@ -292,7 +294,9 @@ impl ResultMap {
             config,
             sent_count: 0,
             recieved_count: 0,
-            finished: false,
+//            logger,
+            cv_data,
+//            finished: false,
         }
     }
 }

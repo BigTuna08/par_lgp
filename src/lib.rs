@@ -37,7 +37,7 @@ pub mod experiments;
 
 
 pub fn heads(){
-    let h = dataMgmt::dataset::get_headers(params::DATA);
+    let h = dataMgmt::dataset::get_headers(params::dataset::DATA);
     print!("headers = [");
     for n in h.iter(){
         println!("\"{}\",",n);
@@ -158,7 +158,7 @@ pub fn heads(){
 ////}
 //
 //pub fn five_fold_cv_tracking_pen(logger: &mut Logger, config: &Config, iter: u32, pen_method: u8){
-//    let data_file = params::DATA;
+//    let data_file = params::params::DATA;
 //    let data = FullDataSet::new(data_file);
 //
 //    let headers = dataMgmt::dataset::get_headers(data_file);
@@ -181,7 +181,7 @@ pub fn heads(){
 //
 //
 //pub fn five_fold_cv_tracking(logger: &mut Logger, config: &Config, iter: u32){
-//    let data_file = params::DATA;
+//    let data_file = params::params::DATA;
 //    let data = FullDataSet::new(data_file);
 //
 //    let headers = dataMgmt::dataset::get_headers(data_file);
@@ -218,7 +218,7 @@ pub fn heads(){
 //// !! Keep - faster bc keeps cv seperate
 ////pub fn five_fold_cv(results_path: &str, config: &Config){
 //////    let results_path = "results/test0";
-////    let data_file = params::DATA;
+////    let data_file = params::params::DATA;
 ////
 ////    let headers = dataMgmt::dataset::get_headers(data_file);
 ////    let data_partitions = dataMgmt::dataset::gen_partitions();
@@ -290,7 +290,7 @@ pub fn heads(){
 //
 //
 //fn run_single_fold_tracking_pen(test_data: TestDataSet, cv_data: ValidationSet, config: &Config, logger: &mut Logger, pen_method: u8) -> ResultMap{
-//    let mut pool = threading::threadpool::ThreadPool::new(params::N_THREADS, test_data, config.get_current_eval_code());
+//    let mut pool = threading::threadpool::ThreadPool::new(params::params::N_THREADS, test_data, config.get_current_eval_code());
 //    let mut pool_cap = 10000;
 //
 //    let mut sent_count: u64 = 0;
@@ -348,7 +348,7 @@ pub fn heads(){
 //
 ////
 ////fn run_single_fold(data: TestDataSet, config: &Config, cont_log_file: &mut File) -> ResultMap{
-////    let mut pool = threading::threadpool::ThreadPool::new(params::N_THREADS, data, config.eval_code);
+////    let mut pool = threading::threadpool::ThreadPool::new(params::params::N_THREADS, data, config.eval_code);
 ////    let mut pool_cap = 10000u32;
 ////
 ////    for _ in 0..pool_cap {

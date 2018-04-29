@@ -24,7 +24,7 @@ pub fn mult(opr1: f32, opr2: f32) -> f32 {
 }
 
 pub fn pdiv(opr1: f32, opr2: f32) -> f32 {
-    if opr2.abs() > params::EPS {opr1/opr2}
+    if opr2.abs() > params::params::EPS {opr1/opr2}
     else { opr1 } //protect if opr2 ~= 0
 }
 

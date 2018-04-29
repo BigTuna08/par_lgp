@@ -12,7 +12,7 @@ pub trait Population {
     fn try_put(&mut self, new_entry: EvalResult) -> PutResult;
     fn get_simple_mutated_genome_rand(&self) -> Program;
 
-    fn update_cv(&mut self, data: &ValidationSet);
+    fn update_cv(&mut self);
     fn get_pop_stats(&self, eval: PopEval) -> PopStats;
 
     fn write_pop_info(&self, file_name: &str, eval: PopEval);

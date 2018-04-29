@@ -104,11 +104,11 @@ impl Logger{
 
 
     pub fn finish_fold(&mut self, final_results: ResultMap){
-        let file_name = format!("{}/genos/iter{}-fold{}.txt", self.root_dir, self.current_iter, self.current_fold);
+        let file_name = format!("iter{}-fold{}.txt", self.current_iter, self.current_fold);
 
-        final_results.write_genos(&file_name);
-        final_results.write_pop_info(&file_name, PopEval::TestFit);
-        final_results.write_pop_info(&file_name, PopEval::CV);
+        final_results.write_genos(&format!("{}/genos/{}", self.root_dir, file_name));
+        final_results.write_pop_info(&format!("{}/test_fit_maps/{}", self.root_dir, file_name), PopEval::TestFit);
+        final_results.write_pop_info(&format!("{}/cv_fit_maps/{}", self.root_dir, file_name), PopEval::CV);
 
         self.new_line();
         self.update_fold_iter();
@@ -116,7 +116,7 @@ impl Logger{
 
 
     fn update_fold_iter(&mut self){
-        if self.current_fold + 1 < params::N_FOLDS{
+        if self.current_fold + 1 < params::dataset::N_FOLDS{
             self.current_fold += 1;
         }
         else {

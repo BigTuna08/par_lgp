@@ -15,16 +15,38 @@ fn main() {
     println!("WARNING!! need to fix run_single_fold_tracking so that it takes the given arg for eval code!!");
     let start = PreciseTime::now();
 
-//    let mut args: Vec<String> = env::args().collect();
-//    println!("ARGS {:?}", args);
-//    let config = Config::new(args);
-    let config = parLGP::experiments::config::FiveFoldMultiTrial::new_default("testingfolder1");
 
-    parLGP::experiments::multi_trial_five_fold_tracking(config);
+
+    let mut args: Vec<String> = env::args().collect();
+    println!("ARGS {:?}", args);
+
+    let mnger = parLGP::experiments::mgmt::Manager::new(args);
+    println!("mnger {:?}", mnger);
+
+    mnger.run_all();
+//    let config = Config::new(args);
+
+//    let config = parLGP::experiments::config::FiveFoldMultiTrial::new_default("testingfolder1");
+
+//    parLGP::experiments::multi_trial_five_fold_tracking(config);
 
     let end = PreciseTime::now();
     println!("{} seconds full program execution.", start.to(end));
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //
 //fn var_pen_test_big(){
