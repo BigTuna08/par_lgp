@@ -4,6 +4,21 @@ pub mod maps;
 use dataMgmt::logger::GenoEval;
 use std::fs::File;
 use std::io::Write;
+use dataMgmt::message::EvalResult;
+use evo_sys::prog::prog::Program;
+use dataMgmt::dataset::ValidationSet;
+
+pub trait Population {
+    fn try_put(&mut self, new_entry: EvalResult) -> PutResult;
+    fn get_simple_mutated_genome_rand(&self) -> Program;
+
+    fn update_cv(&mut self, data: &ValidationSet);
+    fn get_pop_stats(&self, eval: PopEval) -> PopStats;
+
+    fn write_pop_info(&self, file_name: &str, eval: PopEval);
+    fn write_genos(&self, file_name: &str);
+}
+
 
 pub struct PopStats {
     pub best: f32,

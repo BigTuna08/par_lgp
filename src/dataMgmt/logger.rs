@@ -2,6 +2,7 @@ use dataMgmt::trackers;
 use evo_sys::pop::maps::{ResultMap};
 use evo_sys::pop::{PopStats, PopEval};
 use evo_sys::prog::prog::Program;
+use evo_sys::pop::Population;
 use params;
 use std::fs::create_dir;
 use std::fs::File;

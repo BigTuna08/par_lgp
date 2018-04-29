@@ -19,6 +19,7 @@ use std::sync::{Arc, Mutex};
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use threading::threadpool::ThreadPool;
+use evo_sys::pop::Population;
 
 
 pub fn multi_trial_five_fold_tracking(mut config: Config){

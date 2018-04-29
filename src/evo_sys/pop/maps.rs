@@ -8,7 +8,7 @@ use rand::Rng;
 use std;
 use std::fs::File;
 use std::io::Write;
-use super::{PutResult, PopStats, PopEval};
+use super::{PutResult, PopStats, PopEval, Population};
 use dataMgmt::message::EvalResult;
 
 
@@ -19,9 +19,9 @@ pub struct ResultMap{
 }
 
 
-impl ResultMap {
+impl Population for ResultMap {
 
-    pub fn try_put(&mut self, new_entry: EvalResult) -> PutResult {
+    fn try_put(&mut self, new_entry: EvalResult) -> PutResult {
         let inds = &new_entry.map_location.unwrap();
 
         if !self.is_in_bounds(inds) {return PutResult::Failed}
@@ -41,7 +41,7 @@ impl ResultMap {
 
 
     //pick random prog from map and return mutated copy
-    pub fn get_simple_mutated_genome_rand(&self) -> Program {
+    fn get_simple_mutated_genome_rand(&self) -> Program {
         let mut tries = 0;
         let mut tr  = rand::thread_rng();
 
@@ -54,7 +54,7 @@ impl ResultMap {
     }
 
 
-    pub fn update_cv(&mut self, data: &ValidationSet) {
+    fn update_cv(&mut self, data: &ValidationSet) {
         for row_i in 0.. params::MAP_ROWS{
             for col_i in 0.. params::MAP_COLS{
                 if let Some(ref mut genome) = self.prog_map[row_i][ col_i] {
@@ -68,7 +68,7 @@ impl ResultMap {
     }
 
 
-    pub fn get_pop_stats(&self, eval: PopEval) -> PopStats {
+    fn get_pop_stats(&self, eval: PopEval) -> PopStats {
         let mut best = std::f32::MIN;
         let mut worst = std::f32::MAX;
         let mut ave = 0.0f64;
@@ -114,7 +114,7 @@ impl ResultMap {
     }
 
 
-    pub fn write_pop_info(&self, file_name: &str, eval: PopEval) {
+    fn write_pop_info(&self, file_name: &str, eval: PopEval) {
         let mut f = File::create(file_name).unwrap();
 
         for row_i in 0..params::MAP_ROWS {
@@ -140,7 +140,7 @@ impl ResultMap {
     }
 
 
-    pub fn write_genos(&self, file_name: &str) {
+    fn write_genos(&self, file_name: &str) {
         let mut f = File::create(file_name).unwrap();
         for row_i in 0..params::MAP_ROWS {
             for col_i in 0..params::MAP_COLS {

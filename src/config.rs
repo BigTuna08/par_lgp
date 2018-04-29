@@ -31,21 +31,7 @@ impl FiveFoldMultiTrial{
 }
 
 //args: <initial_pop> <total_evals> <out_folder> <n_iter> <comment> <list of eval codes>
-impl Config {
-    pub fn new(args: Vec<String>) -> Config {
-        let mut arg_iter = args.iter();
-        arg_iter.next();
-        let initial_pop = arg_iter.next().unwrap().clone().parse::<u32>().unwrap();
-        let total_evals = arg_iter.next().unwrap().clone().parse::<u64>().unwrap();
-        let out_folder = arg_iter.next().unwrap().clone();
-        let n_iter = arg_iter.next().unwrap().clone().parse::<u32>().unwrap();
-        let comment = arg_iter.next().unwrap().clone();
 
-        let mut eval_codes: Vec<usize> = arg_iter.map(|x| x.parse::<usize>().unwrap()).collect();
-
-        Config { initial_pop, total_evals, out_folder, n_iter, comment, current_eval_code_i: None, eval_codes }
-    }
-}
 
 
 #[derive(Debug)]
