@@ -7,7 +7,7 @@ Archive.zip
 **/*.rs.bk
 *.out
 
-
+.idea/*.xml
 .idea/misc.xml
 .idea/modules.xml
 .idea/workspace.xml
