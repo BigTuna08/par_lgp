@@ -1,5 +1,5 @@
 use dataMgmt::dataset::ValidationSet;
-use dataMgmt::message::Message;
+use dataMgmt::message::EvalResult;
 use evo_sys;
 use evo_sys::prog::prog::Program;
 use params;
@@ -8,8 +8,8 @@ use rand::Rng;
 use std;
 use std::fs::File;
 use std::io::Write;
-use super::{PutResult, PopStats, PopEval, Population};
-use dataMgmt::message::EvalResult;
+use super::{PopStats, PopEval, Population};
+//use dataMgmt::message::Message;
 use experiments::config::Config;
 use experiments::config::{MapConfig};
 use dataMgmt::logger::Logger;
@@ -19,10 +19,7 @@ use dataMgmt::logger::Logger;
 
 pub struct ResultMap{
     prog_map: [[Option<Program>; params::params::MAP_COLS]; params::params::MAP_ROWS],
-//    select_cell_method: u8,
-//    compare_prog_method: u8,
-    config: MapConfig,
-//    logger: &'a mut Logger,
+    pub config: MapConfig,
     cv_data: ValidationSet,
     sent_count: u64,
     pub recieved_count: u64,
@@ -31,27 +28,27 @@ pub struct ResultMap{
 
 impl<'a> Population for ResultMap {
 
-    fn try_put(&mut self, new_entry: EvalResult) -> PutResult {
+    fn try_put(&mut self, new_entry: EvalResult) {
         self.recieved_count += 1;
+        let prog = new_entry.prog;
+        let inds = self.get_loc(&prog);
+        let mut replace = false;
 
-        let inds = &new_entry.map_location.unwrap();
-
-        if !self.is_in_bounds(inds) {return PutResult::Failed}
-
-        let new_fit = new_entry.genome.test_fit.unwrap();
-        let old_fit = self.get_test_fit(inds);
-
-        let result =
-            if inds.0 >= params::params::MAP_ROWS || inds.1 >= params::params::MAP_COLS || new_fit < old_fit { PutResult::Failed }
-            else if new_fit > old_fit { PutResult::Improvement }
-            else if rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT) { PutResult::Equal }
-            else { PutResult::Failed }; //eq but not replaced
-
-        match result {
-            PutResult::Failed => (),
-            _ => self.put(new_entry, inds),
+        if self.is_in_bounds(&inds){
+            match self.prog_map[inds.0][inds.1] {
+                Some(ref old_prog) => {
+                    if self.is_better(&prog, old_prog){
+                        replace = true
+                    }
+                }
+                None => replace = true
+            }
         }
-        result
+
+        if replace {
+            self.put(prog, &inds)
+        }
+
     }
 
 
@@ -224,8 +221,8 @@ impl<'a> ResultMap {
         }
     }
 
-    fn put(&mut self, val: EvalResult, inds: &(usize, usize)) {
-        self.prog_map[inds.0][inds.1] = Some(val.genome);
+    fn put(&mut self, val: Program, inds: &(usize, usize)) {
+        self.prog_map[inds.0][inds.1] = Some(val);
     }
 
     fn is_in_bounds(&self, inds: &(usize, usize))-> bool{
@@ -289,14 +286,10 @@ impl<'a> ResultMap {
                 [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
                 [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
                 [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], ],
-//            select_cell_method,
-//            compare_prog_method,
             config,
             sent_count: 0,
             recieved_count: 0,
-//            logger,
             cv_data,
-//            finished: false,
         }
     }
 }

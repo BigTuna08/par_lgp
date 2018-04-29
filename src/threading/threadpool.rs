@@ -1,5 +1,5 @@
 use dataMgmt::dataset::TestDataSet;
-use dataMgmt::message::{EvalResult, Message};
+use dataMgmt::message::{Message, EvalResult};
 use evo_sys;
 use params;
 use std::collections::VecDeque;
@@ -9,7 +9,7 @@ use std::thread;
 
 
 pub struct ThreadPool {
-    job_sender: mpsc::Sender<EvalResult>,
+    job_sender: mpsc::Sender<Message>,
     result_receiver: mpsc::Receiver<EvalResult>,
     handles: Vec<Option<thread::JoinHandle<()>>>,
 
@@ -47,8 +47,7 @@ impl ThreadPool{
     }
 
 
-    pub fn add_task(&mut self, task: EvalResult) {
-
+    pub fn add_task(&mut self, task: Message) {
         self.job_sender.send(task);
     }
 
@@ -69,7 +68,7 @@ impl ThreadPool{
 
     pub fn terminate(&mut self){
         for thread in 0..self.handles.len()*params::params::WORKER_QUEUE_SIZE {  //make sure to issue enough reques
-            self.job_sender.send(EvalResult::quit());
+            self.job_sender.send(Message::Quit);
         }
 
         for (i,thread) in self.handles.iter_mut().enumerate(){
@@ -79,22 +78,17 @@ impl ThreadPool{
 
 }
 
-fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<EvalResult>>>, result_sender: mpsc::Sender<EvalResult>, data_ref: &TestDataSet, evaluator_ind: usize){
+fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<Message>>>, result_sender: mpsc::Sender<EvalResult>, data_ref: &TestDataSet, evaluator_ind: usize){
     let mut queue = VecDeque::with_capacity(params::params::WORKER_QUEUE_SIZE);
-    let evaluator = evo_sys::prog::eval::get_fn(evaluator_ind);
+    let data_size = data_ref.records.len() as f32;
 
     const refill_after: usize = params::params::WORKER_QUEUE_SIZE/3 + 1;
 
     loop {
-//        println!("before matching q len, lenth is {:?}", queue.len());
-
         match queue.len() {
             0 => { //block and wait for jobs
-//                println!(" before getting lock ");
                 let job_lock = job_receiver.lock().unwrap();
-//                println!("got lock ");
                 while let Ok(job) = job_lock.try_recv() {
-//                    println!(" got job");
                     queue.push_back(job);
                     if queue.len() >= params::params::WORKER_QUEUE_SIZE {break;}
                 }
@@ -112,13 +106,14 @@ fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<EvalResult>>>, result_sender: m
         }
 
         if let Some(next_job) = queue.pop_front() {
-            match next_job.signal {
-                Message::Cont => result_sender.send( evaluator(next_job, data_ref) ),
-                Message::Quit => {
-                    break
+            match next_job {
+                Message::Cont(mut prog) => {
+                    let fit = evo_sys::prog::eval::eval_program_corrects(&prog, data_ref)/data_size;
+                    prog.test_fit = Some(fit);
+                    result_sender.send(EvalResult{prog} );
                 }
-            };
-
+                Message::Quit => break,
+            }
         }
     }
 

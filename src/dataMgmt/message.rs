@@ -21,7 +21,15 @@ use evo_sys::prog::prog::Program;
 //        }
 //    }
 //}
+pub struct EvalResult{
+    pub prog: Program
+}
 
+impl EvalResult{
+    pub fn new(prog: Program)-> EvalResult{
+        EvalResult{prog}
+    }
+}
 
 #[derive(Debug)]
 pub enum Message {

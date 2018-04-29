@@ -53,7 +53,7 @@ impl FiveFoldMultiTrial{
     }
 }
 
-
+#[derive(Debug)]
 pub struct MapConfig{
     pub select_cell_method: u8,
     pub compare_prog_method: u8,

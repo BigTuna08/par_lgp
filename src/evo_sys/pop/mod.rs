@@ -1,5 +1,6 @@
 pub mod maps;
-
+pub mod selectors;
+pub mod comparers;
 
 use dataMgmt::logger::GenoEval;
 use std::fs::File;
@@ -9,7 +10,7 @@ use evo_sys::prog::prog::Program;
 use dataMgmt::dataset::ValidationSet;
 
 pub trait Population {
-    fn try_put(&mut self, new_entry: EvalResult) -> PutResult;
+    fn try_put(&mut self, new_entry: EvalResult);
     fn get_simple_mutated_genome_rand(&self) -> Program;
 
     fn update_cv(&mut self);
@@ -51,9 +52,9 @@ pub enum PopEval<'a>{
     Geno(&'a GenoEval),
 }
 
-
-pub enum PutResult{
-    Failed,
-    Equal,
-    Improvement
-}
+//
+//pub enum PutResult{
+//    Failed,
+//    Equal,
+//    Improvement
+//}
