@@ -8,6 +8,7 @@ use std::fs::create_dir;
 use std::fs::File;
 use std::io::Write;
 
+
 pub type GenoEval = Fn(&Program) -> f32 + 'static;
 
 
@@ -67,6 +68,9 @@ pub struct Logger{
 
     pub geno_functions: Vec<&'static GenoEval>,
 
+    feature_count: Option<File>,
+    feature_distr: Option<File>,
+
     current_iter: u16,
     current_fold: u8, //assumes 5 fold
 }
@@ -85,6 +89,8 @@ impl Logger{
             cv_output_files: None,
             geno_output_files: Vec::new(),
             geno_functions: Vec::new(),
+            feature_count: None,
+            feature_distr: None,
             current_iter:0,
             current_fold: 0,
         }
@@ -95,6 +101,9 @@ impl Logger{
 
         self.log_test_fits(res_map.get_pop_stats(PopEval::TestFit));
         self.log_cv_fits(res_map.get_pop_stats(PopEval::CV));
+
+        self.log_feat_count(res_map.count_eff_feats());
+        self.log_feat_distr(res_map.eff_feats_distr());
 
         for i in 0..self.geno_functions.len(){
             let stats = res_map.get_pop_stats(PopEval::Geno(&self.geno_functions[i]));
@@ -124,6 +133,9 @@ impl Logger{
             self.current_iter += 1;
             self.flush();
         }
+        let file_name = format!("{}/iter{}-fold{}.txt", self.root_dir, self.current_iter, self.current_fold);
+//        let feat_dir = format!("{}/feats", self.root_dir);
+        self.feature_distr = Some(File::create(&file_name).unwrap());
     }
 
 }
@@ -134,6 +146,7 @@ impl Logger{
 
     pub fn full_tracking(&mut self){
         self.track_both_fits();
+        self.track_feats();
 
         self.add_geno_tracker("abs_len", &trackers::get_abs_geno_len);
         self.add_geno_tracker("eff_len", &trackers::get_eff_geno_len);
@@ -168,6 +181,26 @@ impl Logger{
         }
     }
 
+
+    pub fn track_feats(&mut self){
+        match self.feature_count {
+            Some(_) => panic!("Already tracking feats!!!!!"),
+            None => {
+                let feat_dir = format!("{}/feats", self.root_dir);
+                create_dir(&feat_dir);
+                self.feature_count = Some(File::create(&format!("{}/counts.txt", feat_dir)).unwrap());
+                match self.feature_distr {
+                    Some(_) => panic!("Already tracking feats!!!!!"),
+                    None =>{
+                        let file_name = format!("iter{}-fold{}.txt", self.current_iter, self.current_fold);
+                        self.feature_distr = Some(File::create(&format!("{}/{}", feat_dir, file_name)).unwrap());
+                    },
+                };
+            },
+        }
+    }
+
+
     pub fn add_geno_tracker(&mut self, name: &str, geno_eval: &'static GenoEval){
         let out_dir = format!("{}/{}", self.root_dir, name);
         create_dir(&out_dir);
@@ -193,6 +226,26 @@ impl Logger{
         };
     }
 
+    pub fn log_feat_count(&mut self, count: u8) {
+        match self.feature_count {
+            Some(ref mut f) => {
+                f.write(count.to_string().as_bytes());
+                f.write(b"\t");
+            },
+            None => panic!("Not tracking feats!!!!!"),
+        };
+    }
+
+    pub fn log_feat_distr(&mut self, distr: [u8; params::dataset::N_FEATURES as usize]) {
+        match self.feature_distr {
+            Some(ref mut f) => {
+                f.write(array_2_str(&distr).as_bytes());
+                f.write(b"\n");
+            },
+            None => panic!("Not tracking feats!!!!!"),
+        };
+    }
+
     pub fn log_geno_stat(&mut self, stats: PopStats, stat_ind: usize){
         self.geno_output_files[stat_ind].write(stats);
     }
@@ -207,9 +260,14 @@ impl Logger{
             Some(ref mut out_f) => out_f.write_new_line(),
             None => (),
         };
+        match self.feature_count{
+            Some(ref mut f) => {f.write(b"\n");},
+            None => (),
+        };
         for f in self.geno_output_files.iter_mut(){
             f.write_new_line();
         }
+
     }
 
 
@@ -227,4 +285,8 @@ impl Logger{
         }
     }
 
+}
+
+pub fn array_2_str(arr: &[u8]) -> String{
+    arr.iter().fold(String::new(), |acc, &x| format!("{}\t{}", acc, x.to_string()))
 }

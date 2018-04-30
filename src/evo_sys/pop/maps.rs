@@ -170,6 +170,41 @@ impl<'a> Population for ResultMap {
     }
 }
 
+impl ResultMap{
+    pub fn count_eff_feats(&self) -> u8 {
+        let mut feats = [false; params::dataset::N_FEATURES as usize];
+        let mut count = 0;
+        for row_i in 0..params::params::MAP_ROWS {
+            for col_i in 0..params::params::MAP_COLS {
+                if let Some(ref genome) = self.prog_map[row_i][ col_i] {
+                    for feat in genome.get_effective_feats(0) {
+                        if !feats[feat as usize] {
+                            feats[feat as usize] = true;
+                            count += 1;
+                        }
+                    }
+                }
+            }
+        }
+        count
+    }
+
+
+    pub fn eff_feats_distr(&self) -> [u8; params::dataset::N_FEATURES as usize] {
+        let mut feats = [0; params::dataset::N_FEATURES as usize];
+        let mut count = 0;
+        for row_i in 0..params::params::MAP_ROWS {
+            for col_i in 0..params::params::MAP_COLS {
+                if let Some(ref genome) = self.prog_map[row_i][ col_i] {
+                    for feat in genome.get_effective_feats(0) {
+                        feats[feat as usize] += 1;
+                    }
+                }
+            }
+        }
+        feats
+    }
+}
 
 
 impl<'a> ResultMap {
