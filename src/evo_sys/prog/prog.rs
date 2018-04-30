@@ -248,7 +248,8 @@ impl Program{
             }
         }
         eff_regs.retain(|&x|  x >= (params::params::MAX_REGS - self.features.len()) as u8);
-        eff_regs.map
+
+        eff_regs.iter().map(|x| reg_2_feat(&self.features, x)).collect()
     }
 
 
@@ -263,7 +264,7 @@ impl Program{
         }
         eff_regs.into_iter().fold(0, |acc, x| if x < self.n_calc_regs {acc+1} else {acc})
     }
-    // more methods below (private)
+    // more methods below
 }
 
 
@@ -542,7 +543,7 @@ pub fn get_src(n_small: u8, n_big: u8, rng: &mut ThreadRng) ->u8 {
 }
 
 
-pub fn reg_2_feat(feat_list: &Vec<u8>, reg: u8) -> u8{
-    let feat_i = params::params::MAX_REGS - reg as usize;
+pub fn reg_2_feat(feat_list: &Vec<u8>, reg: &u8) -> u8{
+    let feat_i = params::params::MAX_REGS - *reg as usize -1;
     feat_list[feat_i].clone()
 }

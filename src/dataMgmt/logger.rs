@@ -133,7 +133,7 @@ impl Logger{
             self.current_iter += 1;
             self.flush();
         }
-        let file_name = format!("{}/iter{}-fold{}.txt", self.root_dir, self.current_iter, self.current_fold);
+        let file_name = format!("{}/feats/iter{}-fold{}.txt", self.root_dir, self.current_iter, self.current_fold);
 //        let feat_dir = format!("{}/feats", self.root_dir);
         self.feature_distr = Some(File::create(&file_name).unwrap());
     }
