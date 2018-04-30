@@ -1,4 +1,6 @@
 use params;
+use std::fs::File;
+use std::io::Write;
 use std::fs::create_dir_all;
 use experiments::config::FiveFoldMultiTrial;
 use experiments::experiments;
@@ -17,6 +19,10 @@ pub struct Manager{
 
 impl Manager {
     pub fn run_all(&self) {
+
+        File::create(format!("{}/README.txt", &self.out_folder))
+            .unwrap().write(format!("{:?}", &self).as_bytes());
+
         for s in self.select_cell_methods.iter(){
             for c in self.compare_prog_methods.iter(){
                 let config = FiveFoldMultiTrial{
@@ -44,6 +50,8 @@ impl Manager{
 
         match create_dir_all(&out_folder) {
             Ok(_) =>{
+
+
                 let mut select_cell_methods = Vec::new();
                 let mut compare_prog_methods = Vec::new();
                 let mut initial_pop = params::defaults::DEFAULT_INITIAL_POP;
