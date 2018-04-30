@@ -10,8 +10,10 @@ impl ResultMap{
         match self.config.compare_prog_method {
             0 => self.simple_tie_shortest(new_prog, old_prog),
             1 => self.simple_tie_rand(new_prog, old_prog),
-            2 => self.pen(new_prog, old_prog),
-            3 => self.pen2(new_prog, old_prog),
+            2 => self.pen_small(new_prog, old_prog),
+            3 => self.pen_big(new_prog, old_prog),
+            4 => self.var_pen_small(new_prog, old_prog),
+            5 => self.var_pen_big(new_prog, old_prog),
             _ => panic!("Invalid compare method!! \n{:?}", self.config),
         }
     }
@@ -40,7 +42,35 @@ impl ResultMap{
     }
 
 
-    fn pen(&self, new_prog: &Program, old_prog: &Program) -> bool{
+    fn pen_small(&self, new_prog: &Program, old_prog: &Program) -> bool{
+        let period = 200_000.0;
+
+        let v = 1.0 / params::dataset::N_SAMPLES as f32;
+
+        let new = new_prog.test_fit.unwrap() - v*new_prog.get_effective_len(0) as f32;
+        let old = old_prog.test_fit.unwrap() - v*old_prog.get_effective_len(0) as f32;
+
+        if new == old {
+            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+        }
+        return new > old
+    }
+
+    fn pen_big(&self, new_prog: &Program, old_prog: &Program) -> bool{
+        let period = 200_000.0;
+
+        let v = 5.0 / params::dataset::N_SAMPLES as f32;
+
+        let new = new_prog.test_fit.unwrap() - v*new_prog.get_effective_len(0) as f32;
+        let old = old_prog.test_fit.unwrap() - v*old_prog.get_effective_len(0) as f32;
+
+        if new == old {
+            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+        }
+        return new > old
+    }
+
+    fn var_pen_small(&self, new_prog: &Program, old_prog: &Program) -> bool{
         let period = 200_000.0;
         let mut v = self.recieved_count as f32 / period;
         v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
@@ -54,10 +84,11 @@ impl ResultMap{
         return new > old
     }
 
-    fn pen2(&self, new_prog: &Program, old_prog: &Program) -> bool{
-        let period = 200_000.0;
+    fn var_pen_big(&self, new_prog: &Program, old_prog: &Program) -> bool{
+        let period = 500_000.0;
         let mut v = self.recieved_count as f32 / period;
-        v = (v.sin() + 0.8) / params::dataset::N_SAMPLES as f32;
+        v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
+        v *= 10.0;
 
         let new = new_prog.test_fit.unwrap() - v*new_prog.get_effective_len(0) as f32;
         let old = old_prog.test_fit.unwrap() - v*old_prog.get_effective_len(0) as f32;
@@ -67,5 +98,4 @@ impl ResultMap{
         }
         return new > old
     }
-
 }
