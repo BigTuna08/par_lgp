@@ -248,7 +248,7 @@ impl Program{
             }
         }
         eff_regs.retain(|&x|  x >= (params::params::MAX_REGS - self.features.len()) as u8);
-        eff_regs
+        eff_regs.map
     }
 
 
@@ -541,3 +541,8 @@ pub fn get_src(n_small: u8, n_big: u8, rng: &mut ThreadRng) ->u8 {
     val
 }
 
+
+pub fn reg_2_feat(feat_list: &Vec<u8>, reg: u8) -> u8{
+    let feat_i = params::params::MAX_REGS - reg as usize;
+    feat_list[feat_i].clone()
+}
