@@ -17,6 +17,7 @@ for file = folder'
     count = count + 1;
 end
 
-M
+M = M';
+M = M./sum(M); 
 
 end
