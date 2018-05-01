@@ -98,4 +98,26 @@ impl ResultMap{
         }
         return new > old
     }
+
+
+    fn var_pen_double(&self, new_prog: &Program, old_prog: &Program) -> bool{
+        let period = 500_000.0;
+        let mut v = self.recieved_count as f32 / period;
+        v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
+        v *= 10.0;
+
+
+        let (new, old) = if ((self.recieved_count as f32 / period ) as u16 % 2)== 0{
+            (new_prog.test_fit.unwrap() - v*new_prog.get_n_effective_feats(0) as f32,
+                old_prog.test_fit.unwrap() - v*old_prog.get_n_effective_feats(0) as f32)
+        } else {
+            (new_prog.test_fit.unwrap() - v*new_prog.get_effective_len(0) as f32,
+             old_prog.test_fit.unwrap() - v*old_prog.get_effective_len(0) as f32)
+        };
+
+        if new == old {
+            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+        }
+        return new > old
+    }
 }

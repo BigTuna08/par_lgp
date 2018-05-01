@@ -15,43 +15,43 @@ pub type GenoEval = Fn(&Program) -> f32 + 'static;
 
 
 struct FileSet{
-    best: File,
-    worst: File,
+    max: File,
+    min: File,
     ave: File,
     sd: File,
 }
 
 impl FileSet{
     fn new(output_dir: &str) -> FileSet{
-        let best = File::create(format!("{}/best.txt", output_dir)).unwrap();
-        let worst = File::create(format!("{}/worst.txt", output_dir)).unwrap();
+        let max = File::create(format!("{}/max.txt", output_dir)).unwrap();
+        let min = File::create(format!("{}/min.txt", output_dir)).unwrap();
         let ave = File::create(format!("{}/ave.txt", output_dir)).unwrap();
         let sd = File::create(format!("{}/sd.txt", output_dir)).unwrap();
-        FileSet{best, worst, ave, sd}
+        FileSet{ max, min, ave, sd}
     }
 
     pub fn write(&mut self, stat: PopStats){
-        self.best.write(stat.best.to_string().as_bytes());
-        self.worst.write(stat.worst.to_string().as_bytes());
+        self.max.write(stat.best.to_string().as_bytes());
+        self.min.write(stat.worst.to_string().as_bytes());
         self.ave.write(stat.ave.to_string().as_bytes());
         self.sd.write(stat.sd.to_string().as_bytes());
 
-        self.best.write(b"\t");
-        self.worst.write(b"\t");
+        self.max.write(b"\t");
+        self.min.write(b"\t");
         self.ave.write(b"\t");
         self.sd.write(b"\t");
     }
 
     pub fn write_new_line(&mut self){
-        self.best.write(b"\n");
-        self.worst.write(b"\n");
+        self.max.write(b"\n");
+        self.min.write(b"\n");
         self.ave.write(b"\n");
         self.sd.write(b"\n");
     }
 
     pub fn flush(&mut self){
-        self.best.flush();
-        self.worst.flush();
+        self.max.flush();
+        self.min.flush();
         self.ave.flush();
         self.sd.flush();
     }
