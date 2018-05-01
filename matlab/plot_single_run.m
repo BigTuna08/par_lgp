@@ -11,6 +11,7 @@ plot(x,M(trial,:));
 p = gca;
 p.XAxis.Exponent = 6;
 xticks(1:10^6:max_gen);
+set(gca,'FontSize',18)
 end
 
 

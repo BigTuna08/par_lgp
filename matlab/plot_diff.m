@@ -21,3 +21,4 @@ at_end = [fin - fin_d; fin; fin + fin_d]
 
 plot(x, ave-sd, x, ave, x, ave+sd);
 xlabel('evaluations')
+set(gca,'FontSize',18)

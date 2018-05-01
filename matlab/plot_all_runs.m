@@ -3,5 +3,6 @@ function plot_all_runs(in_file)
 % like plot_ave, but only does one run
 M = dlmread(in_file);
 plot(M);
+set(gca,'FontSize',18)
 end
 
