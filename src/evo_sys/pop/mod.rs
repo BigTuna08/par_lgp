@@ -2,7 +2,7 @@ pub mod maps;
 pub mod selectors;
 pub mod comparers;
 
-use dataMgmt::logger::GenoEval;
+use GenoEval;
 use std::fs::File;
 use std::io::Write;
 use dataMgmt::message::EvalResult;

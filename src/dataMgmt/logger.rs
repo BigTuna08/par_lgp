@@ -8,11 +8,7 @@ use std::fs::create_dir;
 use std::fs::File;
 use std::io::Write;
 
-
-pub type GenoEval = Fn(&Program) -> f32 + 'static;
-
-
-
+use GenoEval;
 
 struct FileSet{
     max: File,

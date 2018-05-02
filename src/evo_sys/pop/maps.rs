@@ -171,6 +171,72 @@ impl<'a> Population for ResultMap {
 }
 
 impl ResultMap{
+
+    pub fn log_full(&self, logger: &mut Logger){
+        let mut count = 0.0;
+
+        let mut best_train = std::f32::MIN;
+        let mut worst_train = std::f32::MAX;
+        let mut ave_train = 0.0f64;
+
+        let mut best_cv = std::f32::MIN;
+        let mut worst_cv = std::f32::MAX;
+        let mut ave_cv = 0.0f64;
+
+        let n_evals = logger.geno_functions.len();
+        let mut bests = vec![std::f32::MIN; n_evals];
+        let mut worsts = vec![std::f32::MAX; n_evals];
+        let mut aves = vec![0f64; n_evals];
+
+
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
+
+                if let Some(ref prog) = self.prog_map[row_i][ col_i]{
+
+                    let values = vec![prog.test_fit.unwrap(), prog.cv_fit.unwrap()];
+                    let others: Vec<f32> = logger.geno_functions.iter().map(|f| f(prog)).collect();
+
+                    for value in values.iter().chain(others.iter()){
+
+                    }
+
+//                    let value = match eval {
+//                        PopEval::TestFit => prog.test_fit.unwrap(),
+//                        PopEval::CV => prog.cv_fit.unwrap(),
+//                        PopEval::Geno(eval) => eval(prog),
+//                    };
+
+//                    ave += value as f64;
+//                    count += 1.0;
+//                    if value > best {best=value;}
+//                    if value < worst {worst=value;}
+                }
+
+            }
+        }
+//        ave = ave/count;
+
+//        let mut vari = 0.0;
+//        for row_i in 0.. params::params::MAP_ROWS{
+//            for col_i in 0.. params::params::MAP_COLS{
+//
+//                if let Some(ref prog) = self.prog_map[row_i][ col_i]{
+//                    let value = match eval {
+//                        PopEval::TestFit => prog.test_fit.unwrap(),
+//                        PopEval::CV => prog.cv_fit.unwrap(),
+//                        PopEval::Geno(eval) => eval(prog),
+//                    };
+//                    vari += (value as f64-ave).powi(2);
+//                }
+//
+//            }
+//        }
+//        vari /= count;
+//        PopStats {best, worst, ave, sd:vari.sqrt(), count: count as f32}
+
+    }
+
     pub fn count_eff_feats(&self) -> u8 {
         let mut feats = [false; params::dataset::N_FEATURES as usize];
         let mut count = 0;
