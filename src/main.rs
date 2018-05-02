@@ -11,12 +11,12 @@ use time::PreciseTime;
 
 fn main() {
 
-//    test();
-    println!("WARNING!! need to fix run_single_fold_tracking so that it takes the given arg for eval code!!");
+
     let start = PreciseTime::now();
 
 
 
+//
     let mut args: Vec<String> = env::args().collect();
     println!("ARGS {:?}", args);
 
@@ -24,11 +24,7 @@ fn main() {
     println!("mnger {:?}", mnger);
 
     mnger.run_all();
-//    let config = Config::new(args);
-
-//    let config = parLGP::experiments::config::FiveFoldMultiTrial::new_default("testingfolder1");
-
-//    parLGP::experiments::multi_trial_five_fold_tracking(config);
+//    comp_times();
 
     let end = PreciseTime::now();
     println!("{} seconds full program execution.", start.to(end));
@@ -40,7 +36,25 @@ fn main() {
 
 
 
+fn comp_times(){
+    let i = 20_000;
 
+    let start2 = PreciseTime::now();
+    parLGP::test_a2s(&parLGP::dataMgmt::logger::a_2_s, i);
+    let end2 = PreciseTime::now();
+    let t2 = start2.to(end2);
+
+    let start = PreciseTime::now();
+    parLGP::test_a2s(&parLGP::dataMgmt::logger::array_2_str, i);
+    let end = PreciseTime::now();
+    let t1 = start.to(end);
+
+
+
+
+
+    println!("{} for 1\t{} for 2", t1, t2);
+}
 
 
 

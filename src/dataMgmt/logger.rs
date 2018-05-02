@@ -93,13 +93,13 @@ impl Logger{
     }
 
     //assumes full tracking !!
-    pub fn update(&mut self, res_map: &ResultMap){
+    pub fn update(&mut self, res_map: &ResultMap){  // !! has been replaced by ResultsMap::log_full
 
         self.log_test_fits(res_map.get_pop_stats(PopEval::TestFit));
         self.log_cv_fits(res_map.get_pop_stats(PopEval::CV));
 
         self.log_feat_count(res_map.count_eff_feats());
-        self.log_feat_distr(res_map.eff_feats_distr());
+        self.log_feat_distr(&res_map.eff_feats_distr());
 
         for i in 0..self.geno_functions.len(){
             let stats = res_map.get_pop_stats(PopEval::Geno(&self.geno_functions[i]));
@@ -231,10 +231,20 @@ impl Logger{
         };
     }
 
-    pub fn log_feat_distr(&mut self, distr: [u8; params::dataset::N_FEATURES as usize]) {
+//    pub fn log_feat_distr(&mut self, distr: [u8; params::dataset::N_FEATURES as usize]) {
+//        match self.feature_distr {
+//            Some(ref mut f) => {
+//                f.write(array_2_str(&distr).as_bytes());
+//                f.write(b"\n");
+//            },
+//            None => panic!("Not tracking feats!!!!!"),
+//        };
+//    }
+
+    pub fn log_feat_distr(&mut self, distr: &[u8; params::dataset::N_FEATURES as usize]) {
         match self.feature_distr {
             Some(ref mut f) => {
-                f.write(array_2_str(&distr).as_bytes());
+                f.write(array_2_str(distr).as_bytes());
                 f.write(b"\n");
             },
             None => panic!("Not tracking feats!!!!!"),
@@ -284,4 +294,9 @@ impl Logger{
 
 pub fn array_2_str(arr: &[u8]) -> String{
     arr.iter().fold(String::new(), |acc, &x| format!("{}\t{}", acc, x.to_string()))
+}
+
+pub fn a_2_s(arr: &[u8]) -> String{
+    let v: Vec<String> = arr.iter().map(|x| x.to_string()).collect();
+    v.join("\t")
 }

@@ -8,4 +8,4 @@ pub const DEFAULT_ITERS: u32 = 10;
 pub const DEFAULT_COMMENT: &str = "used default comment.";
 
 
-pub const LOG_FREQ: u32 = 10_000;
+pub const LOG_FREQ: u32 = 25_000;

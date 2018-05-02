@@ -172,22 +172,41 @@ impl<'a> Population for ResultMap {
 
 impl ResultMap{
 
+    //hacked together method to log updates faster than previous method, which iterated over the map
+    //many times. Currently the Map and logger class are too intertwined, and should be better organized
     pub fn log_full(&self, logger: &mut Logger){
         let mut count = 0.0;
 
-        let mut best_train = std::f32::MIN;
-        let mut worst_train = std::f32::MAX;
-        let mut ave_train = 0.0f64;
-
-        let mut best_cv = std::f32::MIN;
-        let mut worst_cv = std::f32::MAX;
-        let mut ave_cv = 0.0f64;
-
         let n_evals = logger.geno_functions.len();
-        let mut bests = vec![std::f32::MIN; n_evals];
-        let mut worsts = vec![std::f32::MAX; n_evals];
-        let mut aves = vec![0f64; n_evals];
+        let mut bests = vec![std::f32::MIN; n_evals+2];  // +2 for 2 fitnesses
+        let mut worsts = vec![std::f32::MAX; n_evals+2];
+        let mut aves = vec![0f64; n_evals+2];
+        let mut varis = vec![0f64; n_evals+2]; //variences
 
+        let mut feats_distr = [0; params::dataset::N_FEATURES as usize];
+
+
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
+
+                if let Some(ref prog) = self.prog_map[row_i][ col_i]{
+
+                    for feat in prog.get_effective_feats(0) {
+                        feats_distr[feat as usize] += 1;
+                    }
+
+                    let values = vec![prog.test_fit.unwrap(), prog.cv_fit.unwrap()];
+                    let others: Vec<f32> = logger.geno_functions.iter().map(|f| f(prog)).collect();
+
+                    for (i, value) in values.iter().chain(others.iter()).enumerate(){
+                        aves[i] += *value as f64;
+                        count += 1.0;
+                        if *value > bests[i] {bests[i] = *value}
+                        if *value < worsts[i] {worsts[i] =*value }
+                    }
+                }
+            }
+        }
 
         for row_i in 0.. params::params::MAP_ROWS{
             for col_i in 0.. params::params::MAP_COLS{
@@ -197,45 +216,44 @@ impl ResultMap{
                     let values = vec![prog.test_fit.unwrap(), prog.cv_fit.unwrap()];
                     let others: Vec<f32> = logger.geno_functions.iter().map(|f| f(prog)).collect();
 
-                    for value in values.iter().chain(others.iter()){
-
+                    for (i, value) in values.iter().chain(others.iter()).enumerate(){
+                        varis[i] += (*value as f64-aves[i]).powi(2);
                     }
-
-//                    let value = match eval {
-//                        PopEval::TestFit => prog.test_fit.unwrap(),
-//                        PopEval::CV => prog.cv_fit.unwrap(),
-//                        PopEval::Geno(eval) => eval(prog),
-//                    };
-
-//                    ave += value as f64;
-//                    count += 1.0;
-//                    if value > best {best=value;}
-//                    if value < worst {worst=value;}
                 }
-
             }
         }
-//        ave = ave/count;
 
-//        let mut vari = 0.0;
-//        for row_i in 0.. params::params::MAP_ROWS{
-//            for col_i in 0.. params::params::MAP_COLS{
-//
-//                if let Some(ref prog) = self.prog_map[row_i][ col_i]{
-//                    let value = match eval {
-//                        PopEval::TestFit => prog.test_fit.unwrap(),
-//                        PopEval::CV => prog.cv_fit.unwrap(),
-//                        PopEval::Geno(eval) => eval(prog),
-//                    };
-//                    vari += (value as f64-ave).powi(2);
-//                }
-//
-//            }
-//        }
-//        vari /= count;
-//        PopStats {best, worst, ave, sd:vari.sqrt(), count: count as f32}
+        logger.log_test_fits(PopStats{
+            best:bests[0],
+            worst:worsts[0],
+            ave:aves[0],
+            sd:varis[0].sqrt(),
+            count,
+        });
 
+        logger.log_cv_fits(PopStats{
+            best:bests[1],
+            worst:worsts[1],
+            ave:aves[1],
+            sd:varis[1].sqrt(),
+            count,
+        });
+
+        for i in 0..n_evals{
+            logger.log_geno_stat(PopStats{
+                best:bests[i+2],
+                worst:worsts[i+2],
+                ave:aves[i+2],
+                sd:varis[i+2].sqrt(),
+                count,
+            }, i);
+        }
+
+        let unique_feat_count = feats_distr.iter().fold(0u8, |mut acc, x| {if *x > 0 {acc+=1;} acc});
+        logger.log_feat_count(unique_feat_count);
+        logger.log_feat_distr(&feats_distr);
     }
+
 
     pub fn count_eff_feats(&self) -> u8 {
         let mut feats = [false; params::dataset::N_FEATURES as usize];
@@ -257,18 +275,17 @@ impl ResultMap{
 
 
     pub fn eff_feats_distr(&self) -> [u8; params::dataset::N_FEATURES as usize] {
-        let mut feats = [0; params::dataset::N_FEATURES as usize];
-        let mut count = 0;
+        let mut feats_distr = [0; params::dataset::N_FEATURES as usize];
         for row_i in 0..params::params::MAP_ROWS {
             for col_i in 0..params::params::MAP_COLS {
                 if let Some(ref genome) = self.prog_map[row_i][ col_i] {
                     for feat in genome.get_effective_feats(0) {
-                        feats[feat as usize] += 1;
+                        feats_distr[feat as usize] += 1;
                     }
                 }
             }
         }
-        feats
+        feats_distr
     }
 }
 

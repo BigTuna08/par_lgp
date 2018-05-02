@@ -58,7 +58,8 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
                 res_map.try_put(pool.next_result_wait());
                 if res_map.recieved_count % logger.freq as u64 == 0 {
                     res_map.update_cv();
-                    logger.update(&res_map);
+//                    logger.update(&res_map); // !! has been replaced by ResultsMap::log_full
+                    res_map.log_full(logger);
                 }
             }
     }
