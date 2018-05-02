@@ -59,7 +59,12 @@ impl<'a> Population for ResultMap {
 
         while tries < params::params::MAP_COLS*params::params::MAP_ROWS * 1000 {
             if let Some(ref parent) = self.prog_map[tr.gen_range(0, params::params::MAP_ROWS)][tr.gen_range(0, params::params::MAP_COLS)] {
-                return parent.test_mutate_copy()
+                let prog = parent.test_mutate_copy();
+                let inds = self.get_loc(&prog);
+
+                if self.is_in_bounds(&inds){
+                    return prog
+                }
             }
         }
         panic!("Timed out when trying to select a parent genome from results map!!");
