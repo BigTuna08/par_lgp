@@ -83,28 +83,28 @@ impl Program{
     }
 
 
-//    pub fn execute_instructions(&self, mut regs: [f32; params::params::MAX_REGS]) ->f32{ //this should take place of exe_instr
-//        let mut skip_count = 0u8; // used to implement branches
-//
-//        for i in self.get_important_instrs(0).into_iter() {
-//
-//            if skip_count > 0 {
-//                skip_count -= 1;
-//                continue;
-//            }
-////            println!("i is {}, len is {}", i, self.instructions.len());
-//            let instr = self.instructions[i];
-////            println!("instr: {:?}", &instr);
-//            let result = ops::OPS[instr.op as usize](regs[instr.src1 as usize], regs[instr.src2 as usize]);
-//            match instr.op {
-//                0 ... 5 => regs[instr.dest as usize] = result, //simple register transfer
-//                6 => if result < 0.0 {skip_count = instr.src2}, //if false, skip next n, use direct constant
-//                7 => if result < 0.0 {skip_count = 1}, //false skip next 1
-//                _ => panic!("invalid op! {:?}", &instr)
-//            }
-//        }
-//        regs[0]
-//    }
+    pub fn execute_important_instructions(&self, mut regs: [f32; params::params::MAX_REGS], important_inds: &Vec<usize>) ->f32{ //this should take place of exe_instr
+        let mut skip_count = 0u8; // used to implement branches
+
+        for i in important_inds{
+
+            if skip_count > 0 {
+                skip_count -= 1;
+                continue;
+            }
+//            println!("i is {}, len is {}", i, self.instructions.len());
+            let instr = self.instructions[*i];
+//            println!("instr: {:?}", &instr);
+            let result = ops::OPS[instr.op as usize](regs[instr.src1 as usize], regs[instr.src2 as usize]);
+            match instr.op {
+                0 ... 5 => regs[instr.dest as usize] = result, //simple register transfer
+                6 => if result < 0.0 {skip_count = instr.src2}, //if false, skip next n, use direct constant
+                7 => if result < 0.0 {skip_count = 1}, //false skip next 1
+                _ => panic!("invalid op! {:?}", &instr)
+            }
+        }
+        regs[0]
+    }
 
 
     pub fn string_instr(&self, instr: &Instruction) -> String{
