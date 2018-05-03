@@ -43,8 +43,8 @@ impl FiveFoldMultiTrial{
         }
     }
 
-    pub fn get_map_config(&self) -> MapConfig{
-        MapConfig{
+    pub fn get_map_config(&self) -> PopConfig {
+        PopConfig {
             select_cell_method: self.select_cell_method,
             compare_prog_method: self.compare_prog_method,
             initial_pop: self.initial_pop,
@@ -54,7 +54,7 @@ impl FiveFoldMultiTrial{
 }
 
 #[derive(Debug)]
-pub struct MapConfig{
+pub struct PopConfig {
     pub select_cell_method: u8,
     pub compare_prog_method: u8,
     pub initial_pop: u32,

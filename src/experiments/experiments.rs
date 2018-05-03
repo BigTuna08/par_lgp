@@ -68,3 +68,22 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
     res_map.update_cv();
     logger.finish_fold(res_map);
 }
+
+// new() -> Self
+// is_finished() -> bool
+// can_send()  -> bool
+// new_prog() -> Program
+
+// try_put(Program)
+// log_full(Logger)
+
+// get_config() -> &MapConfig
+// get_cell_select() -> u8
+// get_compare() -> u8
+
+// get_sent_count -> u64
+// get_received_count -> u64
+// incr_sent() {sent_count++}
+// incr_rece() {re++}
+
+

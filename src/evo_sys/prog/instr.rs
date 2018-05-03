@@ -63,5 +63,9 @@ impl Instruction{
     pub fn contains_reg(&self, x: u8) -> bool {
         self.dest == x || self.src1 == x || self.src2 == x
     }
+
+    pub fn is_branch(&self)->bool{ //should be fixed to aviod manual update if more branches are added
+        return self.op == 6 || self.op == 7
+    }
 }
 

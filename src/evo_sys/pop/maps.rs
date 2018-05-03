@@ -9,9 +9,8 @@ use std;
 use std::fs::File;
 use std::io::Write;
 use super::{PopStats, PopEval, Population};
-//use dataMgmt::message::Message;
 use experiments::config::Config;
-use experiments::config::{MapConfig};
+use experiments::config::{PopConfig};
 use dataMgmt::logger::Logger;
 
 
@@ -19,14 +18,14 @@ use dataMgmt::logger::Logger;
 
 pub struct ResultMap{
     prog_map: [[Option<Program>; params::params::MAP_COLS]; params::params::MAP_ROWS],
-    pub config: MapConfig,
+    pub config: PopConfig,
     cv_data: ValidationSet,
     sent_count: u64,
     pub recieved_count: u64,
 }
 
 
-impl<'a> Population for ResultMap {
+impl Population for ResultMap {
 
     fn try_put(&mut self, new_entry: EvalResult) {
         self.recieved_count += 1;
@@ -127,7 +126,7 @@ impl<'a> Population for ResultMap {
             }
         }
         vari /= count;
-        PopStats {best, worst, ave, sd:vari.sqrt(), count: count as f32}
+        PopStats {best, worst, ave, sd:vari.sqrt()}
     }
 
 
@@ -213,6 +212,10 @@ impl ResultMap{
             }
         }
 
+        for value in aves.iter_mut(){
+            *value /= count;
+        }
+
         for row_i in 0.. params::params::MAP_ROWS{
             for col_i in 0.. params::params::MAP_COLS{
 
@@ -228,12 +231,15 @@ impl ResultMap{
             }
         }
 
+        for value in varis.iter_mut(){
+            *value /= count;
+        }
+
         logger.log_test_fits(PopStats{
             best:bests[0],
             worst:worsts[0],
             ave:aves[0],
             sd:varis[0].sqrt(),
-            count,
         });
 
         logger.log_cv_fits(PopStats{
@@ -241,7 +247,6 @@ impl ResultMap{
             worst:worsts[1],
             ave:aves[1],
             sd:varis[1].sqrt(),
-            count,
         });
 
         for i in 0..n_evals{
@@ -250,7 +255,6 @@ impl ResultMap{
                 worst:worsts[i+2],
                 ave:aves[i+2],
                 sd:varis[i+2].sqrt(),
-                count,
             }, i);
         }
 
@@ -356,7 +360,7 @@ impl<'a> ResultMap {
 
 
 impl<'a> ResultMap {
-    pub fn new( config: MapConfig, cv_data: ValidationSet) -> ResultMap {
+    pub fn new(config: PopConfig, cv_data: ValidationSet) -> ResultMap {
         ResultMap {
             prog_map:
             [[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
