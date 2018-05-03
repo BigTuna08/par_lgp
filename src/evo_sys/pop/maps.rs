@@ -13,7 +13,7 @@ use experiments::config::Config;
 use experiments::config::{PopConfig};
 use dataMgmt::logger::Logger;
 
-
+//use super::PopMap;
 
 
 pub struct ResultMap{
@@ -24,8 +24,52 @@ pub struct ResultMap{
     pub recieved_count: u64,
 }
 
+//impl PopMap for ResultMap{
+impl ResultMap{
+    fn get_config(&self) -> &PopConfig {
+        &self.config
+    }
+
+    fn select_cell(&self, prog: &Program) -> (usize, usize){
+        self.get_loc(prog)
+    }
+
+    fn compare_program(&self, new_prog: &Program, old_prog: &Program) -> bool{
+        self.is_better(new_prog, old_prog)
+    }
+    fn is_in_bounds(&self, inds: &(usize,usize))-> bool{
+        self.is_in_bounds(inds)
+    }
+    fn get(&self, inds:  &(usize,usize)) -> &Option<Program>{
+        &self.prog_map[inds.0][inds.1]
+    }
+    fn put(&mut self,  prog: Program, inds:  &(usize,usize)){
+        self.prog_map[inds.0][inds.1] = Some(prog);
+    }
+}
 
 impl Population for ResultMap {
+
+//    fn get_sent_count(&self) -> u64 {self.sent_count }
+//    fn get_recieved_count(&self) -> u64 {self.recieved_count}
+//    fn incr_sent(&mut self) {self.sent_count+=1;}
+//    fn incr_recieved(&mut self) {self.recieved_count+=1;}
+
+    fn is_finished(&self) -> bool{
+        self.recieved_count >= self.config.total_evals
+    }
+
+
+    fn next_new_prog(&mut self) -> Program{
+        self.sent_count += 1;
+        if self.sent_count <= self.config.initial_pop as u64{
+            Program::new_default_range()
+        }
+            else {
+                self.get_simple_mutated_genome_rand()
+            }
+    }
+
 
     fn try_put(&mut self, new_entry: EvalResult) {
         self.recieved_count += 1;
@@ -50,135 +94,20 @@ impl Population for ResultMap {
 
     }
 
-
-    //pick random prog from map and return mutated copy
-    fn get_simple_mutated_genome_rand(&self) -> Program {
-        let mut tries = 0;
-        let mut tr  = rand::thread_rng();
-
-        while tries < params::params::MAP_COLS*params::params::MAP_ROWS * 1000 {
-            if let Some(ref parent) = self.prog_map[tr.gen_range(0, params::params::MAP_ROWS)][tr.gen_range(0, params::params::MAP_COLS)] {
-                let prog = parent.test_mutate_copy();
-                let inds = self.get_loc(&prog);
-
-                if self.is_in_bounds(&inds){
-                    return prog
-                }
-            }
+    fn can_send(&self)->bool{
+        if self.pending_evals() >= params::params::THREAD_POOL_MAX{
+            return false;
         }
-        panic!("Timed out when trying to select a parent genome from results map!!");
+        (self.recieved_count > 0) || (self.sent_count < self.config.initial_pop as u64)
     }
 
 
-    fn update_cv(&mut self) {
-        for row_i in 0.. params::params::MAP_ROWS{
-            for col_i in 0.. params::params::MAP_COLS{
-                if let Some(ref mut genome) = self.prog_map[row_i][ col_i] {
-                    match genome.cv_fit {
-                        Some(_) => (),
-                        None => genome.cv_fit = Some(evo_sys::prog::eval::eval_program_cv(&genome, &self.cv_data)),
-                    }
-                }
-            }
-        }
-    }
 
 
-    fn get_pop_stats(&self, eval: PopEval) -> PopStats {
-        let mut best = std::f32::MIN;
-        let mut worst = std::f32::MAX;
-        let mut ave = 0.0f64;
-        let mut count = 0.0;
-
-        for row_i in 0.. params::params::MAP_ROWS{
-            for col_i in 0.. params::params::MAP_COLS{
-
-                if let Some(ref prog) = self.prog_map[row_i][ col_i]{
-                    let value = match eval {
-                        PopEval::TestFit => prog.test_fit.unwrap(),
-                        PopEval::CV => prog.cv_fit.unwrap(),
-                        PopEval::Geno(eval) => eval(prog),
-                    };
-
-                    ave += value as f64;
-                    count += 1.0;
-                    if value > best {best=value;}
-                    if value < worst {worst=value;}
-                }
-
-            }
-        }
-        ave = ave/count;
-
-        let mut vari = 0.0;
-        for row_i in 0.. params::params::MAP_ROWS{
-            for col_i in 0.. params::params::MAP_COLS{
-
-                if let Some(ref prog) = self.prog_map[row_i][ col_i]{
-                    let value = match eval {
-                        PopEval::TestFit => prog.test_fit.unwrap(),
-                        PopEval::CV => prog.cv_fit.unwrap(),
-                        PopEval::Geno(eval) => eval(prog),
-                    };
-                    vari += (value as f64-ave).powi(2);
-                }
-
-            }
-        }
-        vari /= count;
-        PopStats {best, worst, ave, sd:vari.sqrt()}
-    }
-
-
-    fn write_pop_info(&self, file_name: &str, eval: PopEval) {
-        let mut f = File::create(file_name).unwrap();
-
-        for row_i in 0..params::params::MAP_ROWS {
-            for col_i in 0..params::params::MAP_COLS {
-
-
-                let value = if let Some(ref prog) = self.prog_map[row_i][ col_i]{
-                    match eval {
-                        PopEval::TestFit => prog.test_fit.unwrap(),
-                        PopEval::CV => prog.cv_fit.unwrap(),
-                        PopEval::Geno(eval) => eval(prog),
-                    }
-
-                }else {
-                    params::params::MIN_FIT
-                };
-
-                f.write(value.to_string().as_bytes());
-                f.write(b"\t");
-            }
-            f.write(b"\n");
-        }
-    }
-
-
-    fn write_genos(&self, file_name: &str) {
-        let mut f = File::create(file_name).unwrap();
-        for row_i in 0..params::params::MAP_ROWS {
-            for col_i in 0..params::params::MAP_COLS {
-                if let Some(ref genome) = self.prog_map[row_i][ col_i] {
-                    f.write(b"(");
-                    f.write(row_i.to_string().as_bytes());
-                    f.write(b",");
-                    f.write(col_i.to_string().as_bytes());
-                    f.write(b")");
-                    f.write(b"\n");
-                    genome.write_effective_self_words(&mut f);
-                }
-            }
-        }
-    }
-}
-
-impl ResultMap{
 
     //hacked together method to log updates faster than previous method, which iterated over the map
     //many times. Currently the Map and logger class are too intertwined, and should be better organized
-    pub fn log_full(&self, logger: &mut Logger){
+    fn log_full(&self, logger: &mut Logger){
         let mut count = 0.0;
 
         let n_evals = logger.geno_functions.len();
@@ -264,6 +193,69 @@ impl ResultMap{
     }
 
 
+    fn write_pop_info(&self, file_name: &str, eval: PopEval) {
+        let mut f = File::create(file_name).unwrap();
+
+
+        for row_i in 0..params::params::MAP_ROWS {
+            for col_i in 0..params::params::MAP_COLS {
+
+
+                let value = if let Some(ref prog) = self.prog_map[row_i][ col_i]{
+                    match eval {
+                        PopEval::TestFit => prog.test_fit.unwrap(),
+                        PopEval::CV => prog.cv_fit.unwrap(),
+                        PopEval::Geno(eval) => eval(prog),
+                    }
+
+                }else {
+                    params::params::MIN_FIT
+                };
+
+                f.write(value.to_string().as_bytes());
+                f.write(b"\t");
+            }
+            f.write(b"\n");
+        }
+    }
+
+
+    fn write_genos(&self, file_name: &str) {
+        let mut f = File::create(file_name).unwrap();
+        for row_i in 0..params::params::MAP_ROWS {
+            for col_i in 0..params::params::MAP_COLS {
+                if let Some(ref genome) = self.prog_map[row_i][ col_i] {
+                    f.write(b"(");
+                    f.write(row_i.to_string().as_bytes());
+                    f.write(b",");
+                    f.write(col_i.to_string().as_bytes());
+                    f.write(b")");
+                    f.write(b"\n");
+                    genome.write_effective_self_words(&mut f);
+                }
+            }
+        }
+    }
+
+    fn update_cv(&mut self) {
+        for row_i in 0.. params::params::MAP_ROWS{
+            for col_i in 0.. params::params::MAP_COLS{
+                if let Some(ref mut genome) = self.prog_map[row_i][ col_i] {
+                    match genome.cv_fit {
+                        Some(_) => (),
+                        None => genome.cv_fit = Some(evo_sys::prog::eval::eval_program_cv(&genome, &self.cv_data)),
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+
+
+impl ResultMap{
+
     pub fn count_eff_feats(&self) -> u8 {
         let mut feats = [false; params::dataset::N_FEATURES as usize];
         let mut count = 0;
@@ -301,19 +293,22 @@ impl ResultMap{
 
 impl<'a> ResultMap {
 
-    pub fn is_finished(&self) -> bool{
-        self.recieved_count >= self.config.total_evals
-    }
+    //pick random prog from map and return mutated copy
+    fn get_simple_mutated_genome_rand(&self) -> Program {
+        let mut tries = 0;
+        let mut tr  = rand::thread_rng();
 
+        while tries < params::params::MAP_COLS*params::params::MAP_ROWS * 1000 {
+            if let Some(ref parent) = self.prog_map[tr.gen_range(0, params::params::MAP_ROWS)][tr.gen_range(0, params::params::MAP_COLS)] {
+                let prog = parent.test_mutate_copy();
+                let inds = self.get_loc(&prog);
 
-    pub fn get_new_prog(&mut self) -> Program{
-        self.sent_count += 1;
-        if self.sent_count <= self.config.initial_pop as u64{
-            Program::new_default_range()
+                if self.is_in_bounds(&inds){
+                    return prog
+                }
+            }
         }
-        else {
-            self.get_simple_mutated_genome_rand()
-        }
+        panic!("Timed out when trying to select a parent genome from results map!!");
     }
 
 
@@ -326,12 +321,7 @@ impl<'a> ResultMap {
     }
 
 
-    pub fn can_send(&self)->bool{
-        if self.pending_evals() >= params::params::THREAD_POOL_MAX{
-            return false;
-        }
-        (self.recieved_count > 0) || (self.sent_count < self.config.initial_pop as u64)
-    }
+
 
 
     fn get_test_fit(&self, inds: &(usize, usize)) -> f32 {
@@ -347,14 +337,14 @@ impl<'a> ResultMap {
             None => params::params::MIN_FIT,
         }
     }
-
-    fn put(&mut self, val: Program, inds: &(usize, usize)) {
-        self.prog_map[inds.0][inds.1] = Some(val);
-    }
-
-    fn is_in_bounds(&self, inds: &(usize, usize))-> bool{
-        (inds.0 < params::params::MAP_ROWS) && (inds.1 < params::params::MAP_COLS)
-    }
+//
+//    fn put(&mut self, val: Program, inds: &(usize, usize)) {
+//        self.prog_map[inds.0][inds.1] = Some(val);
+//    }
+//
+//    fn is_in_bounds(&self, inds: &(usize, usize))-> bool{
+//        (inds.0 < params::params::MAP_ROWS) && (inds.1 < params::params::MAP_COLS)
+//    }
 
 }
 

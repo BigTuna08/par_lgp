@@ -52,7 +52,7 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
 
     while !res_map.is_finished() {
         if res_map.can_send() {
-            pool.add_task(Message::Cont(res_map.get_new_prog()))
+            pool.add_task(Message::Cont(res_map.next_new_prog()))
         }
             else {
                 res_map.try_put(pool.next_result_wait());

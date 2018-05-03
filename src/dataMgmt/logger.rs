@@ -93,19 +93,19 @@ impl Logger{
     }
 
     //assumes full tracking !!
-    pub fn update(&mut self, res_map: &ResultMap){  // !! has been replaced by ResultsMap::log_full
-
-        self.log_test_fits(res_map.get_pop_stats(PopEval::TestFit));
-        self.log_cv_fits(res_map.get_pop_stats(PopEval::CV));
-
-        self.log_feat_count(res_map.count_eff_feats());
-        self.log_feat_distr(&res_map.eff_feats_distr());
-
-        for i in 0..self.geno_functions.len(){
-            let stats = res_map.get_pop_stats(PopEval::Geno(&self.geno_functions[i]));
-            self.log_geno_stat(stats,i);
-        }
-    }
+//    pub fn update(&mut self, res_map: &ResultMap){  // !! has been replaced by ResultsMap::log_full
+//
+//        self.log_test_fits(res_map.get_pop_stats(PopEval::TestFit));
+//        self.log_cv_fits(res_map.get_pop_stats(PopEval::CV));
+//
+//        self.log_feat_count(res_map.count_eff_feats());
+//        self.log_feat_distr(&res_map.eff_feats_distr());
+//
+//        for i in 0..self.geno_functions.len(){
+//            let stats = res_map.get_pop_stats(PopEval::Geno(&self.geno_functions[i]));
+//            self.log_geno_stat(stats,i);
+//        }
+//    }
 
 
     pub fn finish_fold(&mut self, final_results: ResultMap){
