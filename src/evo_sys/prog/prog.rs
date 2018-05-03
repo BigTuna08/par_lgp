@@ -83,28 +83,28 @@ impl Program{
     }
 
 
-    pub fn execute_important_instructions(&self, mut regs: [f32; params::params::MAX_REGS], important_inds: &Vec<usize>) ->f32{ //this should take place of exe_instr
-        let mut skip_count = 0u8; // used to implement branches
-
-        for i in important_inds{
-
-            if skip_count > 0 {
-                skip_count -= 1;
-                continue;
-            }
-//            println!("i is {}, len is {}", i, self.instructions.len());
-            let instr = self.instructions[*i];
-//            println!("instr: {:?}", &instr);
-            let result = ops::OPS[instr.op as usize](regs[instr.src1 as usize], regs[instr.src2 as usize]);
-            match instr.op {
-                0 ... 5 => regs[instr.dest as usize] = result, //simple register transfer
-                6 => if result < 0.0 {skip_count = instr.src2}, //if false, skip next n, use direct constant
-                7 => if result < 0.0 {skip_count = 1}, //false skip next 1
-                _ => panic!("invalid op! {:?}", &instr)
-            }
-        }
-        regs[0]
-    }
+//    pub fn execute_important_instructions(&self, mut regs: [f32; params::params::MAX_REGS], important_inds: &Vec<usize>) ->f32{ //this should take place of exe_instr
+//        let mut skip_count = 0u8; // used to implement branches
+//
+//        for i in important_inds{
+//
+//            if skip_count > 0 {
+//                skip_count -= 1;
+//                continue;
+//            }
+////            println!("i is {}, len is {}", i, self.instructions.len());
+//            let instr = self.instructions[*i];
+////            println!("instr: {:?}", &instr);
+//            let result = ops::OPS[instr.op as usize](regs[instr.src1 as usize], regs[instr.src2 as usize]);
+//            match instr.op {
+//                0 ... 5 => regs[instr.dest as usize] = result, //simple register transfer
+//                6 => if result < 0.0 {skip_count = instr.src2}, //if false, skip next n, use direct constant
+//                7 => if result < 0.0 {skip_count = 1}, //false skip next 1
+//                _ => panic!("invalid op! {:?}", &instr)
+//            }
+//        }
+//        regs[0]
+//    }
 
 
     pub fn string_instr(&self, instr: &Instruction) -> String{
@@ -254,26 +254,26 @@ impl Program{
     // like effective, but also will always include instructions after
     // branch statements. The output of only running these instrcutions should
     // be identical to running all instructions.
-    pub fn get_important_instrs(&self, return_reg_ind: u8) -> Vec<usize>{
-        let mut eff_regs = HashSet::new();
-        let mut eff_instrs = HashSet::new();
-        let mut count = 0;
-        eff_regs.insert(return_reg_ind);
-        for (i, instr) in self.instructions.iter().enumerate().rev(){
-            if eff_regs.contains(&instr.dest) {
-                eff_regs.insert(instr.src1);
-                eff_regs.insert(instr.src2);
-                count += 1;
-                eff_instrs.insert(i);
-            }
-            if instr.is_branch() && i < self.instructions.len()-1{ //dont do for last instr;
-                eff_instrs.insert(i+1);
-            }
-        }
-        let mut eff_instrs: Vec<usize>  = eff_instrs.into_iter().collect();
-        eff_instrs.sort();
-        eff_instrs
-    }
+//    pub fn get_important_instrs(&self, return_reg_ind: u8) -> Vec<usize>{
+//        let mut eff_regs = HashSet::new();
+//        let mut eff_instrs = HashSet::new();
+//        let mut count = 0;
+//        eff_regs.insert(return_reg_ind);
+//        for (i, instr) in self.instructions.iter().enumerate().rev(){
+//            if eff_regs.contains(&instr.dest) {
+//                eff_regs.insert(instr.src1);
+//                eff_regs.insert(instr.src2);
+//                count += 1;
+//                eff_instrs.insert(i);
+//            }
+//            if instr.is_branch() && i < self.instructions.len()-1{ //dont do for last instr;
+//                eff_instrs.insert(i+1);
+//            }
+//        }
+//        let mut eff_instrs: Vec<usize>  = eff_instrs.into_iter().collect();
+//        eff_instrs.sort();
+//        eff_instrs
+//    }
 
 
     pub fn get_n_effective_feats(&self, return_reg_ind: u8) -> usize{
