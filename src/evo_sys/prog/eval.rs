@@ -635,6 +635,7 @@ pub fn eval_program_corrects(genome: &super::prog::Program, data: &DataSet) -> f
     let n_feats = genome.features.len();
 
     let mut correct = 0.0f32;
+    let eff_instr = genome.get_important_instrs(0);
 
     for (sample_i, record) in data.record_iter().enumerate() {
 
@@ -650,7 +651,7 @@ pub fn eval_program_corrects(genome: &super::prog::Program, data: &DataSet) -> f
             regs[params::params::MAX_REGS - 1 - i] = record.features[*feature as usize]
         }
 
-        let prog_output = genome.execute_important_instructions(regs, &genome.get_important_instrs(0));
+        let prog_output = genome.execute_important_instructions(regs, &eff_instr);
 //        let prog_output = genome.execute_instructions(regs);
 
         let prog_result = prog_output >= 0.0;
