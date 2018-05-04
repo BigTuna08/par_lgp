@@ -23,6 +23,7 @@ fn main() {
     let mnger = parLGP::experiments::mgmt::Manager::new(args);
     println!("mnger {:?}", mnger);
 
+//    test_arr();
     mnger.run_all();
 //    comp_times();
 
@@ -31,6 +32,24 @@ fn main() {
 }
 
 
+
+
+fn test_arr(){
+    let mut a0 = [3.3; 100];
+    a0[2] = 9.4;
+
+    let mut a1 = a0.clone();
+    a1[1] = 0.1;
+
+    let mut a2 = a0.clone();
+    a2[3] = 2.2;
+    a0[2] = 0.4;
+
+
+    println!("{:?}", &a0[0..10]);
+    println!("{:?}", &a1[0..10]);
+    println!("{:?}", &a2[0..10]);
+}
 
 
 
