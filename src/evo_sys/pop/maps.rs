@@ -37,15 +37,15 @@ impl ResultMap{
     fn compare_program(&self, new_prog: &Program, old_prog: &Program) -> bool{
         self.is_better(new_prog, old_prog)
     }
-    fn is_in_bounds(&self, inds: &(usize,usize))-> bool{
-        self.is_in_bounds(inds)
-    }
+//    fn is_in_bounds(&self, inds: &(usize,usize))-> bool{
+//        self.is_in_bounds(inds)
+//    }
     fn get(&self, inds:  &(usize,usize)) -> &Option<Program>{
         &self.prog_map[inds.0][inds.1]
     }
-    fn put(&mut self,  prog: Program, inds:  &(usize,usize)){
-        self.prog_map[inds.0][inds.1] = Some(prog);
-    }
+//    fn put(&mut self,  prog: Program, inds:  &(usize,usize)){
+//        self.prog_map[inds.0][inds.1] = Some(prog);
+//    }
 }
 
 impl Population for ResultMap {
@@ -123,7 +123,6 @@ impl Population for ResultMap {
             for col_i in 0.. params::params::MAP_COLS{
 
                 if let Some(ref prog) = self.prog_map[row_i][ col_i]{
-
                     for feat in prog.get_effective_feats(0) {
                         feats_distr[feat as usize] += 1;
                     }
@@ -137,6 +136,7 @@ impl Population for ResultMap {
                         if *value > bests[i] {bests[i] = *value}
                         if *value < worsts[i] {worsts[i] =*value }
                     }
+
                 }
             }
         }
@@ -337,14 +337,14 @@ impl<'a> ResultMap {
             None => params::params::MIN_FIT,
         }
     }
-//
-//    fn put(&mut self, val: Program, inds: &(usize, usize)) {
-//        self.prog_map[inds.0][inds.1] = Some(val);
-//    }
-//
-//    fn is_in_bounds(&self, inds: &(usize, usize))-> bool{
-//        (inds.0 < params::params::MAP_ROWS) && (inds.1 < params::params::MAP_COLS)
-//    }
+
+    fn put(&mut self, val: Program, inds: &(usize, usize)) {
+        self.prog_map[inds.0][inds.1] = Some(val);
+    }
+
+    fn is_in_bounds(&self, inds: &(usize, usize))-> bool{
+        (inds.0 < params::params::MAP_ROWS) && (inds.1 < params::params::MAP_COLS)
+    }
 
 }
 
