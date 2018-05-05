@@ -4,7 +4,7 @@ extern crate rand;
 extern crate serde;
 extern crate time;
 
-use parLGP::experiments::config::Config;
+
 use std::env;
 use std::fs::create_dir;
 use time::PreciseTime;
@@ -21,10 +21,11 @@ fn main() {
     let mut args: Vec<String> = env::args().collect();
     println!("ARGS {:?}", args);
 
-    let mnger = parLGP::experiments::mgmt::Manager::new(args);
+    let mnger = parLGP::experiments::Manager::new(args);
     println!("mnger {:?}", mnger);
 
-//    test_arr();
+//    parLGP::evo_sys::pop::test();
+
     mnger.run_all();
 //    comp_times();
 //    parLGP::evo_sys::pop::test();
@@ -57,25 +58,25 @@ fn test_arr(){
 
 
 
-fn comp_times(){
-    let i = 20_000;
-
-    let start2 = PreciseTime::now();
-    parLGP::test_a2s(&parLGP::dataMgmt::logger::a_2_s, i);
-    let end2 = PreciseTime::now();
-    let t2 = start2.to(end2);
-
-    let start = PreciseTime::now();
-    parLGP::test_a2s(&parLGP::dataMgmt::logger::array_2_str, i);
-    let end = PreciseTime::now();
-    let t1 = start.to(end);
-
-
-
-
-
-    println!("{} for 1\t{} for 2", t1, t2);
-}
+//fn comp_times(){
+//    let i = 20_000;
+//
+//    let start2 = PreciseTime::now();
+//    parLGP::test_a2s(&parLGP::dataMgmt::logger::a_2_s, i);
+//    let end2 = PreciseTime::now();
+//    let t2 = start2.to(end2);
+//
+//    let start = PreciseTime::now();
+//    parLGP::test_a2s(&parLGP::dataMgmt::logger::array_2_str, i);
+//    let end = PreciseTime::now();
+//    let t1 = start.to(end);
+//
+//
+//
+//
+//
+//    println!("{} for 1\t{} for 2", t1, t2);
+//}
 
 
 

@@ -2,36 +2,28 @@ pub mod maps;
 pub mod selectors;
 pub mod comparers;
 
-use GenoEval;
 use std::fs::File;
 use std::io::Write;
-use dataMgmt::message::EvalResult;
-use evo_sys::prog::prog::Program;
-use dataMgmt::dataset::ValidationSet;
-use experiments::config::PopConfig;
-use dataMgmt::logger::Logger;
+
+
 
 use std::f32::consts::PI;
 
-pub trait Population {
-
-    fn is_finished(&self) -> bool;
-    fn can_send(&self) -> bool;
-
-    fn next_new_prog(&mut self) -> Program; //mut so sent count is incremented
-    fn try_put(&mut self, new_entry: EvalResult);
-
-    fn update_cv(&mut self);
-
-    fn log_full(&self, logger: &mut Logger); //Continuous logging.
-    fn write_pop_info(&self, file_name: &str, eval: PopEval); //end of fold log
-    fn write_genos(&self, file_name: &str); //end of fold log
-
-//    fn get_sent_count(&self) -> u64;
-//    fn get_recieved_count(&self) -> u64;
-//    fn incr_sent(&mut self);
-//    fn incr_recieved(&mut self);
-}
+//pub trait Population {
+//
+//    fn is_finished(&self) -> bool;
+//    fn can_send(&self) -> bool;
+//
+//    fn next_new_prog(&mut self) -> Program; //mut so sent count is incremented
+//    fn try_put(&mut self, new_entry: EvalResult);
+//
+//    fn update_cv(&mut self);
+//
+//    fn log_full(&self, logger: &mut Logger); //Continuous logging.
+//    fn write_pop_info(&self, file_name: &str, eval: PopEval); //end of fold log
+//    fn write_genos(&self, file_name: &str); //end of fold log
+//
+//}
 //
 //
 //pub trait PopMap: Population{
@@ -43,7 +35,7 @@ pub trait Population {
 //    fn get(&self, inds:  &(usize,usize)) -> &Option<Program>;
 //    fn put(&mut self,  prog: Program, inds:  &(usize,usize));
 //}
-
+#[derive(Debug)]
 pub struct VarPenConfig{
     v_stretch: f32, // ie amplitude
     h_stretch: f32, // from period
@@ -68,11 +60,15 @@ impl VarPenConfig{
         let h_shift = (-v_shift/v_stretch).asin()/h_stretch - protect_start as f32;
 
         VarPenConfig{
-            v_stretch, h_stretch, v_shift, h_shift, protect_start, protect_end,
+            v_stretch, h_stretch, v_shift, h_shift, protect_start, protect_end:total_evals-protect_end,
         }
     }
 
     pub fn penalty_at(&self, current_eval: u64)-> f32{
+        println!("Self is {:?}", self);
+        if current_eval < self.protect_start || current_eval > self.protect_end {
+            return 0.0;
+        }
         let inside = self.h_stretch*(current_eval as f32+self.h_shift);
         self.v_stretch*inside.sin() + self.v_shift
     }
@@ -137,11 +133,7 @@ impl PopStats {
 }
 
 
-pub enum PopEval<'a>{
-    TestFit,
-    CV,
-    Geno(&'a GenoEval),
-}
+
 
 //
 //pub enum PutResult{

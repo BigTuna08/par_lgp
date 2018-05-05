@@ -1,18 +1,72 @@
-use evo_sys::prog::prog::get_src;
-use evo_sys::prog::prog::Program;
-use params;
-use rand;
-use rand::{Rng, seq, thread_rng, ThreadRng};
+use evo_sys::prog::get_src;
+use evo_sys::{Program, Instruction};
+
+use params as global_params;
+use rand::{Rng, ThreadRng};
 use rand::distributions::Range;
 use rand::distributions::Sample;
 
-#[derive(Copy, Clone, Debug)]
-pub struct Instruction{
-    pub dest: u8,
-    pub op: u8,
-    pub src1: u8,
-    pub src2: u8,
+
+
+impl Program{
+    pub fn rand_instr(&self, rng: &mut ThreadRng) -> Instruction{
+        Instruction{
+            dest: Program::rand_dest(self, rng),
+            op: Program::rand_op(self, rng),
+            src1: Program::rand_src(self, rng),
+            src2: Program::rand_dest(self, rng),
+        }
+    }
+
+    pub fn rand_dest(&self, rng: &mut ThreadRng) -> u8{
+        rng.gen_range(0, self.n_calc_regs)
+    }
+
+    pub fn rand_dest_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
+        if self.n_calc_regs == 1 {return 0}
+
+        let mut n = rng.gen_range(0, self.n_calc_regs);
+        let mut tries = 0;
+        while n == exclude {
+            n = rng.gen_range(0, self.n_calc_regs);
+            tries += 1;
+            if tries > global_params::params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!, {:?}", &self)}
+        }
+        n
+    }
+
+    pub fn rand_src(&self, rng: &mut ThreadRng) -> u8{
+        get_src(self.n_calc_regs, self.features.len() as u8, rng)
+    }
+
+    pub fn rand_src_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
+        let mut n = get_src(self.n_calc_regs, self.features.len() as u8, rng);
+        let mut tries = 0;
+        while n == exclude {
+            n = get_src(self.n_calc_regs, self.features.len() as u8, rng);
+            tries += 1;
+            if tries > global_params::params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!")}
+        }
+        n
+    }
+
+    pub fn rand_op(&self, rng: &mut ThreadRng) -> u8{
+        rng.gen_range(0, global_params::params::N_OPS)
+    }
+
+    pub fn rand_op_exclude(&self, rng: &mut ThreadRng, exclude: u8) -> u8 {
+        let mut tries = 0;
+        let mut n = rng.gen_range(0, global_params::params::N_OPS);
+        while n == exclude {
+            n = rng.gen_range(0, global_params::params::N_OPS);
+            tries += 1;
+            if tries > global_params::params::DUPLICATE_TIME_OUT { panic!("Error getting non dupicate!")}
+        }
+        n
+    }
 }
+
+
 
 impl Instruction{
     pub fn new_random(n_calc_regs: u8, n_feats: u8, n_ops:u8, rng: &mut ThreadRng) -> Instruction{
@@ -68,4 +122,5 @@ impl Instruction{
         return self.op == 6 || self.op == 7
     }
 }
+
 

@@ -1,66 +1,29 @@
-use dataMgmt::dataset::ValidationSet;
-use dataMgmt::message::EvalResult;
+use dataMgmt::ValidationSet;
+use dataMgmt::EvalResult;
 use evo_sys;
-use evo_sys::prog::prog::Program;
+
 use params;
 use rand;
 use rand::Rng;
 use std;
 use std::fs::File;
 use std::io::Write;
-use super::{PopStats, PopEval, Population};
-use experiments::config::Config;
-use experiments::config::{PopConfig};
-use dataMgmt::logger::Logger;
+use super::super::{Program, ProgInspectRequest, ResultMap, PopConfig};
+use super::{PopStats};
 
-//use super::PopMap;
+use dataMgmt::Logger;
+use dataMgmt;
 
 
-pub struct ResultMap{
-    prog_map: [[Option<Program>; params::params::MAP_COLS]; params::params::MAP_ROWS],
-    pub config: PopConfig,
-    cv_data: ValidationSet,
-    sent_count: u64,
-    pub recieved_count: u64,
-}
 
-//impl PopMap for ResultMap{
-impl ResultMap{
-    fn get_config(&self) -> &PopConfig {
-        &self.config
-    }
+impl ResultMap {
 
-    fn select_cell(&self, prog: &Program) -> (usize, usize){
-        self.get_loc(prog)
-    }
-
-    fn compare_program(&self, new_prog: &Program, old_prog: &Program) -> bool{
-        self.is_better(new_prog, old_prog)
-    }
-//    fn is_in_bounds(&self, inds: &(usize,usize))-> bool{
-//        self.is_in_bounds(inds)
-//    }
-    fn get(&self, inds:  &(usize,usize)) -> &Option<Program>{
-        &self.prog_map[inds.0][inds.1]
-    }
-//    fn put(&mut self,  prog: Program, inds:  &(usize,usize)){
-//        self.prog_map[inds.0][inds.1] = Some(prog);
-//    }
-}
-
-impl Population for ResultMap {
-
-//    fn get_sent_count(&self) -> u64 {self.sent_count }
-//    fn get_recieved_count(&self) -> u64 {self.recieved_count}
-//    fn incr_sent(&mut self) {self.sent_count+=1;}
-//    fn incr_recieved(&mut self) {self.recieved_count+=1;}
-
-    fn is_finished(&self) -> bool{
+    pub fn is_finished(&self) -> bool{
         self.recieved_count >= self.config.total_evals
     }
 
 
-    fn next_new_prog(&mut self) -> Program{
+    pub fn next_new_prog(&mut self) -> Program{
         self.sent_count += 1;
         if self.sent_count <= self.config.initial_pop as u64{
             Program::new_default_range()
@@ -71,16 +34,16 @@ impl Population for ResultMap {
     }
 
 
-    fn try_put(&mut self, new_entry: EvalResult) {
+    pub fn try_put(&mut self, new_entry: EvalResult) {
         self.recieved_count += 1;
         let prog = new_entry.prog;
-        let inds = self.get_loc(&prog);
+        let inds = self.select_cell(&prog);
         let mut replace = false;
 
         if self.is_in_bounds(&inds){
             match self.prog_map[inds.0][inds.1] {
                 Some(ref old_prog) => {
-                    if self.is_better(&prog, old_prog){
+                    if self.compare(&prog, old_prog){
                         replace = true
                     }
                 }
@@ -94,7 +57,7 @@ impl Population for ResultMap {
 
     }
 
-    fn can_send(&self)->bool{
+    pub fn can_send(&self)->bool{
         if self.pending_evals() >= params::params::THREAD_POOL_MAX{
             return false;
         }
@@ -103,11 +66,9 @@ impl Population for ResultMap {
 
 
 
-
-
     //hacked together method to log updates faster than previous method, which iterated over the map
     //many times. Currently the Map and logger class are too intertwined, and should be better organized
-    fn log_full(&self, logger: &mut Logger){
+    pub fn log_full(&self, logger: &mut Logger){
         let mut count = 0.0;
 
         let n_evals = logger.geno_functions.len();
@@ -116,13 +77,14 @@ impl Population for ResultMap {
         let mut aves = vec![0f64; n_evals+2];
         let mut varis = vec![0f64; n_evals+2]; //variences
 
-        let mut feats_distr = [0; params::dataset::N_FEATURES as usize];
+        let mut feats_distr = [0; dataMgmt::params::N_FEATURES as usize];
 
 
         for row_i in 0.. params::params::MAP_ROWS{
             for col_i in 0.. params::params::MAP_COLS{
 
                 if let Some(ref prog) = self.prog_map[row_i][ col_i]{
+                    count += 1.0;
                     for feat in prog.get_effective_feats(0) {
                         feats_distr[feat as usize] += 1;
                     }
@@ -132,7 +94,7 @@ impl Population for ResultMap {
 
                     for (i, value) in values.iter().chain(others.iter()).enumerate(){
                         aves[i] += *value as f64;
-                        count += 1.0;
+
                         if *value > bests[i] {bests[i] = *value}
                         if *value < worsts[i] {worsts[i] =*value }
                     }
@@ -193,7 +155,7 @@ impl Population for ResultMap {
     }
 
 
-    fn write_pop_info(&self, file_name: &str, eval: PopEval) {
+    pub fn write_pop_info(&self, file_name: &str, eval: ProgInspectRequest) {
         let mut f = File::create(file_name).unwrap();
 
 
@@ -203,9 +165,9 @@ impl Population for ResultMap {
 
                 let value = if let Some(ref prog) = self.prog_map[row_i][ col_i]{
                     match eval {
-                        PopEval::TestFit => prog.test_fit.unwrap(),
-                        PopEval::CV => prog.cv_fit.unwrap(),
-                        PopEval::Geno(eval) => eval(prog),
+                        ProgInspectRequest::TestFit => prog.test_fit.unwrap(),
+                        ProgInspectRequest::CV => prog.cv_fit.unwrap(),
+                        ProgInspectRequest::Geno(eval) => eval(prog),
                     }
 
                 }else {
@@ -220,7 +182,7 @@ impl Population for ResultMap {
     }
 
 
-    fn write_genos(&self, file_name: &str) {
+    pub fn write_genos(&self, file_name: &str) {
         let mut f = File::create(file_name).unwrap();
         for row_i in 0..params::params::MAP_ROWS {
             for col_i in 0..params::params::MAP_COLS {
@@ -237,7 +199,7 @@ impl Population for ResultMap {
         }
     }
 
-    fn update_cv(&mut self) {
+    pub fn update_cv(&mut self) {
         for row_i in 0.. params::params::MAP_ROWS{
             for col_i in 0.. params::params::MAP_COLS{
                 if let Some(ref mut genome) = self.prog_map[row_i][ col_i] {
@@ -253,45 +215,7 @@ impl Population for ResultMap {
 }
 
 
-
-impl ResultMap{
-
-    pub fn count_eff_feats(&self) -> u8 {
-        let mut feats = [false; params::dataset::N_FEATURES as usize];
-        let mut count = 0;
-        for row_i in 0..params::params::MAP_ROWS {
-            for col_i in 0..params::params::MAP_COLS {
-                if let Some(ref genome) = self.prog_map[row_i][ col_i] {
-                    for feat in genome.get_effective_feats(0) {
-                        if !feats[feat as usize] {
-                            feats[feat as usize] = true;
-                            count += 1;
-                        }
-                    }
-                }
-            }
-        }
-        count
-    }
-
-
-    pub fn eff_feats_distr(&self) -> [u8; params::dataset::N_FEATURES as usize] {
-        let mut feats_distr = [0; params::dataset::N_FEATURES as usize];
-        for row_i in 0..params::params::MAP_ROWS {
-            for col_i in 0..params::params::MAP_COLS {
-                if let Some(ref genome) = self.prog_map[row_i][ col_i] {
-                    for feat in genome.get_effective_feats(0) {
-                        feats_distr[feat as usize] += 1;
-                    }
-                }
-            }
-        }
-        feats_distr
-    }
-}
-
-
-impl<'a> ResultMap {
+impl ResultMap {
 
     //pick random prog from map and return mutated copy
     fn get_simple_mutated_genome_rand(&self) -> Program {
@@ -301,42 +225,22 @@ impl<'a> ResultMap {
         while tries < params::params::MAP_COLS*params::params::MAP_ROWS * 1000 {
             if let Some(ref parent) = self.prog_map[tr.gen_range(0, params::params::MAP_ROWS)][tr.gen_range(0, params::params::MAP_COLS)] {
                 let prog = parent.test_mutate_copy();
-                let inds = self.get_loc(&prog);
+                let inds = self.select_cell(&prog);
 
                 if self.is_in_bounds(&inds){
                     return prog
                 }
             }
+            tries += 1;
         }
         panic!("Timed out when trying to select a parent genome from results map!!");
     }
 
 
-    pub fn pending_evals(&self)-> u64{
+    fn pending_evals(&self)-> u64{
         self.sent_count - self.recieved_count
     }
 
-    pub fn is_empty(&self)-> bool{
-        self.recieved_count == 0
-    }
-
-
-
-
-
-    fn get_test_fit(&self, inds: &(usize, usize)) -> f32 {
-        match self.prog_map[inds.0][inds.1] {
-            Some(ref prog) => prog.test_fit.unwrap(),
-            None => params::params::MIN_FIT,
-        }
-    }
-
-    fn get_cv_fit(&self, inds: &(usize, usize)) -> f32 {
-        match self.prog_map[inds.0][inds.1] {
-            Some(ref prog) => prog.cv_fit.unwrap(),
-            None => params::params::MIN_FIT,
-        }
-    }
 
     fn put(&mut self, val: Program, inds: &(usize, usize)) {
         self.prog_map[inds.0][inds.1] = Some(val);
@@ -349,7 +253,7 @@ impl<'a> ResultMap {
 }
 
 
-impl<'a> ResultMap {
+impl ResultMap {
     pub fn new(config: PopConfig, cv_data: ValidationSet) -> ResultMap {
         ResultMap {
             prog_map:

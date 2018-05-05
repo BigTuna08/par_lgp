@@ -1,11 +1,11 @@
 use params;
-use dataMgmt::dataset::{DataSetManager, TestDataSet, ValidationSet};
-use dataMgmt::logger::Logger;
-use dataMgmt::message::Message;
-use evo_sys::pop::maps::{ResultMap};
+use dataMgmt::{DataSetManager, TestDataSet, ValidationSet};
+use dataMgmt::Logger;
+use dataMgmt::Message;
+use evo_sys::{ResultMap, };
 use threading::threadpool::ThreadPool;
-use experiments::config::FiveFoldMultiTrial;
-use evo_sys::pop::Population;
+use experiments::FiveFoldMultiTrial;
+
 
 use std::fs::File;
 use std::io::Write;
@@ -13,7 +13,7 @@ use std::fs::create_dir_all;
 
 
 
-pub fn multi_trial_five_fold_tracking(mut config: FiveFoldMultiTrial){
+pub fn multi_trial_five_fold_tracking(config: FiveFoldMultiTrial){
 
     let root_out_dir = format!("{}/s{}_c{}", config.out_folder, config.select_cell_method, config.compare_prog_method);
 
@@ -48,7 +48,7 @@ pub fn five_fold_cv_tracking(logger: &mut Logger, config: &FiveFoldMultiTrial) {
 
 fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, config: &FiveFoldMultiTrial, logger: &mut Logger) {
     let mut res_map = ResultMap::new(config.get_map_config(), cv_data);
-    let mut pool = ThreadPool::new(params::params::N_THREADS, test_data, 17);  //fix here!! no 17!
+    let mut pool = ThreadPool::new(params::params::N_THREADS, test_data);
 
     while !res_map.is_finished() {
         if res_map.can_send() {
@@ -58,7 +58,6 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
                 res_map.try_put(pool.next_result_wait());
                 if res_map.recieved_count % logger.freq as u64 == 0 {
                     res_map.update_cv();
-//                    logger.update(&res_map); // !! has been replaced by ResultsMap::log_full
                     res_map.log_full(logger);
                 }
             }
@@ -69,21 +68,5 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
     logger.finish_fold(res_map);
 }
 
-// new() -> Self
-// is_finished() -> bool
-// can_send()  -> bool
-// new_prog() -> Program
-
-// try_put(Program)
-// log_full(Logger)
-
-// get_config() -> &MapConfig
-// get_cell_select() -> u8
-// get_compare() -> u8
-
-// get_sent_count -> u64
-// get_received_count -> u64
-// incr_sent() {sent_count++}
-// incr_rece() {re++}
 
 

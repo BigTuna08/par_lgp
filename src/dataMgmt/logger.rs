@@ -1,21 +1,17 @@
 use dataMgmt::trackers;
-use evo_sys::pop::maps::{ResultMap};
-use evo_sys::pop::{PopStats, PopEval};
-use evo_sys::prog::prog::Program;
-use evo_sys::pop::Population;
-use params;
+use evo_sys::{ResultMap, ProgInspectRequest};
+use evo_sys::pop::{PopStats};
+//use evo_sys::prog::prog::Program;
+//use evo_sys::pop::Population;
 use std::fs::create_dir;
 use std::fs::File;
 use std::io::Write;
 
+use super::{FileSet, Logger};
+
 use GenoEval;
 
-struct FileSet{
-    max: File,
-    min: File,
-    ave: File,
-    sd: File,
-}
+
 
 impl FileSet{
     fn new(output_dir: &str) -> FileSet{
@@ -54,22 +50,7 @@ impl FileSet{
 
 }
 
-pub struct Logger{
-    pub freq: u32,
-    pub root_dir: String,
 
-    test_output_files: Option<FileSet>,
-    cv_output_files: Option<FileSet>,
-    geno_output_files: Vec<FileSet>,
-
-    pub geno_functions: Vec<&'static GenoEval>,
-
-    feature_count: Option<File>,
-    feature_distr: Option<File>,
-
-    current_iter: u16,
-    current_fold: u8, //assumes 5 fold
-}
 
 
 impl Logger{
@@ -112,8 +93,8 @@ impl Logger{
         let file_name = format!("iter{}-fold{}.txt", self.current_iter, self.current_fold);
 
         final_results.write_genos(&format!("{}/genos/{}", self.root_dir, file_name));
-        final_results.write_pop_info(&format!("{}/test_fit_maps/{}", self.root_dir, file_name), PopEval::TestFit);
-        final_results.write_pop_info(&format!("{}/cv_fit_maps/{}", self.root_dir, file_name), PopEval::CV);
+        final_results.write_pop_info(&format!("{}/test_fit_maps/{}", self.root_dir, file_name), ProgInspectRequest::TestFit);
+        final_results.write_pop_info(&format!("{}/cv_fit_maps/{}", self.root_dir, file_name), ProgInspectRequest::CV);
 
         self.new_line();
         self.update_fold_iter();
@@ -121,7 +102,7 @@ impl Logger{
 
 
     fn update_fold_iter(&mut self){
-        if self.current_fold + 1 < params::dataset::N_FOLDS{
+        if self.current_fold + 1 < super::params::N_FOLDS{
             self.current_fold += 1;
         }
         else {
@@ -231,17 +212,8 @@ impl Logger{
         };
     }
 
-//    pub fn log_feat_distr(&mut self, distr: [u8; params::dataset::N_FEATURES as usize]) {
-//        match self.feature_distr {
-//            Some(ref mut f) => {
-//                f.write(array_2_str(&distr).as_bytes());
-//                f.write(b"\n");
-//            },
-//            None => panic!("Not tracking feats!!!!!"),
-//        };
-//    }
 
-    pub fn log_feat_distr(&mut self, distr: &[u8; params::dataset::N_FEATURES as usize]) {
+    pub fn log_feat_distr(&mut self, distr: &[u8; super::params::N_FEATURES as usize]) {
         match self.feature_distr {
             Some(ref mut f) => {
                 f.write(array_2_str(distr).as_bytes());

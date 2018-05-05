@@ -1,4 +1,4 @@
-use evo_sys::prog::prog::Program;
+use evo_sys::Program;
 
 pub fn get_abs_geno_len(p: &Program) -> f32{
     p.get_abs_len() as f32

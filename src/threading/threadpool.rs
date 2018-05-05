@@ -1,5 +1,5 @@
-use dataMgmt::dataset::TestDataSet;
-use dataMgmt::message::{Message, EvalResult};
+use dataMgmt::TestDataSet;
+use dataMgmt::{Message, EvalResult};
 use evo_sys;
 use params;
 use std::collections::VecDeque;
@@ -18,7 +18,7 @@ pub struct ThreadPool {
 
 impl ThreadPool{
 
-    pub fn new(size: usize, data_set: TestDataSet, evaluator_ind: usize) -> ThreadPool {
+    pub fn new(size: usize, data_set: TestDataSet) -> ThreadPool {
         let mut handles = Vec::with_capacity(size);
 
         let (job_sender, job_receiver) = mpsc::channel();
@@ -32,10 +32,9 @@ impl ThreadPool{
             let rx = job_receiver.clone();
             let tx = result_sender.clone();
             let dr = data_ref.clone();
-            let ev_code = evaluator_ind.clone();
 
             let handle = thread::spawn(move ||{
-                worker(rx, tx, &dr, ev_code);
+                worker(rx, tx, &dr);
             });
             handles.push(Some(handle));
         }
@@ -67,18 +66,18 @@ impl ThreadPool{
     }
 
     pub fn terminate(&mut self){
-        for thread in 0..self.handles.len()*params::params::WORKER_QUEUE_SIZE {  //make sure to issue enough reques
+        for _ in 0..self.handles.len()*params::params::WORKER_QUEUE_SIZE {  //make sure to issue enough reques
             self.job_sender.send(Message::Quit);
         }
 
-        for (i,thread) in self.handles.iter_mut().enumerate(){
+        for thread in self.handles.iter_mut(){
             thread.take().unwrap().join();
         }
     }
 
 }
 
-fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<Message>>>, result_sender: mpsc::Sender<EvalResult>, data_ref: &TestDataSet, evaluator_ind: usize){
+fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<Message>>>, result_sender: mpsc::Sender<EvalResult>, data_ref: &TestDataSet){
     let mut queue = VecDeque::with_capacity(params::params::WORKER_QUEUE_SIZE);
     let data_size = data_ref.records.len() as f32;
 

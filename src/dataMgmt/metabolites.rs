@@ -1,3 +1,12 @@
+pub fn print_headers(){
+    let h = super::dataset::get_headers(super::params::DATA);
+    print!("headers = [");
+    for n in h.iter(){
+        println!("\"{}\",",n);
+    }
+    print!("]");
+}
+
 pub const DATA_HEADERS: [&'static str; 156]  = ["Ac_Orn",
 "Ala",
 "Arg",

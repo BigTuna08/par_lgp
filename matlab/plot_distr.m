@@ -1,4 +1,4 @@
-function plot_distr(in_file, column)
+function [ave, sd] = plot_distr(in_file, column)
 %column optional arg, used to select time step
 %if not given final column is used (final result)
 M = dlmread(in_file);

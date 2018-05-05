@@ -1,0 +1,15 @@
+csf = 'cv_fits' %compare_stat_folder
+
+[s, c] =  get_folder_conditions;
+
+res = zeros(length(s), length(c))
+
+if ~exist('folder','var')
+   d = dir('./s*');
+else
+   d = strcat(folder,'/s*');
+end
+
+for f = d'
+    fname = strcat(
+end

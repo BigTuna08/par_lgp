@@ -1,16 +1,15 @@
-use super::maps::ResultMap;
-use evo_sys::prog::prog::Program;
+use super::super::{ResultMap, Program};
 use rand;
 use rand::Rng;
-use params;
+
+use dataMgmt;
 
 use super::VarPenConfig;
 
-use std::f32::consts::PI;
 
 impl ResultMap{
 
-    pub fn is_better(&self, new_prog: &Program, old_prog: &Program) -> bool {
+    pub fn compare(&self, new_prog: &Program, old_prog: &Program) -> bool {
         match self.config.compare_prog_method {
             0 => self.simple_tie_shortest(new_prog, old_prog),
             1 => self.simple_tie_rand(new_prog, old_prog),
@@ -63,7 +62,7 @@ impl ResultMap{
     fn simple_tie_shortest(&self, new_prog: &Program, old_prog: &Program) -> bool{
         if new_prog.test_fit.unwrap() == old_prog.test_fit.unwrap(){
             if new_prog.get_effective_len(0) == old_prog.get_effective_len(0){
-                return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+                return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
             }
             else {
                 return new_prog.get_effective_len(0) < old_prog.get_effective_len(0)
@@ -76,7 +75,7 @@ impl ResultMap{
 
     fn simple_tie_rand(&self, new_prog: &Program, old_prog: &Program) -> bool{
         if new_prog.test_fit.unwrap() == old_prog.test_fit.unwrap(){
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         else {
             return new_prog.test_fit.unwrap() > old_prog.test_fit.unwrap()
@@ -86,27 +85,26 @@ impl ResultMap{
 
     fn pen_small(&self, new_prog: &Program, old_prog: &Program) -> bool{
 
-        let v = 1.0 / params::dataset::N_SAMPLES as f32;
+        let v = 1.0 / dataMgmt::params::N_SAMPLES as f32;
 
         let new = new_prog.test_fit.unwrap() - v*new_prog.get_effective_len(0) as f32;
         let old = old_prog.test_fit.unwrap() - v*old_prog.get_effective_len(0) as f32;
 
         if new == old {
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
 
     fn pen_big(&self, new_prog: &Program, old_prog: &Program) -> bool{
-        let period = 200_000.0;
 
-        let v = 5.0 / params::dataset::N_SAMPLES as f32;
+        let v = 5.0 / dataMgmt::params::N_SAMPLES as f32;
 
         let new = new_prog.test_fit.unwrap() - v*new_prog.get_effective_len(0) as f32;
         let old = old_prog.test_fit.unwrap() - v*old_prog.get_effective_len(0) as f32;
 
         if new == old {
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
@@ -114,13 +112,13 @@ impl ResultMap{
     fn var_pen_small(&self, new_prog: &Program, old_prog: &Program) -> bool{
         let period = 200_000.0;
         let mut v = self.recieved_count as f32 / period;
-        v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
+        v = (v.sin() + 1.0) / dataMgmt::params::N_SAMPLES as f32;
 
         let new = new_prog.test_fit.unwrap() - v*new_prog.get_effective_len(0) as f32;
         let old = old_prog.test_fit.unwrap() - v*old_prog.get_effective_len(0) as f32;
 
         if new == old {
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
@@ -128,14 +126,14 @@ impl ResultMap{
     fn var_pen_big(&self, new_prog: &Program, old_prog: &Program) -> bool{
         let period = 500_000.0;
         let mut v = self.recieved_count as f32 / period;
-        v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
+        v = (v.sin() + 1.0) / dataMgmt::params::N_SAMPLES as f32;
         v *= 10.0;
 
         let new = new_prog.test_fit.unwrap() - v*new_prog.get_effective_len(0) as f32;
         let old = old_prog.test_fit.unwrap() - v*old_prog.get_effective_len(0) as f32;
 
         if new == old {
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
@@ -144,7 +142,7 @@ impl ResultMap{
     fn var_pen_double(&self, new_prog: &Program, old_prog: &Program) -> bool{
         let period = 500_000.0;
         let mut v = self.recieved_count as f32 / period;
-        v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
+        v = (v.sin() + 1.0) / dataMgmt::params::N_SAMPLES as f32;
         v *= 10.0;
 
 
@@ -157,7 +155,7 @@ impl ResultMap{
         };
 
         if new == old {
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
@@ -165,14 +163,14 @@ impl ResultMap{
     fn var_pen_bigger(&self, new_prog: &Program, old_prog: &Program) -> bool{
         let period = 500_000.0;
         let mut v = self.recieved_count as f32 / period;
-        v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
+        v = (v.sin() + 1.0) / dataMgmt::params::N_SAMPLES as f32;
         v *= 40.0;
 
         let new = new_prog.test_fit.unwrap() - v*new_prog.get_effective_len(0) as f32;
         let old = old_prog.test_fit.unwrap() - v*old_prog.get_effective_len(0) as f32;
 
         if new == old {
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
@@ -181,14 +179,14 @@ impl ResultMap{
     fn var_pen_big_feats(&self, new_prog: &Program, old_prog: &Program) -> bool{
         let period = 500_000.0;
         let mut v = self.recieved_count as f32 / period;
-        v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
+        v = (v.sin() + 1.0) / dataMgmt::params::N_SAMPLES as f32;
         v *= 10.0;
 
         let new = new_prog.test_fit.unwrap() - v*new_prog.get_n_effective_feats(0) as f32;
         let old = old_prog.test_fit.unwrap() - v*old_prog.get_n_effective_feats(0) as f32;
 
         if new == old {
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
@@ -197,14 +195,14 @@ impl ResultMap{
     fn var_pen_bigger_feats(&self, new_prog: &Program, old_prog: &Program) -> bool{
         let period = 500_000.0;
         let mut v = self.recieved_count as f32 / period;
-        v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
+        v = (v.sin() + 1.0) / dataMgmt::params::N_SAMPLES as f32;
         v *= 40.0;
 
         let new = new_prog.test_fit.unwrap() - v*new_prog.get_n_effective_feats(0) as f32;
         let old = old_prog.test_fit.unwrap() - v*old_prog.get_n_effective_feats(0) as f32;
 
         if new == old {
-        return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+        return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
@@ -213,7 +211,7 @@ impl ResultMap{
     fn var_pen_bigger_halftime(&self, new_prog: &Program, old_prog: &Program) -> bool{
         let period = 500_000.0;
         let mut v = self.recieved_count as f32 / period;
-        v = (v.sin() + 1.0) / params::dataset::N_SAMPLES as f32;
+        v = (v.sin() + 1.0) / dataMgmt::params::N_SAMPLES as f32;
         v *= 10.0;
 
 
@@ -225,35 +223,33 @@ impl ResultMap{
         };
 
         if new == old {
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
 
     fn var_pen_configurable_eff_len(&self, new_prog: &Program, old_prog: &Program, config: VarPenConfig) -> bool {
         let pen = config.penalty_at(self.recieved_count);
-        let new = new_prog.test_fit.unwrap() - pen*new_prog.get_n_effective_feats(0) as f32;
-        let old = old_prog.test_fit.unwrap() - pen*old_prog.get_n_effective_feats(0) as f32;
+
+        let new = new_prog.test_fit.unwrap() - pen*new_prog.get_effective_len(0) as f32;
+        let old = old_prog.test_fit.unwrap() - pen*old_prog.get_effective_len(0) as f32;
 
         if new == old { //random
-            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
         }
         return new > old
     }
 
-//    fn var_pen(&self, new_prog: &Program, old_prog: &Program, min_pen: f32, max_pen: f32, n_waves: f32, protect_start: u64, protect_end: u64 ) -> bool{
-//        let wave_input = (self.config.total_evals- self.recieved_count) as f32;
-//
-//        let period = self.config.total_evals - protect_start - protect_end;
-//        let period = (period as f32)/n_waves;
-//
-//        let mut v = (2.0*PI*wave_input/period).sin();
-//
-//
-//
-//        let vert_strech = (max_pen-min_pen)/2.0;
-//
-//        let vert_trans = max_pen - vert_strech;
-//
-//    }
+    fn var_pen_configurable_eff_feats(&self, new_prog: &Program, old_prog: &Program, config: VarPenConfig) -> bool {
+        let pen = config.penalty_at(self.recieved_count);
+
+        let new = new_prog.test_fit.unwrap() - pen*new_prog.get_n_effective_feats(0) as f32;
+        let old = old_prog.test_fit.unwrap() - pen*old_prog.get_n_effective_feats(0) as f32;
+
+        if new == old { //random
+            return rand::thread_rng().gen_weighted_bool(super::super::params::REPLACE_EQ_FIT);
+        }
+        return new > old
+    }
+
 }
