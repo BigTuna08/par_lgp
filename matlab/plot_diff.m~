@@ -5,7 +5,7 @@ if ~exist('gens','var')
 end
 
 M_test = dlmread( strcat(root_dir, '/test_fits/max.txt') );
-M_cv = dlmread( strcat(root_dir, '/cv_fits/max.txt') );
+M_cv = dlmread( strcat(root_dir, '/cv_fits/best.txt') );
 M = M_test - M_cv; %in file is matrix, colums are time steps, rows are trials
 N_points = size(M,2);
 

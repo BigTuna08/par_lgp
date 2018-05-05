@@ -12,7 +12,7 @@ select_methods = [];
 compare_methods = [];
 
 for f = d'
-    [s, c] = folder_name_to_nums(f.name)
+    [s, c] = folder_name_to_nums(f.name);
     select_methods = [select_methods s];
     compare_methods = [compare_methods c];
 end

@@ -25,24 +25,24 @@ impl ResultMap{
 
             11 => self.var_pen_configurable_eff_len(new_prog, old_prog,  //baseline
                                                     VarPenConfig::new(0.0,
-                                                                      5.0,
-                                                                      2.0,
+                                                                      1.0,
+                                                                      3.0,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.total_evals)),
 
             12 => self.var_pen_configurable_eff_len(new_prog, old_prog, //double waves
                                                     VarPenConfig::new(0.0,
-                                                                      5.0,
-                                                                      4.0,
+                                                                      1.0,
+                                                                      6.0,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.total_evals)),
 
             13 => self.var_pen_configurable_eff_len(new_prog, old_prog, //slight bonus
-                                                    VarPenConfig::new(-0.25,
-                                                                      5.0,
-                                                                      2.0,
+                                                    VarPenConfig::new(-0.2,
+                                                                      1.0,
+                                                                      3.0,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.total_evals)),
@@ -50,7 +50,7 @@ impl ResultMap{
             14 => self.var_pen_configurable_eff_len(new_prog, old_prog, //big penalty
                                                     VarPenConfig::new(0.0,
                                                                       20.0,
-                                                                      2.0,
+                                                                      3.0,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.total_evals)),

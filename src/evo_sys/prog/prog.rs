@@ -31,10 +31,10 @@ impl Program{
 
         let mut rng = thread_rng();
 
-        Program::new_random(rng.gen_range(instr_min, instr_max ),
-                                rng.gen_range(calc_regs_min, calc_reg_max),
-                                    rng.gen_range(ops_min, ops_max),
-                                    rng.gen_range(feats_min, feats_max))
+        Program::new_random(rng.gen_range(instr_min, instr_max +1),
+                                rng.gen_range(calc_regs_min, calc_reg_max+1),
+                                    rng.gen_range(ops_min, ops_max+1),
+                                    rng.gen_range(feats_min, feats_max+1))
 
     }
 

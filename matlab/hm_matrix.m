@@ -9,7 +9,7 @@ max_v = max(max(M))
 
 
 h = heatmap(M);
-caxis([.9, 1])
+caxis([max_v-0.05, max_v])
 h.Colormap = parula;
 h.XData = 0:49;
 h.YData = 0:49;
