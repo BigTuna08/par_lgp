@@ -1,4 +1,5 @@
 use super::super::{ResultMap, Program};
+use params::params::{MAP_ROWS, MAP_COLS};
 
 impl ResultMap{
 
@@ -11,6 +12,7 @@ impl ResultMap{
             4 =>  self.abs_len_eff_feat(prog, 1),
             5 =>  self.eff_len_eff_feat_improved(prog),
             6 =>  self.comp_feat(prog, 1),
+            7 => self.e_comp_feat_len(prog),
             _ => panic!("Invalid get location method!! \n{:?}", self.config),
         }
     }
@@ -61,5 +63,16 @@ impl ResultMap{
         (row, col)
     }
 
+    fn e_comp_feat_len(&self, prog: &Program)  -> (usize, usize){
+        let feats = (prog.get_n_effective_feats(0) as f32).powi(2);
+        let comp = (prog.get_n_effective_comp_regs(0) as f32).powi(2);
+        let len =  (prog.get_effective_len(0) as f32).powi(2);
+        let row = ( comp/ comp + feats);
+        let col = (len / len + feats);
+
+        let row = (row*MAP_ROWS as f32) as usize;
+        let col = (col*MAP_COLS as f32) as usize;
+        (row, col)
+    }
 
 }

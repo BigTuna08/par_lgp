@@ -58,6 +58,8 @@ impl Logger{
         create_dir(format!("{}/genos", root_dir));
         create_dir(format!("{}/cv_fit_maps", root_dir));
         create_dir(format!("{}/test_fit_maps", root_dir));
+        create_dir(format!("{}/eff_feat_maps", root_dir));
+        create_dir(format!("{}/eff_len_maps", root_dir));
 
         Logger{
             freq,
@@ -95,6 +97,9 @@ impl Logger{
         final_results.write_genos(&format!("{}/genos/{}", self.root_dir, file_name));
         final_results.write_pop_info(&format!("{}/test_fit_maps/{}", self.root_dir, file_name), ProgInspectRequest::TestFit);
         final_results.write_pop_info(&format!("{}/cv_fit_maps/{}", self.root_dir, file_name), ProgInspectRequest::CV);
+        final_results.write_pop_info(&format!("{}/eff_feat_maps/{}", self.root_dir, file_name), ProgInspectRequest::Geno(&trackers::get_eff_feats));
+        final_results.write_pop_info(&format!("{}/eff_len_maps/{}", self.root_dir, file_name), ProgInspectRequest::Geno(&trackers::get_eff_geno_len));
+
 
         self.new_line();
         self.update_fold_iter();
