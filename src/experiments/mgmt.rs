@@ -140,3 +140,138 @@ impl Manager{
     }
 
 }
+
+
+
+#[derive(Debug)]
+pub struct Manager2{
+    pub methods: Vec<(u8,u8)>,
+    pub initial_pop: u32,
+    pub total_evals: u64,
+    pub n_iter: u32,
+    pub out_folder: String,
+    pub comment: String,
+}
+
+
+impl Manager2 {
+    pub fn run_all(&self) {
+
+        File::create(format!("{}/README.txt", &self.out_folder))
+            .unwrap().write(format!("{:?}", &self).as_bytes());
+
+        for &(s,c) in self.methods.iter(){
+                let config = FiveFoldMultiTrial{
+                    select_cell_method:s,
+                    compare_prog_method:c,
+                    initial_pop: self.initial_pop,
+                    total_evals: self.total_evals,
+                    n_iter: self.n_iter,
+                    comment: self.comment.clone(),
+                    out_folder: self.out_folder.clone(),
+                };
+                experiments::multi_trial_five_fold_tracking(config);
+        }
+    }
+}
+
+
+
+impl Manager2{
+
+    pub fn new(args: Vec<String>) -> Manager2{
+
+        let out_folder = format!("results/{}/raw", args[1]);
+
+        match create_dir_all(&out_folder) {
+            Ok(_) =>{
+
+
+                let mut methods = Vec::new();
+                let mut initial_pop = params::defaults::DEFAULT_INITIAL_POP;
+                let mut total_evals = params::defaults::DEFAULT_TOTAL_EVALS;
+                let mut n_iter = params::defaults::DEFAULT_ITERS;
+                let mut comment = String::from(params::defaults::DEFAULT_COMMENT);
+
+
+                let mut i = 0;
+                while i < args.len() {
+                    let mut arg = &args[i];
+
+                    if arg.eq_ignore_ascii_case("-s") {
+                        i += 1;
+                        while i < args.len() && !&args[i].starts_with("-") {
+                            let new_arg = &args[i];
+                            let new_arg = new_arg.parse::<u8>().unwrap();
+
+                            i += 1;
+
+
+                            let new_arg2 = &args[i];
+                            let new_arg2 = new_arg2.parse::<u8>();
+                            match new_arg2 {
+                                Ok(new_arg2) =>{
+                                    methods.push((new_arg, new_arg2));
+                                    i += 1;
+                                }
+                                Err(e) => panic!("need select and compare method!! err is {:?}", e),
+                            }
+
+                        }
+                    }
+
+
+                            else if arg.eq_ignore_ascii_case("-p"){
+                                i += 1;
+                                if i < args.len() && !&args[i].starts_with("-") {
+                                    let new_arg = &args[i];
+                                    initial_pop = new_arg.parse::<u32>().unwrap();
+                                    i += 1;
+                                }
+                            }
+
+                                else if arg.eq_ignore_ascii_case("-i"){
+                                    i += 1;
+                                    if i < args.len() && !&args[i].starts_with("-") {
+                                        let new_arg = &args[i];
+                                        n_iter = new_arg.parse::<u32>().unwrap();
+                                        i += 1;
+                                    }
+                                }
+
+                                    else if arg.eq_ignore_ascii_case("-e"){
+                                        i += 1;
+                                        if i < args.len() && !&args[i].starts_with("-") {
+                                            let new_arg = &args[i];
+                                            total_evals = new_arg.parse::<u64>().unwrap();
+                                            i += 1;
+                                        }
+                                    }
+
+                                        else if arg.eq_ignore_ascii_case("-m"){
+                                            i += 1;
+                                            if i < args.len() && !&args[i].starts_with("-") {
+                                                comment =  args[i].clone();
+                                                i += 1;
+                                            }
+                                        }
+
+                                            else {
+                                                i += 1;
+                                            }
+                }
+
+
+                if methods.is_empty(){
+                    panic!("no methods given !!");
+                }
+
+
+
+                Manager2 { methods, initial_pop, total_evals, out_folder, n_iter, comment}
+            }
+            Err(e) => panic!("Problem creating out dir! {:?}\n Err is {:?}", &out_folder, e)
+        }
+    }
+
+}

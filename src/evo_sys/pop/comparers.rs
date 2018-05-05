@@ -4,6 +4,8 @@ use rand;
 use rand::Rng;
 use params;
 
+use super::VarPenConfig;
+
 use std::f32::consts::PI;
 
 impl ResultMap{
@@ -21,6 +23,39 @@ impl ResultMap{
             8 => self.var_pen_big_feats(new_prog, old_prog),
             9 => self.var_pen_bigger_feats(new_prog, old_prog),
             10 => self.var_pen_bigger_halftime(new_prog, old_prog),
+
+            11 => self.var_pen_configurable_eff_len(new_prog, old_prog,  //baseline
+                                                    VarPenConfig::new(0.0,
+                                                                      5.0,
+                                                                      2.0,
+                                                                      self.config.initial_pop as u64,
+                                                                      self.config.initial_pop as u64,
+                                                                      self.config.total_evals)),
+
+            12 => self.var_pen_configurable_eff_len(new_prog, old_prog, //double waves
+                                                    VarPenConfig::new(0.0,
+                                                                      5.0,
+                                                                      4.0,
+                                                                      self.config.initial_pop as u64,
+                                                                      self.config.initial_pop as u64,
+                                                                      self.config.total_evals)),
+
+            13 => self.var_pen_configurable_eff_len(new_prog, old_prog, //slight bonus
+                                                    VarPenConfig::new(-0.25,
+                                                                      5.0,
+                                                                      2.0,
+                                                                      self.config.initial_pop as u64,
+                                                                      self.config.initial_pop as u64,
+                                                                      self.config.total_evals)),
+
+            14 => self.var_pen_configurable_eff_len(new_prog, old_prog, //big penalty
+                                                    VarPenConfig::new(0.0,
+                                                                      20.0,
+                                                                      2.0,
+                                                                      self.config.initial_pop as u64,
+                                                                      self.config.initial_pop as u64,
+                                                                      self.config.total_evals)),
+
             _ => panic!("Invalid compare method!! \n{:?}", self.config),
         }
     }
@@ -190,6 +225,17 @@ impl ResultMap{
         };
 
         if new == old {
+            return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
+        }
+        return new > old
+    }
+
+    fn var_pen_configurable_eff_len(&self, new_prog: &Program, old_prog: &Program, config: VarPenConfig) -> bool {
+        let pen = config.penalty_at(self.recieved_count);
+        let new = new_prog.test_fit.unwrap() - pen*new_prog.get_n_effective_feats(0) as f32;
+        let old = old_prog.test_fit.unwrap() - pen*old_prog.get_n_effective_feats(0) as f32;
+
+        if new == old { //random
             return rand::thread_rng().gen_weighted_bool(params::evolution::REPLACE_EQ_FIT);
         }
         return new > old

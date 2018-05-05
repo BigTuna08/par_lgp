@@ -13,6 +13,7 @@ fn main() {
 
 
     let start = PreciseTime::now();
+    println!("manager#2 hack should be done better, normal manager not working atm");
 
 
 
@@ -26,6 +27,7 @@ fn main() {
 //    test_arr();
     mnger.run_all();
 //    comp_times();
+//    parLGP::evo_sys::pop::test();
 
     let end = PreciseTime::now();
     println!("{} seconds full program execution.", start.to(end));

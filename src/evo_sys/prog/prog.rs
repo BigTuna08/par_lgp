@@ -28,8 +28,8 @@ pub struct Program{
 impl Program{
 
     pub fn new_default_range() -> Program{
-        Program::new_random_range(1, 40,
-                                  1, 40,
+        Program::new_random_range(1, 50,
+                                  1, 50,
                                   params::params::N_OPS, params::params::N_OPS+1,
                                   1, 156)
     }
