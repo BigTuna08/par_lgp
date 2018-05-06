@@ -58,9 +58,10 @@ impl GenPop{
         // choose best of selected
         let mut best_prog = None;
         for i in choosen {
-            if self.progs[i].test_fit.unwrap() > best_fit ||
-                (self.progs[i].test_fit.unwrap() == best_fit && rng.gen()){
+            let fit = self.progs[i].test_fit.unwrap();
+            if fit > best_fit || (fit == best_fit && rng.gen()){// if tie 50/50 random
                 best_prog = Some(&self.progs[i]);
+                best_fit = fit;
             }
         }
         best_prog.unwrap().test_mutate_copy()

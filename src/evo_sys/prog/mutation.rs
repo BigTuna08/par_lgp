@@ -7,7 +7,6 @@ use super::super::{Program};
 impl Program{
 
     pub fn test_mutate_copy(&self) -> Program{
-
         let n = rand::thread_rng().gen_range(0, 25);
         match n {
             0 => self.ins_instr_copy(),
@@ -19,9 +18,16 @@ impl Program{
             6 => self.swap_feat_copy(),
             _ => self.mut_instr_copy(),
         }
-
     }
 
+    pub fn no_meta_mutate_copy(&self) -> Program{
+        let n = rand::thread_rng().gen_range(0, 10);
+        match n {
+            0 => self.ins_instr_copy(),
+            1 => self.del_instr_copy(),
+            _ => self.mut_instr_copy(),
+        }
+    }
 
     pub fn mut_instr_copy(&self) -> Program{
         let features = self.features.clone();
