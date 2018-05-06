@@ -1,3 +1,7 @@
+pub const GEN_POP_SIZE: usize = 250;
+pub const GEN_POP_GENS: u32 = 250;
+
+
 // Rates are expressed as 1 in RATE chance (eg RATE = 20 => 1/20 = 4% chance)
 
 pub const REPLACE_EQ_FIT: u32 = 2; //rate to replace best when fitness is eq

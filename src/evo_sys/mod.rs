@@ -40,6 +40,17 @@ pub struct ResultMap{
 }
 
 
+pub struct GenPop{
+    progs: Vec<Program>,
+    cv_data: ValidationSet,
+    pop_size: usize,
+    total_gens: u32,
+    current_gen: u32,
+    current_gen_recived: usize,
+    current_gen_sent: usize,
+}
+
+
 #[derive(Debug)]
 pub struct PopConfig {
     pub select_cell_method: u8,

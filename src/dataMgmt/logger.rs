@@ -1,5 +1,5 @@
 use dataMgmt::trackers;
-use evo_sys::{ResultMap, ProgInspectRequest};
+use evo_sys::{ResultMap, ProgInspectRequest, GenPop};
 use evo_sys::pop::{PopStats};
 //use evo_sys::prog::prog::Program;
 //use evo_sys::pop::Population;
@@ -92,6 +92,20 @@ impl Logger{
 
 
     pub fn finish_fold(&mut self, final_results: ResultMap){
+        let file_name = format!("iter{}-fold{}.txt", self.current_iter, self.current_fold);
+
+        final_results.write_genos(&format!("{}/genos/{}", self.root_dir, file_name));
+        final_results.write_pop_info(&format!("{}/test_fit_maps/{}", self.root_dir, file_name), ProgInspectRequest::TestFit);
+        final_results.write_pop_info(&format!("{}/cv_fit_maps/{}", self.root_dir, file_name), ProgInspectRequest::CV);
+        final_results.write_pop_info(&format!("{}/eff_feat_maps/{}", self.root_dir, file_name), ProgInspectRequest::Geno(&trackers::get_eff_feats));
+        final_results.write_pop_info(&format!("{}/eff_len_maps/{}", self.root_dir, file_name), ProgInspectRequest::Geno(&trackers::get_eff_geno_len));
+
+
+        self.new_line();
+        self.update_fold_iter();
+    }
+
+    pub fn finish_fold_pop(&mut self, final_results: GenPop){
         let file_name = format!("iter{}-fold{}.txt", self.current_iter, self.current_fold);
 
         final_results.write_genos(&format!("{}/genos/{}", self.root_dir, file_name));

@@ -2,7 +2,7 @@ use params;
 use dataMgmt::{DataSetManager, TestDataSet, ValidationSet};
 use dataMgmt::Logger;
 use dataMgmt::Message;
-use evo_sys::{ResultMap, };
+use evo_sys::{ResultMap, GenPop};
 use threading::threadpool::ThreadPool;
 use experiments::FiveFoldMultiTrial;
 
@@ -69,4 +69,25 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
 }
 
 
+fn run_single_fold_tracking_generational(test_data: TestDataSet, cv_data: ValidationSet, config: &FiveFoldMultiTrial, logger: &mut Logger) {
+    let mut pop = GenPop::new(250, 10, cv_data);
+    let mut pool = ThreadPool::new(params::params::N_THREADS, test_data);
 
+    pop.initialize(&mut pool);
+
+    while !pop.is_finished() { //do a generation
+        while !pop.sent_all() {
+            pool.add_task(Message::Cont(pop.get_mutated_genome_tournament(16)));
+        }
+        while !pop.recieved_all() {
+            pop.try_put(pool.next_result_wait());
+        }
+        pop.next_gen();
+        pop.log_full(logger);
+        assert_eq!(pool.current_job_count(), 0);
+    }
+
+    pool.terminate();
+    pop.update_cv();
+    logger.finish_fold_pop(pop);
+}

@@ -1,6 +1,7 @@
 pub mod maps;
 pub mod selectors;
 pub mod comparers;
+pub mod gen_pop;
 
 use std::fs::File;
 use std::io::Write;
@@ -9,32 +10,7 @@ use std::io::Write;
 
 use std::f32::consts::PI;
 
-//pub trait Population {
-//
-//    fn is_finished(&self) -> bool;
-//    fn can_send(&self) -> bool;
-//
-//    fn next_new_prog(&mut self) -> Program; //mut so sent count is incremented
-//    fn try_put(&mut self, new_entry: EvalResult);
-//
-//    fn update_cv(&mut self);
-//
-//    fn log_full(&self, logger: &mut Logger); //Continuous logging.
-//    fn write_pop_info(&self, file_name: &str, eval: PopEval); //end of fold log
-//    fn write_genos(&self, file_name: &str); //end of fold log
-//
-//}
-//
-//
-//pub trait PopMap: Population{
-//    fn get_config(&self) -> &PopConfig;
-//
-//    fn select_cell(&self, prog: &Program) -> (usize, usize);
-//    fn compare_program(&self, new_prog: &Program, old_prog: &Program) -> bool;
-//    fn is_in_bounds(&self, inds: &(usize,usize))-> bool;
-//    fn get(&self, inds:  &(usize,usize)) -> &Option<Program>;
-//    fn put(&mut self,  prog: Program, inds:  &(usize,usize));
-//}
+
 #[derive(Debug)]
 pub struct VarPenConfig{
     v_stretch: f32, // ie amplitude

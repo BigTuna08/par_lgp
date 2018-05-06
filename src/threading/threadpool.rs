@@ -6,13 +6,14 @@ use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc;
 use std::thread;
+//use std::time::Duration;
 
 
 pub struct ThreadPool {
     job_sender: mpsc::Sender<Message>,
     result_receiver: mpsc::Receiver<EvalResult>,
     handles: Vec<Option<thread::JoinHandle<()>>>,
-
+    current_job_count: u32,
 }
 
 
@@ -40,7 +41,7 @@ impl ThreadPool{
         }
 
         ThreadPool{
-            job_sender, result_receiver, handles, // evaluator// data_set
+            job_sender, result_receiver, handles, current_job_count:0// evaluator// data_set
         }
 
     }
@@ -48,16 +49,22 @@ impl ThreadPool{
 
     pub fn add_task(&mut self, task: Message) {
         self.job_sender.send(task);
+        self.current_job_count += 1;
     }
 
     pub fn next_result(&mut self) -> Option<EvalResult> {
         if let Ok(result) = self.result_receiver.try_recv() {
+            self.current_job_count -= 1;
             return Some(result)
         }
         None
     }
 
     pub fn next_result_wait(&mut self) -> EvalResult {
+        if self.current_job_count == 0{
+            panic!("Called next_result_wait, but no results exist! You'll be waiting forever!");
+        }
+        self.current_job_count -= 1;
         match self.result_receiver.recv() {
             Ok(message) => message,
             _ => panic!("Error getting result!!")
@@ -73,6 +80,10 @@ impl ThreadPool{
         for thread in self.handles.iter_mut(){
             thread.take().unwrap().join();
         }
+    }
+
+    pub fn current_job_count(&self)->u32{
+        self.current_job_count
     }
 
 }
