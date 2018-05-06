@@ -67,8 +67,8 @@ impl ResultMap{
         let feats = (prog.get_n_effective_feats(0) as f32).powi(2);
         let comp = (prog.get_n_effective_comp_regs(0) as f32).powi(2);
         let len =  (prog.get_effective_len(0) as f32).powi(2);
-        let row = ( comp/ comp + feats);
-        let col = (len / len + feats);
+        let row = ( comp/ (comp + feats));
+        let col = (len / (len + feats));
 
         let row = (row*MAP_ROWS as f32) as usize;
         let col = (col*MAP_COLS as f32) as usize;

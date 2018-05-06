@@ -65,7 +65,7 @@ impl VarPenConfig{
     }
 
     pub fn penalty_at(&self, current_eval: u64)-> f32{
-        println!("Self is {:?}", self);
+       
         if current_eval < self.protect_start || current_eval > self.protect_end {
             return 0.0;
         }
