@@ -55,7 +55,11 @@ impl Program{
 
     //return a new empty program
     pub fn new_empty() -> Program{
-        Program{n_calc_regs:0, features:Vec::new(), instructions:Vec::new(), test_fit:None, cv_fit:None}
+        Program{n_calc_regs:0,
+            features:Vec::new(),
+            instructions:Vec::new(),
+            test_fit: Some(global_params::params::MIN_FIT),
+            cv_fit:Some(global_params::params::MIN_FIT), }
     }
 
 

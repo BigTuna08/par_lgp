@@ -40,7 +40,7 @@ pub fn five_fold_cv_tracking(logger: &mut Logger, config: &FiveFoldMultiTrial) {
     let mut data_manager = DataSetManager::new_rand_partition();
 
     while let Some((test_data, cv_data)) = data_manager.next_set(){ //run 5 times
-        run_single_fold_tracking(test_data, cv_data, config, logger);
+        run_single_fold_tracking_generational(test_data, cv_data, config, logger);
     }
 }
 
@@ -70,19 +70,22 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
 
 
 fn run_single_fold_tracking_generational(test_data: TestDataSet, cv_data: ValidationSet, config: &FiveFoldMultiTrial, logger: &mut Logger) {
-    let mut pop = GenPop::new(250, 10, cv_data);
+    let mut pop = GenPop::new(250, 10_000, cv_data);
     let mut pool = ThreadPool::new(params::params::N_THREADS, test_data);
 
     pop.initialize(&mut pool);
+    println!("initialized!");
 
     while !pop.is_finished() { //do a generation
         while !pop.sent_all() {
-            pool.add_task(Message::Cont(pop.get_mutated_genome_tournament(16)));
+            pool.add_task(Message::Cont(pop.get_mutated_genome_tournament(4)));
         }
         while !pop.recieved_all() {
             pop.try_put(pool.next_result_wait());
         }
         pop.next_gen();
+        pop.update_cv();
+//        println!("before log!");
         pop.log_full(logger);
         assert_eq!(pool.current_job_count(), 0);
     }

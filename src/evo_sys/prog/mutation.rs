@@ -181,6 +181,9 @@ impl Program{
         if self.features.len() == dataMgmt::params::N_FEATURES as usize { //just do micro mutation
             return self.mut_instr_copy()
         }
+        if self.features.len() == 0 {
+            return self.ins_feat_copy()
+        }
 
         let mut rng = rand::thread_rng();
         let mut features = self.features.clone();

@@ -32,8 +32,13 @@ impl GenPop{
 
     pub fn initialize(&mut self, thread_pool: &mut ThreadPool){
         for _ in 0..self.pop_size{
-            thread_pool.add_task(Message::Cont(Program::new_default_range()))
+            thread_pool.add_task(Message::Cont(Program::new_default_range()));
         }
+
+        for _ in 0..self.pop_size*2{
+            self.progs.push(Program::new_empty());
+        }
+
         let mut recieved = 0;
         while recieved < self.pop_size {
             self.progs[recieved] = thread_pool.next_result_wait().prog;
@@ -210,7 +215,7 @@ fn simple_tie_rand(new_prog: &Program, old_prog: &Program) -> Ordering{
         if thread_rng().gen(){ return Ordering::Greater}
         else { return Ordering::Less }
     }
-        else {
-            return new_prog.test_fit.unwrap().partial_cmp(&old_prog.test_fit.unwrap()).unwrap()
-        }
+    else {
+        return new_prog.test_fit.unwrap().partial_cmp(&old_prog.test_fit.unwrap()).unwrap()
+    }
 }

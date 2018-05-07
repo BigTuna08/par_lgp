@@ -1,4 +1,4 @@
-csf = 'test_fits' %compare_stat_folder
+csf = 'cv_fits' %compare_stat_folder
 stat = 'max';
 
 [ss, cs] =  get_folder_conditions
