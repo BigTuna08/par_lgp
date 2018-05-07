@@ -40,7 +40,7 @@ pub fn five_fold_cv_tracking(logger: &mut Logger, config: &FiveFoldMultiTrial) {
     let mut data_manager = DataSetManager::new_rand_partition();
 
     while let Some((test_data, cv_data)) = data_manager.next_set(){ //run 5 times
-        run_single_fold_tracking_generational(test_data, cv_data, config, logger);
+        run_single_fold_tracking(test_data, cv_data, config, logger);
     }
 }
 
