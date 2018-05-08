@@ -47,31 +47,6 @@ impl FiveFoldMultiTrial{
 }
 
 
-impl Manager {
-    pub fn run_all(&self) {
-
-        File::create(format!("{}/README.txt", &self.out_folder))
-            .unwrap().write(format!("{:?}", &self).as_bytes());
-
-        for s in self.select_cell_methods.iter(){
-            for c in self.compare_prog_methods.iter(){
-                let config = FiveFoldMultiTrial{
-                    select_cell_method:*s,
-                    compare_prog_method:*c,
-                    initial_pop: self.initial_pop,
-                    total_evals: self.total_evals,
-                    n_iter: self.n_iter,
-                    comment: self.comment.clone(),
-                    out_folder: self.out_folder.clone(),
-                };
-                experiments::multi_trial_five_fold_tracking(config);
-            }
-        }
-    }
-}
-
-
-
 impl Manager{
 
     pub fn new(args: Vec<String>) -> Manager{
@@ -171,30 +146,6 @@ impl Manager{
 
 }
 
-
-
-
-
-impl Manager2 {
-    pub fn run_all(&self) {
-
-        File::create(format!("{}/README.txt", &self.out_folder))
-            .unwrap().write(format!("{:?}", &self).as_bytes());
-
-        for &(s,c) in self.methods.iter(){
-                let config = FiveFoldMultiTrial{
-                    select_cell_method:s,
-                    compare_prog_method:c,
-                    initial_pop: self.initial_pop,
-                    total_evals: self.total_evals,
-                    n_iter: self.n_iter,
-                    comment: self.comment.clone(),
-                    out_folder: self.out_folder.clone(),
-                };
-                experiments::multi_trial_five_fold_tracking(config);
-        }
-    }
-}
 
 
 

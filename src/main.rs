@@ -8,6 +8,7 @@ extern crate time;
 use std::env;
 use std::fs::create_dir;
 use time::PreciseTime;
+use parLGP::experiments::ExperimentRunner;
 
 fn main() {
 

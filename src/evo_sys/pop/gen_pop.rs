@@ -46,7 +46,28 @@ impl GenPop{
         }
     }
 
-    pub fn get_mutated_genome_tournament(&mut self, t_size: usize) -> Program{
+    pub fn run_random_gens(&mut self, thread_pool: &mut ThreadPool, n_gens: u32){
+
+        for _ in 0..n_gens{
+
+            for _ in 0..self.pop_size{
+                thread_pool.add_task(Message::Cont(Program::new_default_range()));
+            }
+
+
+            let mut recieved = 0;
+            while recieved < self.pop_size {
+                self.progs[self.pop_size as usize + recieved] = thread_pool.next_result_wait().prog;
+                recieved += 1;
+            }
+            self.next_gen();
+        }
+
+
+    }
+
+
+    pub fn get_mutated_genome_tournament(&mut self, t_size: usize, mutation_code: u8) -> Program{
 
         if t_size > self.pop_size{panic!("Tournament is bigger than pop! Cannot select enough");}
         if self.current_gen_sent >= self.pop_size{panic!("Trying to send to many progs for a gen!");}
@@ -69,8 +90,9 @@ impl GenPop{
                 best_fit = fit;
             }
         }
-        best_prog.unwrap().test_mutate_copy()
+        best_prog.unwrap().mutate_copy(mutation_code)
     }
+
 
     pub fn try_put(&mut self, new_entry: EvalResult){
         if self.current_gen_recived >= self.pop_size {
@@ -219,3 +241,5 @@ fn simple_tie_rand(new_prog: &Program, old_prog: &Program) -> Ordering{
         return new_prog.test_fit.unwrap().partial_cmp(&old_prog.test_fit.unwrap()).unwrap()
     }
 }
+
+

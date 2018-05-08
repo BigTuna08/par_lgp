@@ -23,13 +23,13 @@ impl ResultMap {
     }
 
 
-    pub fn next_new_prog(&mut self) -> Program{
+    pub fn next_new_prog(&mut self, mutation_code: u8) -> Program{
         self.sent_count += 1;
         if self.sent_count <= self.config.initial_pop as u64{
             Program::new_default_range()
         }
             else {
-                self.get_simple_mutated_genome_rand()
+                self.get_simple_mutated_genome_rand(mutation_code)
             }
     }
 
@@ -218,13 +218,13 @@ impl ResultMap {
 impl ResultMap {
 
     //pick random prog from map and return mutated copy
-    fn get_simple_mutated_genome_rand(&self) -> Program {
+    fn get_simple_mutated_genome_rand(&self, mutation_code: u8) -> Program {
         let mut tries = 0;
         let mut tr  = rand::thread_rng();
 
         while tries < params::params::MAP_COLS*params::params::MAP_ROWS * 1000 {
             if let Some(ref parent) = self.prog_map[tr.gen_range(0, params::params::MAP_ROWS)][tr.gen_range(0, params::params::MAP_COLS)] {
-                let prog = parent.test_mutate_copy();
+                let prog = parent.mutate_copy(mutation_code);
                 let inds = self.select_cell(&prog);
 
                 if self.is_in_bounds(&inds){

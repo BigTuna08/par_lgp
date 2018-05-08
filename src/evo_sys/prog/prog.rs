@@ -176,16 +176,19 @@ impl Program{
     }
 
     pub fn get_effective_feats(&self, return_reg_ind: u8) -> HashSet<u8>{
+
         let mut eff_regs = HashSet::new();
         eff_regs.insert(return_reg_ind);
+//        println!("first ind={} len={}", return_reg_ind, eff_regs.len());
         for instr in self.instructions.iter().rev(){
             if eff_regs.contains(&instr.dest) {
                 eff_regs.insert(instr.src1);
                 eff_regs.insert(instr.src2);
             }
         }
+//        println!("second ind={} len={} regs{:?}", return_reg_ind, eff_regs.len(), &eff_regs);
         eff_regs.retain(|&x|  x >= (global_params::params::MAX_REGS - self.features.len()) as u8);
-
+//        println!("thrid ind={} len={}", return_reg_ind, eff_regs.len());
         eff_regs.iter().map(|x| super::reg_2_feat(&self.features, x)).collect()
     }
 
@@ -207,10 +210,10 @@ impl Program{
     ////                 For Logging            ////
 
     pub fn string_instr(&self, instr: &Instruction) -> String{
-        let n_feats = self.features.len() as u8;
+        let n_feats = self.features.len();
         let src1 =
-            if instr.src1 >= (global_params::params::MAX_REGS  as u8- n_feats) {
-                let d = global_params::params::MAX_REGS - instr.src1 as usize -1; //0..n_feats
+            if instr.src1 as usize >= (global_params::params::MAX_REGS - n_feats) {
+                let d = (global_params::params::MAX_REGS - instr.src1 as usize) -1; //0..n_feats
                 let fest_num = self.features[d];
                 format!("{}",&dataMgmt::metabolites::DATA_HEADERS[fest_num as usize])
             }else {
@@ -218,7 +221,7 @@ impl Program{
             };
 
         let src2 =
-            if instr.src2 >= (global_params::params::MAX_REGS as u8 - n_feats) {
+            if instr.src2 as usize >= (global_params::params::MAX_REGS - n_feats) {
                 let d = global_params::params::MAX_REGS - instr.src2 as usize - 1; //0..n_feats
                 let fest_num = self.features[d];
                 format!("{}",&dataMgmt::metabolites::DATA_HEADERS[fest_num as usize])

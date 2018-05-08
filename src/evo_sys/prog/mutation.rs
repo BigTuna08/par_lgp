@@ -6,6 +6,14 @@ use super::super::{Program};
 
 impl Program{
 
+    pub fn mutate_copy(&self, code: u8) -> Program{
+        match code {
+            0 => self.test_mutate_copy(),
+            1 => self.no_meta_mutate_copy(),
+            _ => panic!("Invalid mutate copy code!")
+        }
+    }
+
     pub fn test_mutate_copy(&self) -> Program{
         let n = rand::thread_rng().gen_range(0, 25);
         match n {
