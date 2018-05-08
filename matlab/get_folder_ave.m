@@ -3,7 +3,7 @@ function M = get_folder_ave(f_name)
 % average of them.
 % f_name = 'eval6/test_fit_maps/'
 
-folder = dir(strcat(f_name,'*.txt'));
+folder = dir(strcat(f_name,'*.txt'))
 count = 0;
 
 for file = folder'
