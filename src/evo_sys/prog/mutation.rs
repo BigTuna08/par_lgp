@@ -6,6 +6,7 @@ use super::super::{Program};
 
 impl Program{
 
+    //creates a mutated copy of prog
     pub fn mutate_copy(&self, code: u8) -> Program{
         match code {
             0 => self.test_mutate_copy(),

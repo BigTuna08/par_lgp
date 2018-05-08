@@ -1,11 +1,15 @@
 use params;
 use std::fs::File;
 use std::io::Write;
+use std::boxed::Box;
 use std::fs::create_dir_all;
 use experiments::experiments;
 use evo_sys::PopConfig;
-use super::{FiveFoldMultiTrial, Manager, Manager2};
+use super::{FiveFoldMultiTrial, Manager, Manager2, ExperimentRunner};
 
+pub fn new(args: Vec<String>)-> Box<ExperimentRunner>{
+    Box::new(Manager::new(args))
+}
 
 impl FiveFoldMultiTrial{
 

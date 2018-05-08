@@ -22,7 +22,7 @@ fn main() {
     let mut args: Vec<String> = env::args().collect();
     println!("ARGS {:?}", args);
 
-    let mnger = parLGP::experiments::Manager::new(args);
+    let mnger = parLGP::experiments::mgmt::new(args);
     println!("mnger {:?}", mnger);
 
 //    parLGP::evo_sys::pop::test();
