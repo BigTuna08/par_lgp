@@ -13,6 +13,7 @@ impl ResultMap{
             5 =>  self.eff_len_eff_feat_improved(prog),
             6 =>  self.comp_feat(prog, 1),
             7 => self.e_comp_feat_len(prog),
+            8 => self.e_comp_feat_len2(prog),
             _ => panic!("Invalid get location method!! \n{:?}", self.config),
         }
     }
