@@ -1,4 +1,5 @@
 use csv;
+use csv::ReaderBuilder;
 use params as global_params;
 use rand;
 use rand::Rng;
@@ -23,10 +24,18 @@ impl FullDataSet{
 
         let mut records = [DataRecord::new_blank(); params::N_SAMPLES];
         let f = File::open(data_file).unwrap();
-        let mut csv_rdr = csv::Reader::from_reader(f);
+
+        let mut csv_rdr = ReaderBuilder::new()
+            .delimiter(b'\t')
+            .from_reader(f);
+
+//        println!("Geeting new data! {:?}", csv_rdr.headers().unwrap().len());
+
+//        let mut csv_rdr = csv::Reader::from_reader(f);
 
         for (i,result) in csv_rdr.records().enumerate() {
             if let Ok(result) = result{
+//                println!("result is {:?}", result);
                 let mut result_iter = result.iter();
 
                 result_iter.next(); //skip first 2
@@ -43,10 +52,18 @@ impl FullDataSet{
                 for (j, next_entry) in result_iter.enumerate() {
                     match next_entry.parse::<f32>() {
                         Ok(entry) => features[j] = entry,
-                        Err(_) => features[j] = global_params::params::NA_TOKEN
+                        Err(e) => {
+//                            features[j] = global_params::params::NA_TOKEN
+//                            print!("Error reading something!! i={} j={} err is {:?}", i, j, e);
+                            panic!("error getting inputs!, change code if dataset containt missing");
+                        }
                     }
                 }
                 records[i] = DataRecord{features, class};
+            }
+            else {
+                println!("bad record! i={}, {:?}", i, &result);
+                panic!("");
             }
         }
 

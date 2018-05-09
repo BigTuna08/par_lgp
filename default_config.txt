@@ -1,0 +1,17 @@
+// For either mode
+
+MODE: MAP                                 // MAP or GEN
+OUT_FOLDER: defaultout                    // any name, output folder will be created with this name
+N_ITERATIONS: 1                           // integer > 0
+
+MUTATION_METHODS: 0 1                     // 1 or more integers, each separated by a space
+COMPARE_METHOD: 0 2 3                     // 1 or more integers, each separated by a space
+
+DATA_FILE: inputs/data3.csv
+
+// For map mode
+
+
+N_EVALS: 10000 50000
+INITIAL_POP_SIZES: 100 1000
+MAP_METHODS: 0 6

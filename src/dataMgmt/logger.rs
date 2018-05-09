@@ -232,7 +232,7 @@ impl Logger{
     }
 
 
-    pub fn log_feat_distr(&mut self, distr: &[u8; super::params::N_FEATURES as usize]) {
+    pub fn log_feat_distr(&mut self, distr: &[u16; super::params::N_FEATURES as usize]) {
         match self.feature_distr {
             Some(ref mut f) => {
                 f.write(array_2_str(distr).as_bytes());
@@ -283,7 +283,7 @@ impl Logger{
 
 }
 
-pub fn array_2_str(arr: &[u8]) -> String{
+pub fn array_2_str(arr: &[u16]) -> String{
     arr.iter().fold(String::new(), |acc, &x| format!("{}\t{}", acc, x.to_string()))
 }
 

@@ -5,7 +5,9 @@ extern crate serde;
 extern crate time;
 
 
+use std::fs::File;
 use std::env;
+use std::io::prelude::*;
 use std::fs::create_dir;
 use time::PreciseTime;
 use parLGP::experiments::ExperimentRunner;
@@ -21,13 +23,14 @@ fn main() {
 //
     let mut args: Vec<String> = env::args().collect();
     println!("ARGS {:?}", args);
+    process_config("default_config.txt");
 
-    let mnger = parLGP::experiments::mgmt::new(args);
-    println!("mnger {:?}", mnger);
+//    let mnger = parLGP::experiments::mgmt::new(args);
+//    println!("mnger {:?}", mnger);
 
 //    parLGP::evo_sys::pop::test();
 
-    mnger.run_all();
+//    mnger.run_all();
 //    comp_times();
 //    parLGP::evo_sys::pop::test();
 
@@ -35,6 +38,15 @@ fn main() {
     println!("{} seconds full program execution.", start.to(end));
 }
 
+
+fn process_config(loc: &str){
+    let mut f = File::open(loc).expect("error oping file!");
+    let mut c = String::new();
+    f.read_to_string(&mut c);
+    for line in c.lines(){
+        println!("{}", line);
+    }
+}
 
 
 
@@ -56,8 +68,36 @@ fn test_arr(){
 }
 
 
+struct MasterConfig{
+
+}
 
 
+struct CoreConfig{
+    pop_type: PopType,
+    out_folder: String,
+    data_file: String,
+    compare_prog_method: u8,    // multi !
+    trial_id: u32,
+    comment: String,
+}
+
+pub enum PopType{
+    Map(MapConfig),
+    Gen(PopConfig),
+}
+
+pub struct MapConfig{
+    select_cell_method: u8,
+    initial_pop: u32,
+    total_evals: u64,
+}
+
+pub struct PopConfig{
+    pub tourn_size: usize,
+    pub total_gens: u32,
+    pub random_gens: u32,
+}
 
 //fn comp_times(){
 //    let i = 20_000;

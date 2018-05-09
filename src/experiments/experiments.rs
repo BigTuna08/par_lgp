@@ -40,7 +40,7 @@ pub fn five_fold_cv_tracking(logger: &mut Logger, config: &FiveFoldMultiTrial) {
     let mut data_manager = DataSetManager::new_rand_partition();
 
     while let Some((test_data, cv_data)) = data_manager.next_set(){ //run 5 times
-        run_single_fold_tracking_generational(test_data, cv_data, config, logger);
+        run_single_fold_tracking(test_data, cv_data, config, logger);
     }
 }
 
@@ -52,7 +52,7 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
 
     while !res_map.is_finished() {
         if res_map.can_send() {
-            pool.add_task(Message::Cont(res_map.next_new_prog(1)))  //nonmeta!
+            pool.add_task(Message::Cont(res_map.next_new_prog(0)))  // with meta!
         }
             else {
                 res_map.try_put(pool.next_result_wait());

@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-pub const DATA: &str = "inputs/data.csv";
+pub const DATA: &str = "inputs/data3.csv";
 pub const N_FOLDS: u8 = 5;
 pub const N_FEATURES: u8 = 156;
 pub const N_SAMPLES: usize = 389;
