@@ -10,7 +10,6 @@ use std::env;
 
 use std::fs::create_dir;
 use time::PreciseTime;
-use parLGP::experiments::ExperimentRunner;
 use parLGP::config::get_runner;
 
 fn main() {

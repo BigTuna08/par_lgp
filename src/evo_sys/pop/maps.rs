@@ -1,5 +1,5 @@
 use dataMgmt::ValidationSet;
-use dataMgmt::EvalResult;
+use dataMgmt::{ Message, EvalResult, TestDataSet};
 use evo_sys;
 
 use params;
@@ -10,11 +10,38 @@ use std::fs::File;
 use std::io::Write;
 use super::super::{Program, ProgInspectRequest, ResultMap};
 use super::{PopStats};
+use threading::threadpool::ThreadPool;
 
 use dataMgmt::Logger;
 use dataMgmt;
 use ResultMapConfig;
+use std::sync::Arc;
 
+impl ResultMap{
+    pub fn run_all(&mut self, test_data: TestDataSet){
+
+    }
+    pub fn run_all_tracking(&mut self, test_data: Arc<TestDataSet>, logger: &mut Logger){
+        let mut pool = ThreadPool::new(params::params::N_THREADS, test_data);
+        let mutate_method = self.config.mutate_method;
+
+        while !self.is_finished() {
+            if self.can_send() {
+                pool.add_task(Message::Cont(self.next_new_prog(mutate_method)));
+            }
+                else {
+                    self.try_put(pool.next_result_wait());
+                    if self.recieved_count % logger.freq as u64 == 0 {
+                        self.update_cv();
+                        self.log_full(logger);
+                    }
+                }
+        }
+
+        pool.terminate();
+        self.update_cv();
+    }
+}
 
 
 impl ResultMap {
@@ -255,7 +282,7 @@ impl ResultMap {
 
 
 impl ResultMap {
-    pub fn new(config: ResultMapConfig, cv_data: ValidationSet) -> ResultMap {
+    pub fn new(config: ResultMapConfig, cv_data: Box<ValidationSet>) -> ResultMap {
         ResultMap {
             prog_map:
             [[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],

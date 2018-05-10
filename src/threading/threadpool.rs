@@ -19,7 +19,7 @@ pub struct ThreadPool {
 
 impl ThreadPool{
 
-    pub fn new(size: usize, data_set: TestDataSet) -> ThreadPool {
+    pub fn new(size: usize, data_ref: Arc<TestDataSet>) -> ThreadPool {
         let mut handles = Vec::with_capacity(size);
 
         let (job_sender, job_receiver) = mpsc::channel();
@@ -27,7 +27,7 @@ impl ThreadPool{
 
         let job_receiver = Arc::new(Mutex::new(job_receiver)); //clone so all threads can receive
 
-        let data_ref = Arc::new(data_set);
+//        let data_ref = Arc::new(data_set);
 
         for _ in 0..size{
             let rx = job_receiver.clone();

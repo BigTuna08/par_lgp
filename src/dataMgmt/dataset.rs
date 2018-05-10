@@ -4,7 +4,7 @@ use params as global_params;
 use rand;
 use rand::Rng;
 use std::fs::File;
-
+use std::sync::Arc;
 
 use super::{DataRecord, FullDataSet, params, Partition, DataSetManager, TestDataSet, ValidationSet};
 
@@ -149,6 +149,46 @@ impl DataSetManager{
 
     pub fn new_rand_partition() -> DataSetManager{
         DataSetManager{partitions:gen_partitions(), current_partition:0}
+    }
+
+    pub fn next_set_refs(&mut self) -> Option<(Arc<TestDataSet>, Box<ValidationSet>)>{
+
+        if self.current_partition >= params::N_FOLDS{return None}
+
+        let mut test_records = [DataRecord::new_blank(); params::TEST_DATA_SET_SIZE];
+        let mut cv_records = [DataRecord::new_blank(); params::FOLD_SIZE];
+
+        let mut test_dataset_i = 0;
+        let mut cv_dataset_i = 0;
+
+        let full_set = FullDataSet::new(params::DATA);
+
+        for (partition_i, partition) in self.partitions.iter().enumerate() {
+
+            if partition_i == self.current_partition as usize { // cv
+                for sample_i in partition.cases.iter() {
+                    cv_records[cv_dataset_i] = full_set.records[*sample_i];
+                    cv_dataset_i += 1;
+                }
+                for sample_i in partition.controls.iter() {
+                    cv_records[cv_dataset_i] = full_set.records[*sample_i];
+                    cv_dataset_i += 1;
+                }
+            }
+                else { //test
+                    for sample_i in partition.cases.iter() {
+                        test_records[test_dataset_i] = full_set.records[*sample_i];
+                        test_dataset_i += 1;
+                    }
+                    for sample_i in partition.controls.iter() {
+                        test_records[test_dataset_i] = full_set.records[*sample_i];
+                        test_dataset_i += 1;
+                    }
+                }
+        }
+        self.current_partition += 1;
+        Some((Arc::new(TestDataSet { records:test_records,}),
+              Box::new(ValidationSet{ records:cv_records,})))
     }
 
     pub fn next_set(&mut self) -> Option<(TestDataSet, ValidationSet)>{

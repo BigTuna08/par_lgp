@@ -1,4 +1,4 @@
-//pub const GEN_POP_SIZE: usize = 250;
+pub const GEN_POP_SIZE: usize = 2500;
 //pub const GEN_POP_GENS: u32 = 250;
 
 

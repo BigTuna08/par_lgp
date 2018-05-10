@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use {CoreConfig, PopInfo, MapInfo, GenPopInfo, Runner, ConfigFile, Mode};
 use std;
+use experiments::experiments;
 
 pub fn get_runner(loc: &str) -> Runner{
     let config = process_config(loc);
@@ -19,6 +20,12 @@ pub fn get_runner(loc: &str) -> Runner{
 
 
 impl Runner{
+
+    pub fn run_all_configs(&mut self){
+        while let Some(config) = self.next_config(){
+            experiments::multi_trial_five_fold_tracking(config);
+        }
+    }
 
     pub fn next_config(&mut self) -> Option<CoreConfig>{
         if self.incr_inds(){

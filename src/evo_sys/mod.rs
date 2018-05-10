@@ -3,9 +3,10 @@ pub mod pop;
 pub mod params;
 
 use params as global_params;
-use dataMgmt::{ValidationSet};
+use dataMgmt::{ValidationSet, Logger, TestDataSet};
 use GenoEval;
 use ResultMapConfig;
+use GenPopConfig;
 
 
 
@@ -32,10 +33,15 @@ pub struct Instruction{
 
 ////      Population structs   ////
 
+pub trait Runnable{
+    fn run_all(&mut self, test_data: TestDataSet);
+    fn run_all_tracking(&mut self, test_data: TestDataSet, logger: &mut Logger);
+}
+
 pub struct ResultMap{
     prog_map: [[Option<Program>; global_params::params::MAP_COLS]; global_params::params::MAP_ROWS],
     pub config: ResultMapConfig,
-    cv_data: ValidationSet,
+    cv_data: Box<ValidationSet>,
     sent_count: u64,
     pub recieved_count: u64,
 }
@@ -43,9 +49,8 @@ pub struct ResultMap{
 
 pub struct GenPop{
     progs: Vec<Program>,
-    cv_data: ValidationSet,
-    pop_size: usize,
-    total_gens: u32,
+    config: GenPopConfig,
+    cv_data: Box<ValidationSet>,
     current_gen: u32,
     current_gen_recived: usize,
     current_gen_sent: usize,

@@ -1,11 +1,13 @@
-use super::super::{GenPop, Program};
-use dataMgmt::{Message, EvalResult, ValidationSet};
+use params::params as global_params;
+use super::super::{GenPop, Program, params, Runnable};
+use dataMgmt::{Message, EvalResult, ValidationSet, TestDataSet};
 use threading::threadpool::ThreadPool;
 use dataMgmt;
 use evo_sys::ProgInspectRequest;
 use evo_sys;
 use dataMgmt::Logger;
 use evo_sys::pop::PopStats;
+use GenPopConfig;
 
 use std::io::Write;
 use std::fs::File;
@@ -14,16 +16,43 @@ use rand::thread_rng;
 use rand::Rng;
 use std::f32;
 use std::cmp::Ordering;
+use std::sync::Arc;
+
+impl GenPop{
+    pub fn run_all(&mut self, test_data: TestDataSet){
+
+    }
+    pub fn run_all_tracking(&mut self, test_data: Arc<TestDataSet>, logger: &mut Logger){
+        let mut pool = ThreadPool::new(global_params::N_THREADS, test_data);
+        let t_size = self.config.tourn_size as usize;
+        let mut_method = self.config.mutate_method;
+        self.initialize(&mut pool);
+        while !self.is_finished() { //do a generation
+            while !self.sent_all() {
+                pool.add_task(Message::Cont(self.get_mutated_genome_tournament(t_size, mut_method)));   //nonmeta!
+            }
+            while !self.recieved_all() {
+                self.try_put(pool.next_result_wait());
+            }
+            self.next_gen();
+            self.update_cv();
+            self.log_full(logger);
+            assert_eq!(pool.current_job_count(), 0);
+        }
+
+        pool.terminate();
+        self.update_cv();
+    }
+}
 
 
 impl GenPop{
 
-    pub fn new(pop_size: usize, total_gens: u32, cv_data: ValidationSet)->GenPop{
+    pub fn new(config: GenPopConfig, cv_data: Box<ValidationSet>)->GenPop{
         GenPop{
-            progs: Vec::with_capacity(pop_size*2),
+            progs: Vec::with_capacity(2*params::GEN_POP_SIZE),
             cv_data,
-            pop_size,
-            total_gens,
+            config,
             current_gen:0,
             current_gen_recived: 0,
             current_gen_sent: 0,
@@ -31,16 +60,16 @@ impl GenPop{
     }
 
     pub fn initialize(&mut self, thread_pool: &mut ThreadPool){
-        for _ in 0..self.pop_size{
+        for _ in 0..params::GEN_POP_SIZE{
             thread_pool.add_task(Message::Cont(Program::new_default_range()));
         }
 
-        for _ in 0..self.pop_size*2{
+        for _ in 0..params::GEN_POP_SIZE*2{
             self.progs.push(Program::new_empty());
         }
 
         let mut recieved = 0;
-        while recieved < self.pop_size {
+        while recieved < params::GEN_POP_SIZE {
             self.progs[recieved] = thread_pool.next_result_wait().prog;
             recieved += 1;
         }
@@ -50,14 +79,14 @@ impl GenPop{
 
         for _ in 0..n_gens{
 
-            for _ in 0..self.pop_size{
+            for _ in 0..params::GEN_POP_SIZE{
                 thread_pool.add_task(Message::Cont(Program::new_default_range()));
             }
 
 
             let mut recieved = 0;
-            while recieved < self.pop_size {
-                self.progs[self.pop_size as usize + recieved] = thread_pool.next_result_wait().prog;
+            while recieved < params::GEN_POP_SIZE {
+                self.progs[params::GEN_POP_SIZE as usize + recieved] = thread_pool.next_result_wait().prog;
                 recieved += 1;
             }
             self.next_gen();
@@ -69,8 +98,8 @@ impl GenPop{
 
     pub fn get_mutated_genome_tournament(&mut self, t_size: usize, mutation_code: u8) -> Program{
 
-        if t_size > self.pop_size{panic!("Tournament is bigger than pop! Cannot select enough");}
-        if self.current_gen_sent >= self.pop_size{panic!("Trying to send to many progs for a gen!");}
+        if t_size > params::GEN_POP_SIZE{panic!("Tournament is bigger than pop! Cannot select enough");}
+        if self.current_gen_sent >= params::GEN_POP_SIZE{panic!("Trying to send to many progs for a gen!");}
         self.current_gen_sent += 1;
 
         // select progams by index
@@ -78,7 +107,7 @@ impl GenPop{
         let mut best_fit = f32::MIN;
         let mut rng = thread_rng();
         while choosen.len() < t_size {
-            choosen.insert(rng.gen_range(0, self.pop_size));
+            choosen.insert(rng.gen_range(0, params::GEN_POP_SIZE));
         }
 
         // choose best of selected
@@ -95,7 +124,7 @@ impl GenPop{
 
 
     pub fn try_put(&mut self, new_entry: EvalResult){
-        if self.current_gen_recived >= self.pop_size {
+        if self.current_gen_recived >= params::GEN_POP_SIZE {
             panic!("trying to add to many programs for a generation!\n call next_gen()!")
         }
         self.progs[self.current_gen_recived] = new_entry.prog;
@@ -110,15 +139,15 @@ impl GenPop{
     }
 
     pub fn recieved_all(&self)->bool {
-        self.current_gen_recived == self.pop_size
+        self.current_gen_recived == params::GEN_POP_SIZE
     }
 
     pub fn sent_all(&self)->bool {
-        self.current_gen_sent == self.pop_size
+        self.current_gen_sent == params::GEN_POP_SIZE
     }
 
     pub fn is_finished(&self)-> bool{
-        self.current_gen == self.total_gens
+        self.current_gen == self.config.total_gens
     }
 }
 
