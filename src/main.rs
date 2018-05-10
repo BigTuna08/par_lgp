@@ -5,26 +5,29 @@ extern crate serde;
 extern crate time;
 
 
-use std::fs::File;
+
 use std::env;
-use std::io::prelude::*;
+
 use std::fs::create_dir;
 use time::PreciseTime;
 use parLGP::experiments::ExperimentRunner;
+use parLGP::config::get_runner;
 
 fn main() {
 
 
     let start = PreciseTime::now();
-    println!("manager#2 hack should be done better, normal manager not working atm");
 
 
 
 //
     let mut args: Vec<String> = env::args().collect();
     println!("ARGS {:?}", args);
-    process_config("default_config.txt");
 
+    let mut runner = get_runner("default_config.txt");
+
+    println!("runner {:?}", runner);
+    runner.print_dry_run();
 //    let mnger = parLGP::experiments::mgmt::new(args);
 //    println!("mnger {:?}", mnger);
 
@@ -39,65 +42,6 @@ fn main() {
 }
 
 
-fn process_config(loc: &str){
-    let mut f = File::open(loc).expect("error oping file!");
-    let mut c = String::new();
-    f.read_to_string(&mut c);
-    for line in c.lines(){
-        println!("{}", line);
-    }
-}
-
-
-
-fn test_arr(){
-    let mut a0 = [3.3; 100];
-    a0[2] = 9.4;
-
-    let mut a1 = a0.clone();
-    a1[1] = 0.1;
-
-    let mut a2 = a0.clone();
-    a2[3] = 2.2;
-    a0[2] = 0.4;
-
-
-    println!("{:?}", &a0[0..10]);
-    println!("{:?}", &a1[0..10]);
-    println!("{:?}", &a2[0..10]);
-}
-
-
-struct MasterConfig{
-
-}
-
-
-struct CoreConfig{
-    pop_type: PopType,
-    out_folder: String,
-    data_file: String,
-    compare_prog_method: u8,    // multi !
-    trial_id: u32,
-    comment: String,
-}
-
-pub enum PopType{
-    Map(MapConfig),
-    Gen(PopConfig),
-}
-
-pub struct MapConfig{
-    select_cell_method: u8,
-    initial_pop: u32,
-    total_evals: u64,
-}
-
-pub struct PopConfig{
-    pub tourn_size: usize,
-    pub total_gens: u32,
-    pub random_gens: u32,
-}
 
 //fn comp_times(){
 //    let i = 20_000;

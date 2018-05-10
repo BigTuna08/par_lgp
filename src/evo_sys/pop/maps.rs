@@ -8,18 +8,19 @@ use rand::Rng;
 use std;
 use std::fs::File;
 use std::io::Write;
-use super::super::{Program, ProgInspectRequest, ResultMap, PopConfig};
+use super::super::{Program, ProgInspectRequest, ResultMap};
 use super::{PopStats};
 
 use dataMgmt::Logger;
 use dataMgmt;
+use ResultMapConfig;
 
 
 
 impl ResultMap {
 
     pub fn is_finished(&self) -> bool{
-        self.recieved_count >= self.config.total_evals
+        self.recieved_count >= self.config.n_evals
     }
 
 
@@ -254,7 +255,7 @@ impl ResultMap {
 
 
 impl ResultMap {
-    pub fn new(config: PopConfig, cv_data: ValidationSet) -> ResultMap {
+    pub fn new(config: ResultMapConfig, cv_data: ValidationSet) -> ResultMap {
         ResultMap {
             prog_map:
             [[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],

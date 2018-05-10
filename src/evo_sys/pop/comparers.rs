@@ -29,7 +29,7 @@ impl ResultMap{
                                                                       3.0,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.initial_pop as u64,
-                                                                      self.config.total_evals)),
+                                                                      self.config.n_evals)),
 
             12 => self.var_pen_configurable_eff_len(new_prog, old_prog, //double waves
                                                     VarPenConfig::new(0.0,
@@ -37,7 +37,7 @@ impl ResultMap{
                                                                       6.0,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.initial_pop as u64,
-                                                                      self.config.total_evals)),
+                                                                      self.config.n_evals)),
 
             13 => self.var_pen_configurable_eff_len(new_prog, old_prog, //slight bonus
                                                     VarPenConfig::new(-0.2,
@@ -45,7 +45,7 @@ impl ResultMap{
                                                                       3.0,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.initial_pop as u64,
-                                                                      self.config.total_evals)),
+                                                                      self.config.n_evals)),
 
             14 => self.var_pen_configurable_eff_len(new_prog, old_prog, //big penalty
                                                     VarPenConfig::new(0.0,
@@ -53,7 +53,7 @@ impl ResultMap{
                                                                       3.0,
                                                                       self.config.initial_pop as u64,
                                                                       self.config.initial_pop as u64,
-                                                                      self.config.total_evals)),
+                                                                      self.config.n_evals)),
 
             _ => panic!("Invalid compare method!! \n{:?}", self.config),
         }

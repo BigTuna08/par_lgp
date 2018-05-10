@@ -87,7 +87,7 @@ impl ExperimentRunner for Manager {
                     comment: self.comment.clone(),
                     out_folder: self.out_folder.clone(),
                 };
-                experiments::multi_trial_five_fold_tracking(config);
+//                experiments::multi_trial_five_fold_tracking(config);
             }
         }
     }
@@ -111,7 +111,7 @@ impl ExperimentRunner for Manager2 {
                 comment: self.comment.clone(),
                 out_folder: self.out_folder.clone(),
             };
-            experiments::multi_trial_five_fold_tracking(config);
+//            experiments::multi_trial_five_fold_tracking(config);
         }
     }
 }

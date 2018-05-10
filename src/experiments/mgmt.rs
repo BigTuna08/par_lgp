@@ -4,7 +4,7 @@ use std::io::Write;
 use std::boxed::Box;
 use std::fs::create_dir_all;
 use experiments::experiments;
-use evo_sys::PopConfig;
+//use evo_sys::PopConfig;
 use super::{FiveFoldMultiTrial, Manager, Manager2, ExperimentRunner};
 
 pub fn new(args: Vec<String>)-> Box<ExperimentRunner>{
@@ -40,14 +40,14 @@ impl FiveFoldMultiTrial{
         }
     }
 
-    pub fn get_map_config(&self) -> PopConfig {
-        PopConfig {
-            select_cell_method: self.select_cell_method,
-            compare_prog_method: self.compare_prog_method,
-            initial_pop: self.initial_pop,
-            total_evals: self.total_evals,
-        }
-    }
+//    pub fn get_map_config(&self) -> PopConfig {
+//        PopConfig {
+//            select_cell_method: self.select_cell_method,
+//            compare_prog_method: self.compare_prog_method,
+//            initial_pop: self.initial_pop,
+//            total_evals: self.total_evals,
+//        }
+//    }
 }
 
 

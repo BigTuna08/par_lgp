@@ -5,6 +5,7 @@ pub mod params;
 use params as global_params;
 use dataMgmt::{ValidationSet};
 use GenoEval;
+use ResultMapConfig;
 
 
 
@@ -33,7 +34,7 @@ pub struct Instruction{
 
 pub struct ResultMap{
     prog_map: [[Option<Program>; global_params::params::MAP_COLS]; global_params::params::MAP_ROWS],
-    pub config: PopConfig,
+    pub config: ResultMapConfig,
     cv_data: ValidationSet,
     sent_count: u64,
     pub recieved_count: u64,
@@ -50,14 +51,14 @@ pub struct GenPop{
     current_gen_sent: usize,
 }
 
-
-#[derive(Debug)]
-pub struct PopConfig {
-    pub select_cell_method: u8,
-    pub compare_prog_method: u8,
-    pub initial_pop: u32,
-    pub total_evals: u64,
-}
+//
+//#[derive(Debug)]
+//pub struct PopConfig {
+//    pub select_cell_method: u8,
+//    pub compare_prog_method: u8,
+//    pub initial_pop: u32,
+//    pub total_evals: u64,
+//}
 
 
 

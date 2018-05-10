@@ -4,8 +4,8 @@ use dataMgmt::Logger;
 use dataMgmt::Message;
 use evo_sys::{ResultMap, GenPop};
 use threading::threadpool::ThreadPool;
-use experiments::FiveFoldMultiTrial;
-
+//use experiments::FiveFoldMultiTrial;
+use CoreConfig;
 
 use std::fs::File;
 use std::io::Write;
@@ -13,28 +13,28 @@ use std::fs::create_dir_all;
 
 
 
-pub fn multi_trial_five_fold_tracking(config: FiveFoldMultiTrial){
+pub fn multi_trial_five_fold_tracking(config: CoreConfig){
 
-    let root_out_dir = format!("{}/s{}_c{}", config.out_folder, config.select_cell_method, config.compare_prog_method);
+//    let root_out_dir = format!("{}/s{}_c{}", config.out_folder, config.select_cell_method, config.compare_prog_method);
 
-    match create_dir_all(&root_out_dir) {
+    match create_dir_all(&config.out_folder) {
         Ok(_) =>{
-            File::create(format!("{}/README.txt", &root_out_dir))
+            File::create(format!("{}/README.txt", &config.out_folder))
                 .unwrap().write(format!("{:?}", &config).as_bytes());
 
-            let mut logger = Logger::new(params::defaults::LOG_FREQ, &root_out_dir);
+            let mut logger = Logger::new(params::defaults::LOG_FREQ, &config.out_folder);
             logger.full_tracking();
 
-            for _ in 0..config.n_iter{
+            for _ in 0..config.n_iterations{
                 five_fold_cv_tracking(&mut logger, &config);
             }
         }
-        Err(e) => panic!("Problem creating out dir! {:?}\n Err is {:?}", &root_out_dir, e)
+        Err(e) => panic!("Problem creating out dir! {:?}\n Err is {:?}", &config.out_folder, e)
     }
 }
 
 
-pub fn five_fold_cv_tracking(logger: &mut Logger, config: &FiveFoldMultiTrial) {
+pub fn five_fold_cv_tracking(logger: &mut Logger, config: &CoreConfig) {
 
     //manages the data set by creating partitions, and shifting them after each fold
     let mut data_manager = DataSetManager::new_rand_partition();
@@ -46,8 +46,8 @@ pub fn five_fold_cv_tracking(logger: &mut Logger, config: &FiveFoldMultiTrial) {
 
 
 
-fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, config: &FiveFoldMultiTrial, logger: &mut Logger) {
-    let mut res_map = ResultMap::new(config.get_map_config(), cv_data);
+fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, config: &CoreConfig, logger: &mut Logger) {
+    let mut res_map = ResultMap::new(config.create_result_map_config(), cv_data);
     let mut pool = ThreadPool::new(params::params::N_THREADS, test_data);
 
     while !res_map.is_finished() {
@@ -69,7 +69,7 @@ fn run_single_fold_tracking(test_data: TestDataSet, cv_data: ValidationSet, conf
 }
 
 
-fn run_single_fold_tracking_generational(test_data: TestDataSet, cv_data: ValidationSet, config: &FiveFoldMultiTrial, logger: &mut Logger) {
+fn run_single_fold_tracking_generational(test_data: TestDataSet, cv_data: ValidationSet, config: &CoreConfig, logger: &mut Logger) {
     let mut pop = GenPop::new(500, 1000, cv_data);
     let mut pool = ThreadPool::new(params::params::N_THREADS, test_data);
 

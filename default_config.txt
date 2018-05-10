@@ -10,8 +10,11 @@ COMPARE_METHOD: 0 2 3                     // 1 or more integers, each separated 
 DATA_FILE: inputs/data3.csv
 
 // For map mode
-
-
 N_EVALS: 10000 50000
 INITIAL_POP_SIZES: 100 1000
 MAP_METHODS: 0 6
+
+// For Gen mode
+TOTAL_GENS: 100 200
+INIT_GENS: 0 5 10
+TOURN_SIZE: 4 16
