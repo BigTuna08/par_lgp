@@ -23,6 +23,7 @@ impl FullDataSet{
     pub fn new(data_file: &str) -> FullDataSet{
 
         let mut records = [DataRecord::new_blank(); params::N_SAMPLES];
+        println!("trying to get full dataset {}!", data_file);
         let f = File::open(data_file).unwrap();
 
         let mut csv_rdr = ReaderBuilder::new()
@@ -143,16 +144,17 @@ fn is_case(n: usize)->bool{
 
 impl DataSetManager{
 
-    pub fn new(partitions: Vec<Partition>) -> DataSetManager{
-        DataSetManager{partitions, current_partition:0}
-    }
+//    pub fn new(partitions: Vec<Partition>) -> DataSetManager{
+//        DataSetManager{partitions, current_partition:0}
+//    }
 
-    pub fn new_rand_partition() -> DataSetManager{
-        DataSetManager{partitions:gen_partitions(), current_partition:0}
+    pub fn new_rand_partition(data_file: String) -> DataSetManager{
+        DataSetManager{partitions:gen_partitions(), current_partition:0, data_file}
     }
 
     pub fn next_set_refs(&mut self) -> Option<(Arc<TestDataSet>, Box<ValidationSet>)>{
 
+        println!("getting refs!");
         if self.current_partition >= params::N_FOLDS{return None}
 
         let mut test_records = [DataRecord::new_blank(); params::TEST_DATA_SET_SIZE];
@@ -161,7 +163,7 @@ impl DataSetManager{
         let mut test_dataset_i = 0;
         let mut cv_dataset_i = 0;
 
-        let full_set = FullDataSet::new(params::DATA);
+        let full_set = FullDataSet::new(&self.data_file);
 
         for (partition_i, partition) in self.partitions.iter().enumerate() {
 

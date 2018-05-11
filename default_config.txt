@@ -7,7 +7,7 @@ N_ITERATIONS: 1                           // integer > 0
 MUTATION_METHODS: 0 1                     // 1 or more integers, each separated by a space
 COMPARE_METHOD: 0 2 3                     // 1 or more integers, each separated by a space
 
-DATA_FILE: inputs/data3.csv
+DATA_FILE: inputs/data.csv
 
 // For map mode
 N_EVALS: 10000 50000

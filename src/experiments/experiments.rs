@@ -49,7 +49,7 @@ pub fn multi_trial_five_fold_tracking(config: CoreConfig){
 pub fn five_fold_cv_tracking_ref(logger: &mut Logger, config: &CoreConfig) {
 
     //manages the data set by creating partitions, and shifting them after each fold
-    let mut data_manager = DataSetManager::new_rand_partition();
+    let mut data_manager = DataSetManager::new_rand_partition(config.data_file.clone());
 
     while let Some((test_data, cv_data)) = data_manager.next_set_refs(){ //run 5 times
         run_single_fold_tracking(test_data, cv_data, config, logger);

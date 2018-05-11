@@ -51,6 +51,7 @@ pub struct Partition{
 pub struct DataSetManager{
     partitions: Vec<Partition>,
     current_partition: u8,
+    data_file: String,
 }
 
 

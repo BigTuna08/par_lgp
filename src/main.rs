@@ -26,7 +26,7 @@ fn main() {
     let mut runner = get_runner("default_config.txt");
 
     println!("runner {:?}", runner);
-    runner.print_dry_run();
+    runner.run_all_configs();
 //    let mnger = parLGP::experiments::mgmt::new(args);
 //    println!("mnger {:?}", mnger);
 
