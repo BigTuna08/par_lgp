@@ -54,7 +54,11 @@ impl ResultMap {
     pub fn next_new_prog(&mut self, mutation_code: u8) -> Program{
         self.sent_count += 1;
         if self.sent_count <= self.config.initial_pop as u64{
-            Program::new_default_range()
+            let mut prog = Program::new_default_range();
+            while !self.is_in_bounds(&self.select_cell(&prog)) {
+                prog = Program::new_default_range();
+            }
+            prog
         }
             else {
                 self.get_simple_mutated_genome_rand(mutation_code)
@@ -240,6 +244,16 @@ impl ResultMap {
         }
     }
 
+
+    pub fn printout_pop_info(&self) {
+        println!("\n** Pop Info **\n\n");
+        for row_i in 0..params::params::MAP_ROWS {
+            for col_i in 0..params::params::MAP_COLS {
+                println!("{:?}", &self.prog_map[row_i][ col_i]);
+            }
+        }
+    }
+
 }
 
 
@@ -250,7 +264,7 @@ impl ResultMap {
         let mut tries = 0;
         let mut tr  = rand::thread_rng();
 
-        while tries < params::params::MAP_COLS*params::params::MAP_ROWS * 1000 {
+        while tries < params::params::MAP_COLS*params::params::MAP_ROWS * 10000 {
             if let Some(ref parent) = self.prog_map[tr.gen_range(0, params::params::MAP_ROWS)][tr.gen_range(0, params::params::MAP_COLS)] {
                 let prog = parent.mutate_copy(mutation_code);
                 let inds = self.select_cell(&prog);
@@ -261,6 +275,7 @@ impl ResultMap {
             }
             tries += 1;
         }
+        self.printout_pop_info();
         panic!("Timed out when trying to select a parent genome from results map!!");
     }
 

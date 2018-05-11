@@ -23,7 +23,7 @@ impl FullDataSet{
     pub fn new(data_file: &str) -> FullDataSet{
 
         let mut records = [DataRecord::new_blank(); params::N_SAMPLES];
-        println!("trying to get full dataset {}!", data_file);
+//        println!("trying to get full dataset {}!", data_file);
         let f = File::open(data_file).unwrap();
 
         let mut csv_rdr = ReaderBuilder::new()
@@ -154,7 +154,7 @@ impl DataSetManager{
 
     pub fn next_set_refs(&mut self) -> Option<(Arc<TestDataSet>, Box<ValidationSet>)>{
 
-        println!("getting refs!");
+//        println!("getting refs!");
         if self.current_partition >= params::N_FOLDS{return None}
 
         let mut test_records = [DataRecord::new_blank(); params::TEST_DATA_SET_SIZE];

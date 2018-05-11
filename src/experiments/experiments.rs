@@ -59,14 +59,14 @@ pub fn five_fold_cv_tracking_ref(logger: &mut Logger, config: &CoreConfig) {
 fn run_single_fold_tracking(test_data: Arc<TestDataSet>, cv_data: Box<ValidationSet>, config: &CoreConfig, logger: &mut Logger) {
     match config.pop_config {
         PopInfo::Gen(_) => {
-            let mut res_map = ResultMap::new(config.create_result_map_config(), cv_data);
+            let mut res_map = GenPop::new(config.create_gen_pop_config(), cv_data);
             res_map.run_all_tracking(test_data, logger);
-            logger.finish_fold(res_map);
+            logger.finish_fold_pop(res_map);
         },
         PopInfo::Map(_) => {
-            let mut pop = GenPop::new(config.create_gen_pop_config(), cv_data);
+            let mut pop = ResultMap::new(config.create_result_map_config(), cv_data);
             pop.run_all_tracking(test_data, logger);
-            logger.finish_fold_pop(pop);
+            logger.finish_fold(pop);
         },
     }
 }

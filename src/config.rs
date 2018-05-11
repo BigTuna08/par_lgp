@@ -28,52 +28,56 @@ impl Runner{
     }
 
     pub fn next_config(&mut self) -> Option<CoreConfig>{
+        println!("starting next config ind are {} {} {} {} {}", self.mutate_i, self.compare_i, self.vec_1_i, self.vec_2_i, self.vec_3_i);
+
+        let data_file = self.config.data_file.clone();
+        let compare_prog_method = self.config.compare_methods[self.compare_i];
+        let mutate_method = self.config.mutate_methods[self.mutate_i];
+        let n_iterations = self.config.n_iterations;
+
+        let pop_config = match self.mode {
+            Mode::Map => {
+                PopInfo::Map(MapInfo {
+                    select_cell_method: self.config.get_map_methods(self.vec_3_i).unwrap(),
+                    initial_pop: self.config.get_inital_pop_size(self.vec_2_i).unwrap(),
+                    n_evals: self.config.get_n_eval(self.vec_1_i).unwrap(),
+                })
+            },
+            Mode::Gen => {
+                PopInfo::Gen(GenPopInfo {
+                    tourn_size: self.config.get_tourn_sizes(self.vec_3_i).unwrap(),
+                    total_gens: self.config.get_total_gens(self.vec_2_i).unwrap(),
+                    random_gens: self.config.get_random_gens(self.vec_1_i).unwrap(),
+                })
+            },
+        };
+        println!("mid: ind are {} {} {} {} {}", self.mutate_i, self.compare_i, self.vec_1_i, self.vec_2_i, self.vec_3_i);
+        println!("also config is {:?}", self.config );
+
+        let out_folder =  match self.mode {//folder name is roughly mutate_compare_total_initial_other
+            Mode::Map => format!("{}/{}_{}_{}_{}_{}",
+                                 self.config.out_folder,
+                                 self.config.mutate_methods[self.mutate_i],
+                                 self.config.compare_methods[self.compare_i],
+                                 self.config.get_n_eval(self.vec_1_i).unwrap(),
+                                 self.config.get_inital_pop_size(self.vec_2_i).unwrap(),
+                                 self.config.get_map_methods(self.vec_3_i).unwrap()),
+            Mode::Gen => format!("{}/{}_{}_{}_{}_{}",
+                                 self.config.out_folder,
+                                 self.config.mutate_methods[self.mutate_i],
+                                 self.config.compare_methods[self.compare_i],
+                                 self.config.get_total_gens(self.vec_1_i).unwrap(),
+                                 self.config.get_random_gens(self.vec_2_i).unwrap(),
+                                 self.config.get_tourn_sizes(self.vec_3_i).unwrap()),
+        };
+        println!("got out f: ind are {} {} {} {} {}", self.mutate_i, self.compare_i, self.vec_1_i, self.vec_2_i, self.vec_3_i);
+
         if self.incr_inds(){
-
-            let data_file = self.config.data_file.clone();
-            let compare_prog_method = self.config.compare_methods[self.compare_i];
-            let mutate_method = self.config.mutate_methods[self.mutate_i];
-            let n_iterations = self.config.n_iterations;
-
-            let pop_config = match self.mode {
-                Mode::Map => {
-                    PopInfo::Map(MapInfo {
-                        select_cell_method: self.config.get_map_methods(self.vec_1_i).unwrap(),
-                        initial_pop: self.config.get_inital_pop_size(self.vec_2_i).unwrap(),
-                        n_evals: self.config.get_n_eval(self.vec_3_i).unwrap(),
-                    })
-                },
-                Mode::Gen => {
-                    PopInfo::Gen(GenPopInfo {
-                        tourn_size: self.config.get_tourn_sizes(self.vec_1_i).unwrap(),
-                        total_gens: self.config.get_total_gens(self.vec_2_i).unwrap(),
-                        random_gens: self.config.get_random_gens(self.vec_3_i).unwrap(),
-                    })
-                },
-            };
-
-            let out_folder =  match self.mode {//folder name is roughly mutate_compare_total_initial_other
-                Mode::Map => format!("{}/{}_{}_{}_{}_{}",
-                                     self.config.out_folder,
-                                     self.config.mutate_methods[self.mutate_i],
-                                     self.config.compare_methods[self.compare_i],
-                                     self.config.get_n_eval(self.vec_1_i).unwrap(),
-                                     self.config.get_inital_pop_size(self.vec_2_i).unwrap(),
-                                     self.config.get_map_methods(self.vec_3_i).unwrap()),
-                Mode::Gen => format!("{}/{}_{}_{}_{}_{}",
-                                     self.config.out_folder,
-                                     self.config.mutate_methods[self.mutate_i],
-                                     self.config.compare_methods[self.compare_i],
-                                     self.config.get_total_gens(self.vec_1_i).unwrap(),
-                                     self.config.get_random_gens(self.vec_2_i).unwrap(),
-                                     self.config.get_tourn_sizes(self.vec_3_i).unwrap()),
-            };
-
             Some(CoreConfig{
                 out_folder, data_file, compare_prog_method, mutate_method, pop_config, n_iterations,
             })
         }
-            else { None }
+        else { None }
 
     }
 

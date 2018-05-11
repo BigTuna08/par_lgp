@@ -10,7 +10,7 @@ pub const THREAD_POOL_MAX: u64 = 10000;
 
 
 pub const EPS: f32 = 1e-6;
-pub const DUPLICATE_TIME_OUT: u32 = 10_000; //when trying to generate new number, quit after this many times
+pub const DUPLICATE_TIME_OUT: u32 = 100_000; //when trying to generate new number, quit after this many times
 
 
 pub const NA_TOKEN: f32 = -1.0f32;
