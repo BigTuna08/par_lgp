@@ -90,7 +90,7 @@ impl Program{
             let result = ops::OPS[instr.op as usize](regs[instr.src1 as usize], regs[instr.src2 as usize]);
             match instr.op {
                 0 ... 5 => regs[instr.dest as usize] = result, //simple register transfer
-                6 => if result < 0.0 {skip_count = instr.src2}, //if false, skip next n, use direct constant
+                6 => if result < 0.0 {skip_count = 1}, //if false, skip next n, use direct constant
                 7 => if result < 0.0 {skip_count = 1}, //false skip next 1
                 _ => panic!("invalid op! {:?}", &instr)
             }
