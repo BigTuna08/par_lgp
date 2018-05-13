@@ -225,6 +225,8 @@ impl ResultMap {
                     f.write(col_i.to_string().as_bytes());
                     f.write(b")");
                     f.write(b"\n");
+                    genome.write_self_words(&mut f);
+                    f.write(b"\n");
                     genome.write_effective_self_words(&mut f);
                 }
             }

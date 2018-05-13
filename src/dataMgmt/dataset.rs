@@ -20,10 +20,11 @@ impl DataRecord{
 
 impl FullDataSet{
 
-    pub fn new(data_file: &str) -> FullDataSet{
+    pub fn new(data_file: &str) -> Box<FullDataSet>{
+        println!("Begin getting new full data set");
 
-        let mut records = [DataRecord::new_blank(); params::N_SAMPLES];
-//        println!("trying to get full dataset {}!", data_file);
+        let mut records =  Box::new([DataRecord::new_blank(); params::N_SAMPLES]);
+        println!("records init");
         let f = File::open(data_file).unwrap();
 
         let mut csv_rdr = ReaderBuilder::new()
@@ -33,7 +34,7 @@ impl FullDataSet{
 //        println!("Geeting new data! {:?}", csv_rdr.headers().unwrap().len());
 
 //        let mut csv_rdr = csv::Reader::from_reader(f);
-
+        println!("before iter");
         for (i,result) in csv_rdr.records().enumerate() {
             if let Ok(result) = result{
 //                println!("result is {:?}", result);
@@ -67,10 +68,12 @@ impl FullDataSet{
                 panic!("");
             }
         }
+        println!("Before returning");
 
-        FullDataSet{
-            records,
-        }
+
+        Box::new(FullDataSet{
+            records:*records,
+        })
     }
 }
 
@@ -156,14 +159,18 @@ impl DataSetManager{
 
 //        println!("getting refs!");
         if self.current_partition >= params::N_FOLDS{return None}
+        println!("in next_Set before trying to load");
 
-        let mut test_records = [DataRecord::new_blank(); params::TEST_DATA_SET_SIZE];
-        let mut cv_records = [DataRecord::new_blank(); params::FOLD_SIZE];
+        let mut test_records = &mut [DataRecord::new_blank(); params::TEST_DATA_SET_SIZE];
+        println!("got test");
+        let mut cv_records = &mut [DataRecord::new_blank(); params::FOLD_SIZE];
 
         let mut test_dataset_i = 0;
         let mut cv_dataset_i = 0;
-
+        println!("got cv");
         let full_set = FullDataSet::new(&self.data_file);
+
+        println!("after getting full set");
 
         for (partition_i, partition) in self.partitions.iter().enumerate() {
 
@@ -189,8 +196,8 @@ impl DataSetManager{
                 }
         }
         self.current_partition += 1;
-        Some((Arc::new(TestDataSet { records:test_records,}),
-              Box::new(ValidationSet{ records:cv_records,})))
+        Some((Arc::new(TestDataSet { records:*test_records,}),
+              Box::new(ValidationSet{ records:*cv_records,})))
     }
 
     pub fn next_set(&mut self) -> Option<(TestDataSet, ValidationSet)>{

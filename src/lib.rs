@@ -10,6 +10,7 @@ pub mod threading;
 pub mod dataMgmt;
 pub mod experiments;
 pub mod config;
+pub mod serv;
 
 use evo_sys::Program;
 
