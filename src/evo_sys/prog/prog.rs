@@ -240,32 +240,33 @@ impl Program{
     ////                 For Logging            ////
 
     pub fn string_instr(&self, instr: &Instruction) -> String{
+        let n_feats = self.features.len();
+        let src1 =
+            if instr.src1 as usize >= (global_params::params::MAX_REGS - n_feats) {
+                let d = (global_params::params::MAX_REGS - instr.src1 as usize) -1; //0..n_feats
+                let fest_num = self.features[d];
+                format!("{}",&dataMgmt::metabolites::DATA_HEADERS[fest_num as usize])
+            }else {
+                format!("${}",instr.src1)
+            };
+
+        let src2 =
+            if instr.src2 as usize >= (global_params::params::MAX_REGS - n_feats) {
+                let d = global_params::params::MAX_REGS - instr.src2 as usize - 1; //0..n_feats
+                let fest_num = self.features[d];
+                format!("{}",&dataMgmt::metabolites::DATA_HEADERS[fest_num as usize])
+            }else {
+                format!("${}",instr.src2)
+            };
+
         if instr.is_branch(){
             match instr.op {
-                6 => format!("skip next if {} > 0", instr.src1),
-                7 => format!("skip next if {} > {}", instr.src1, instr.src2),
+                6 => format!("skip next if {} > 0", src1),
+                7 => format!("skip next if {} > {}", src1, src2),
                 _ => panic!("invalid op! this part is poorly programmed"),
             }
         }
         else {
-            let n_feats = self.features.len();
-            let src1 =
-                if instr.src1 as usize >= (global_params::params::MAX_REGS - n_feats) {
-                    let d = (global_params::params::MAX_REGS - instr.src1 as usize) -1; //0..n_feats
-                    let fest_num = self.features[d];
-                    format!("{}",&dataMgmt::metabolites::DATA_HEADERS[fest_num as usize])
-                }else {
-                    format!("${}",instr.src1)
-                };
-
-            let src2 =
-                if instr.src2 as usize >= (global_params::params::MAX_REGS - n_feats) {
-                    let d = global_params::params::MAX_REGS - instr.src2 as usize - 1; //0..n_feats
-                    let fest_num = self.features[d];
-                    format!("{}",&dataMgmt::metabolites::DATA_HEADERS[fest_num as usize])
-                }else {
-                    format!("${}",instr.src2)
-                };
             format!("${}\t=\t{}\t{}\t{}", instr.dest, ops::OPS_NAMES[instr.op as usize], src1, src2)
         }
     }
