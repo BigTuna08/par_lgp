@@ -284,18 +284,24 @@ impl Program{
         }
     }
 
-    pub fn write_self_words(&self, f: &mut File){
 
+    pub fn write_header(&self, f: &mut File) {
+        f.write(b"# Score on training data: ");
+        f.write(self.test_fit.unwrap().to_string().as_bytes());
+        f.write(b"\n");
+        f.write(b"# Score on training data: ");
+        f.write(self.cv_fit.unwrap().to_string().as_bytes());
+        f.write(b"\n");
         f.write(b"# Len: ");
         f.write(self.instructions.len().to_string().as_bytes());
         f.write(b"\n");
         f.write(b"# Eff Len: ");
         f.write(self.get_effective_len(0).to_string().as_bytes());
         f.write(b"\n");
-        f.write(b"# Eff feats: ");
+        f.write(b"# Number of eff feats: ");
         f.write(self.get_n_effective_feats(0).to_string().as_bytes());
         f.write(b"\n");
-        f.write(b"# Eff comp regs: ");
+        f.write(b"# Number of eff comp regs: ");
         f.write(self.get_n_effective_comp_regs(0).to_string().as_bytes());
         f.write(b"\n*");
 
@@ -303,6 +309,9 @@ impl Program{
         f.write(b"\n*");
         let feat_str = self.feat_str();
         f.write(feat_str.as_bytes());
+    }
+
+    pub fn write_self_words(&self, f: &mut File){
         f.write(b"\n\n## All instructions ##\n");
         for instr in self.instructions.iter(){
             let instr_str = self.string_instr(instr);
@@ -315,18 +324,6 @@ impl Program{
 
     pub fn write_effective_self_words(&self, f: &mut File){
         f.write(b"## Effective instructions ## \n");
-//        f.write(b"#Eff feats: ");
-//        let eff_feats = self.get_effective_feats(0).iter().fold(String::new(), |acc, x| { format!("{}\t{}", acc, x)} );
-//        f.write(eff_feats.as_bytes());
-//        f.write(b"\n");
-//        f.write(b"#Eff comp regs: ");
-//        f.write(self.get_n_effective_comp_regs(0).to_string().as_bytes());
-//        f.write(b"\n*");
-//        f.write(self.n_calc_regs.to_string().as_bytes());
-//        f.write(b"\n*");
-//        let feat_str = self.feat_str();
-//        f.write(feat_str.as_bytes());
-//        f.write(b"\n");
         for instr_i in self.get_effective_instrs_good(0){
             let instr = self.instructions[instr_i];
             let instr_str = self.string_instr(&instr);
