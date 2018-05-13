@@ -103,17 +103,7 @@ impl Program{
 
     //return # of effective instructions
     pub fn get_effective_len(&self, return_reg_ind: u8) -> usize{
-        let mut eff_regs = HashSet::new();
-        let mut count = 0;
-        eff_regs.insert(return_reg_ind);
-        for instr in self.instructions.iter().rev(){
-            if eff_regs.contains(&instr.dest) {
-                eff_regs.insert(instr.src1);
-                eff_regs.insert(instr.src2);
-                count += 1;
-            }
-        }
-        count
+        self.get_effective_instrs_good(0).len()
     }
 
 
@@ -169,52 +159,60 @@ impl Program{
         eff_instrs
     }
 
-
-    // like effective, but also will always include instructions after
-    // branch statements. The output of only running these instrcutions should
-    // be identical to running all instructions.
-    pub fn get_important_instrs(&self, return_reg_ind: u8) -> Vec<usize>{
-        let mut eff_regs = HashSet::new();
-        let mut eff_instrs = HashSet::new();
-        eff_regs.insert(return_reg_ind);
-        for (i, instr) in self.instructions.iter().enumerate().rev(){
-            if eff_regs.contains(&instr.dest) {
-                eff_regs.insert(instr.src1);
-                eff_regs.insert(instr.src2);
-                eff_instrs.insert(i);
-            }
-            if instr.is_branch() && i < self.instructions.len()-1{ //dont do for last instr;
-                eff_instrs.insert(i+1);
-            }
-        }
-        let mut eff_instrs: Vec<usize>  = eff_instrs.into_iter().collect();
-        eff_instrs.sort();
-        eff_instrs
-    }
+//    // like effective, but also will always include instructions after
+//    // branch statements. The output of only running these instrcutions should
+//    // be identical to running all instructions.
+//    pub fn get_important_instrs(&self, return_reg_ind: u8) -> Vec<usize>{
+//        let mut eff_regs = HashSet::new();
+//        let mut eff_instrs = HashSet::new();
+//        eff_regs.insert(return_reg_ind);
+//        for (i, instr) in self.instructions.iter().enumerate().rev(){
+//            if eff_regs.contains(&instr.dest) {
+//                eff_regs.insert(instr.src1);
+//                eff_regs.insert(instr.src2);
+//                eff_instrs.insert(i);
+//            }
+//            if instr.is_branch() && i < self.instructions.len()-1{ //dont do for last instr;
+//                eff_instrs.insert(i+1);
+//            }
+//        }
+//        let mut eff_instrs: Vec<usize>  = eff_instrs.into_iter().collect();
+//        eff_instrs.sort();
+//        eff_instrs
+//    }
 
 
     pub fn get_n_effective_feats(&self, return_reg_ind: u8) -> usize{
         let mut eff_regs = HashSet::new();
-        eff_regs.insert(return_reg_ind);
-        for instr in self.instructions.iter().rev(){
-            if eff_regs.contains(&instr.dest) {
+
+        for instr_i in self.get_effective_instrs_good(0){
+            let instr = self.instructions[instr_i];
+            if instr.op == 6 {
+                eff_regs.insert(instr.src1);
+            }
+            else {
                 eff_regs.insert(instr.src1);
                 eff_regs.insert(instr.src2);
             }
         }
-        eff_regs.into_iter().fold(0, |acc, x| if x >= (global_params::params::MAX_REGS - self.features.len()) as u8 {acc+1} else {acc})
+
+        eff_regs
+            .into_iter()
+            .fold(0, |acc, x| if x >= (global_params::params::MAX_REGS - self.features.len()) as u8 {acc+1} else {acc})
     }
 
     pub fn get_effective_feats(&self, return_reg_ind: u8) -> HashSet<u8>{
-
         let mut eff_regs = HashSet::new();
-        eff_regs.insert(return_reg_ind);
-//        println!("first ind={} len={}", return_reg_ind, eff_regs.len());
-        for instr in self.instructions.iter().rev(){
-            if eff_regs.contains(&instr.dest) {
+
+        for instr_i in self.get_effective_instrs_good(0){
+            let instr = self.instructions[instr_i];
+            if instr.op == 6 {
                 eff_regs.insert(instr.src1);
-                eff_regs.insert(instr.src2);
             }
+                else {
+                    eff_regs.insert(instr.src1);
+                    eff_regs.insert(instr.src2);
+                }
         }
 //        println!("second ind={} len={} regs{:?}", return_reg_ind, eff_regs.len(), &eff_regs);
         eff_regs.retain(|&x|  x >= (global_params::params::MAX_REGS - self.features.len()) as u8);
@@ -226,11 +224,15 @@ impl Program{
     pub fn get_n_effective_comp_regs(&self, return_reg_ind: u8) -> usize{
         let mut eff_regs = HashSet::new();
         eff_regs.insert(return_reg_ind);
-        for instr in self.instructions.iter().rev(){
-            if eff_regs.contains(&instr.dest) {
+        for instr_i in self.get_effective_instrs_good(0){
+            let instr = self.instructions[instr_i];
+            if instr.op == 6 {
                 eff_regs.insert(instr.src1);
-                eff_regs.insert(instr.src2);
             }
+                else {
+                    eff_regs.insert(instr.src1);
+                    eff_regs.insert(instr.src2);
+                }
         }
         eff_regs.into_iter().fold(0, |acc, x| if x < self.n_calc_regs {acc+1} else {acc})
     }
