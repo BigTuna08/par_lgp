@@ -67,7 +67,7 @@ impl Program{
 
 
     pub fn create_compressed(&self) -> Program{
-        let instr_i = self.get_important_instrs(0);
+        let instr_i = self.get_effective_instrs_good(0);
         let instrs: Vec<Instruction> = instr_i.into_iter().map(|i| {self.instructions[i].clone()}).collect();
         Program{
             n_calc_regs: 0,
@@ -124,16 +124,46 @@ impl Program{
 
 
     //returns list of line numbers of effective instr, starting from 0
-    pub fn get_effective_instrs(&self, return_reg_ind: u8) -> Vec<usize>{
+//    pub fn get_effective_instrs(&self, return_reg_ind: u8) -> Vec<usize>{
+//        let mut eff_regs = HashSet::new();
+//        let mut eff_instrs = Vec::new();
+//        eff_regs.insert(return_reg_ind);
+//        for (i, instr) in self.instructions.iter().enumerate().rev(){
+//            if eff_regs.contains(&instr.dest) {
+//                eff_regs.insert(instr.src1);
+//                eff_regs.insert(instr.src2);
+//                eff_instrs.push(i);
+//            }
+//        }
+//        eff_instrs.sort();
+//        eff_instrs
+//    }
+
+    pub fn get_effective_instrs_good(&self, return_reg_ind: u8) -> Vec<usize>{
         let mut eff_regs = HashSet::new();
         let mut eff_instrs = Vec::new();
+        let mut last_eff = false;
         eff_regs.insert(return_reg_ind);
+
         for (i, instr) in self.instructions.iter().enumerate().rev(){
-            if eff_regs.contains(&instr.dest) {
-                eff_regs.insert(instr.src1);
-                eff_regs.insert(instr.src2);
-                eff_instrs.push(i);
+            if instr.is_branch() {
+                if last_eff { // becuase branch only ever skips one.
+                    eff_instrs.push(i);
+                }
             }
+            else {
+                if eff_regs.contains(&instr.dest) {
+                    eff_regs.remove(&instr.dest);
+                    eff_regs.insert(instr.src1);
+                    eff_regs.insert(instr.src2);
+                    eff_instrs.push(i);
+                    last_eff = true;
+                }
+                else {
+                    last_eff = false;
+                }
+            }
+
         }
         eff_instrs.sort();
         eff_instrs
@@ -247,16 +277,16 @@ impl Program{
 
     pub fn write_self_words(&self, f: &mut File){
 
-        f.write(b"#Len: ");
+        f.write(b"# Len: ");
         f.write(self.instructions.len().to_string().as_bytes());
         f.write(b"\n");
-        f.write(b"#Eff Len: ");
+        f.write(b"# Eff Len: ");
         f.write(self.get_effective_len(0).to_string().as_bytes());
         f.write(b"\n");
-        f.write(b"#Eff feats: ");
+        f.write(b"# Eff feats: ");
         f.write(self.get_n_effective_feats(0).to_string().as_bytes());
         f.write(b"\n");
-        f.write(b"#Eff comp regs: ");
+        f.write(b"# Eff comp regs: ");
         f.write(self.get_n_effective_comp_regs(0).to_string().as_bytes());
         f.write(b"\n*");
 
@@ -264,7 +294,7 @@ impl Program{
         f.write(b"\n*");
         let feat_str = self.feat_str();
         f.write(feat_str.as_bytes());
-        f.write(b"\n");
+        f.write(b"\n\n## All instructions ##\n");
         for instr in self.instructions.iter(){
             let instr_str = self.string_instr(instr);
             f.write(instr_str.as_bytes());
@@ -275,19 +305,20 @@ impl Program{
 
 
     pub fn write_effective_self_words(&self, f: &mut File){
-        f.write(b"#Eff feats: ");
-        let eff_feats = self.get_effective_feats(0).iter().fold(String::new(), |acc, x| { format!("{}\t{}", acc, x)} );
-        f.write(eff_feats.as_bytes());
-        f.write(b"\n");
-        f.write(b"#Eff comp regs: ");
-        f.write(self.get_n_effective_comp_regs(0).to_string().as_bytes());
-        f.write(b"\n*");
-        f.write(self.n_calc_regs.to_string().as_bytes());
-        f.write(b"\n*");
-        let feat_str = self.feat_str();
-        f.write(feat_str.as_bytes());
-        f.write(b"\n");
-        for instr_i in self.get_effective_instrs(0){
+        f.write(b"## Effective instructions ## \n");
+//        f.write(b"#Eff feats: ");
+//        let eff_feats = self.get_effective_feats(0).iter().fold(String::new(), |acc, x| { format!("{}\t{}", acc, x)} );
+//        f.write(eff_feats.as_bytes());
+//        f.write(b"\n");
+//        f.write(b"#Eff comp regs: ");
+//        f.write(self.get_n_effective_comp_regs(0).to_string().as_bytes());
+//        f.write(b"\n*");
+//        f.write(self.n_calc_regs.to_string().as_bytes());
+//        f.write(b"\n*");
+//        let feat_str = self.feat_str();
+//        f.write(feat_str.as_bytes());
+//        f.write(b"\n");
+        for instr_i in self.get_effective_instrs_good(0){
             let instr = self.instructions[instr_i];
             let instr_str = self.string_instr(&instr);
             f.write(instr_str.as_bytes());
