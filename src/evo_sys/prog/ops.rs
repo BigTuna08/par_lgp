@@ -1,7 +1,7 @@
 use params;
 
 pub static OPS: &'static [fn(f32, f32) -> f32] =
-    &[add, subt, mult, pdiv, pow, log, bip , big];
+    &[add, subt, mult, pdiv, pow, log, sig, big];
 
 pub static OPS_NAMES: &'static [&'static str] =
     &["add", "subt", "mult", "pdiv", "pow", "log", "bip" , "big"];
@@ -40,6 +40,12 @@ pub fn log(opr1: f32, opr2: f32) -> f32 {
 pub fn bip(opr1: f32, _opr2: f32) -> f32 {
     if opr1 > 0.0 {1.0} //branch
     else {-1.0} //dont
+}
+
+//skip if greater
+pub fn sig(opr1: f32, opr2: f32) -> f32 {
+    if opr1 > opr2 {1.0} //branch
+        else {-1.0} //dont
 }
 
 //branch if greater
