@@ -15,6 +15,9 @@ impl ResultMap{
             7 => self.e_comp_feat_len(prog),
             8 => self.e_comp_feat_len2(prog),
             9 => self.e_comp_feat_len3(prog),
+            10 => self.e_len_br(prog),
+            11 => self.e_feat_br(prog),
+            12 => self.e_len_feat_br(prog),
             _ => panic!("Invalid get location method!! \n{:?}", self.config),
         }
     }
@@ -103,6 +106,31 @@ impl ResultMap{
         let col = (col*MAP_COLS as f32) as usize;
         (row, col)
     }
+
+    fn e_len_br(&self, prog: &Program)  -> (usize, usize){
+        let row = ( prog.get_percent_branch(0)*MAP_ROWS as f32) as usize;
+        let col = prog.get_effective_len(0);
+        (row, col)
+    }
+
+
+    fn e_feat_br(&self, prog: &Program)  -> (usize, usize){
+        let row = ( prog.get_percent_branch(0)*MAP_ROWS as f32) as usize;
+        let col = prog.get_n_effective_feats(0) as usize;
+        (row, col)
+    }
+
+    fn e_len_feat_br(&self, prog: &Program)  -> (usize, usize){
+        let feats = (prog.get_n_effective_feats(0) as f32).powi(2);
+        let len =  (prog.get_effective_len(0) as f32).powi(2);
+
+        let col = ( feats / (feats + len))*1.25;// const 5/4 makes range 0-1
+        let col = (col*MAP_COLS as f32) as usize;
+        let row = ( prog.get_percent_branch(0)*MAP_ROWS as f32) as usize;
+
+        (row, col)
+    }
+
 
 
 }

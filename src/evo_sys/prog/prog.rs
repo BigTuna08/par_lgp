@@ -159,6 +159,40 @@ impl Program{
         eff_instrs
     }
 
+
+    pub fn get_percent_branch(&self, return_reg_ind: u8) -> f32{
+        let mut eff_regs = HashSet::new();
+        let mut last_eff = false;
+        eff_regs.insert(return_reg_ind);
+
+        let mut eff_instr_count = 0.0;
+        let mut branch_count = 0.0;
+
+        for (i, instr) in self.instructions.iter().enumerate().rev(){
+            if instr.is_branch() {
+                if last_eff { // becuase branch only ever skips one.
+                    eff_instr_count += 1.0;
+                    branch_count += 1.0;
+                }
+            }
+                else {
+                    if eff_regs.contains(&instr.dest) {
+                        eff_regs.remove(&instr.dest);
+                        eff_regs.insert(instr.src1);
+                        eff_regs.insert(instr.src2);
+                        last_eff = true;
+                        eff_instr_count += 1.0;
+                        branch_count += 1.0;
+                    }
+                        else {
+                            last_eff = false;
+                        }
+                }
+
+        }
+        branch_count/eff_instr_count
+    }
+
 //    // like effective, but also will always include instructions after
 //    // branch statements. The output of only running these instrcutions should
 //    // be identical to running all instructions.

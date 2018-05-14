@@ -24,13 +24,13 @@ pub const MUT_INSTR_COPY_RATE: u32 = 20; // was 200
 ///     Defaults for creating random program   ////
 
 pub const DEFAULT_INSTR_MIN: usize = 1;
-pub const DEFAULT_INSTR_MAX: usize = 50;
+pub const DEFAULT_INSTR_MAX: usize = 20;
 
 pub const DEFAULT_CALC_REG_MIN: u8 = 1;
-pub const DEFAULT_CALC_REG_MAX: u8 = 100;
+pub const DEFAULT_CALC_REG_MAX: u8 = 50;
 
 pub const DEFAULT_N_OPS_MIN: u8 = 8;
 pub const DEFAULT_N_OPS_MAX: u8 = 8;
 
 pub const DEFAULT_FEAT_MIN: u8 = 1;
-pub const DEFAULT_FEAT_MAX: u8 = 100;
+pub const DEFAULT_FEAT_MAX: u8 = 50;

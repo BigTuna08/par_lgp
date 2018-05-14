@@ -269,7 +269,7 @@ fn process_config(loc: &str) -> ConfigFile{
 
 
     let mode = mode.unwrap();
-    let out_folder = out_folder.unwrap();
+    let out_folder = format!("results/{}",out_folder.unwrap());
     let data_file = data_file.unwrap();
     let n_iterations = n_iterations.unwrap();
     let mutate_methods = mutate_methods.unwrap();
