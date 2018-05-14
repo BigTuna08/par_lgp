@@ -1,21 +1,36 @@
+function [res] = get_compare_matrix(dim1, dim2, folder )
+
+
 csf = 'cv_fits' %compare_stat_folder
 stat = 'max';
 
-[ss, cs] =  get_folder_conditions
+
+if ~exist('folder','var')
+   d = dir('./*');
+   folder = '';
+else
+   d = strcat(folder,'/*');
+end
+
+
+[ss, cs] =  get_folder_conditions(dim1, dim2, folder )
 
 res = zeros(length(ss), length(cs))
 
-if ~exist('folder','var')
-   d = dir('./s*');
-else
-   d = strcat(folder,'/s*');
-end
+
 
 for f = d'
-    fname = strcat(f.name, '/', csf, '/', stat, '.txt')
-    [av, sd] = plot_distr(fname);
+    fname = f.name
+    n1 = fname(1);
+    if n1 == '.'
+        continue
+    end
     
-    [s, c] = folder_name_to_nums(f.name);
+    fname = strcat(f.name, '/', csf, '/', stat, '.txt');
+    
+    [av, sd] = plot_distr(fname)
+    
+    [s, c] = folder_name_to_nums(f.name, dim1, dim2);
     si = find(ss==s);
     ci = find(cs==c);
     res(si,ci) = av;

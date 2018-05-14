@@ -1,20 +1,26 @@
-function [select_methods, compare_methods] = get_folder_conditions(folder)
+function [first_dim, second_dim] = get_folder_conditions(dim1, dim2, folder )
 % find how many s and c's there are, to create matrix for comparing
 
 if ~exist('folder','var')
-   d = dir('./s*');
+   d = dir('./*');
 else
-   d = strcat(folder,'/s*');
+   d = dir(strcat(folder,'./*'));
 end
 
 
-select_methods = [];
-compare_methods = [];
-
+first_dim = [];
+second_dim = [];
+d
 for f = d'
-    [s, c] = folder_name_to_nums(f.name);
-    select_methods = [select_methods s];
-    compare_methods = [compare_methods c];
+    fname = f.name
+    n1 = fname(1);
+    if n1 == '.'
+        continue
+    end
+    
+    [a1 a2] = folder_name_to_nums(f.name, dim1, dim2);
+    first_dim = [first_dim a1];
+    second_dim = [second_dim a2];
 end
-select_methods = unique(select_methods);
-compare_methods = unique(compare_methods);
+first_dim = unique(first_dim);
+second_dim = unique(second_dim);
