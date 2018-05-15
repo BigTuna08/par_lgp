@@ -11,8 +11,8 @@ max_v = max(max(M))
 h = heatmap(M);
 caxis([max_v-0.05, max_v])
 h.Colormap = parula;
-h.XData = 0:49;
-h.YData = 0:49;
+h.XData = 1:25;
+h.YData = 1:25;
 
 warning('off','MATLAB:structOnObject') % for setting x axis to top
 axp = struct(h);     

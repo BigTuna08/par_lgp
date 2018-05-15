@@ -182,7 +182,6 @@ impl Program{
                         eff_regs.insert(instr.src2);
                         last_eff = true;
                         eff_instr_count += 1.0;
-                        branch_count += 1.0;
                     }
                         else {
                             last_eff = false;

@@ -1,5 +1,6 @@
 use super::super::{ResultMap, Program};
 use params::params::{MAP_ROWS, MAP_COLS};
+use super::VarPenConfig;
 
 impl ResultMap{
 
@@ -18,6 +19,20 @@ impl ResultMap{
             10 => self.e_len_br(prog),
             11 => self.e_feat_br(prog),
             12 => self.e_len_feat_br(prog),
+            13 => self.newone(prog, 5, 10, VarPenConfig::new(-5.0,
+                                                         5.0,
+                                                         3.0,
+                                                         self.config.initial_pop as u64,
+                                                         self.config.initial_pop as u64,
+                                                         self.config.n_evals)),
+
+            14 => self.newone(prog, 5, 10, VarPenConfig::new(0.0, //no varible, protects all!!
+                                                             1.0,
+                                                             3.0,
+                                                             self.config.n_evals,
+                                                             self.config.n_evals,
+                                                             self.config.n_evals)),
+
             _ => panic!("Invalid get location method!! \n{:?}", self.config),
         }
     }
@@ -108,15 +123,32 @@ impl ResultMap{
     }
 
     fn e_len_br(&self, prog: &Program)  -> (usize, usize){
-        let row = ( prog.get_percent_branch(0)*MAP_ROWS as f32) as usize;
         let col = prog.get_effective_len(0);
-        (row, col)
+
+
+        if col > 0{ //dont need progs with eff len=0
+            let br = prog.get_percent_branch(0);
+            let row = ( br*MAP_ROWS as f32) as usize;
+//            println!("row={} col={} br={}", row, col, br);
+            (row, col-1)
+        }
+        else {
+            (10000, 10000) //out of bounds, used random numbers
+        }
+
+
     }
 
 
     fn e_feat_br(&self, prog: &Program)  -> (usize, usize){
         let row = ( prog.get_percent_branch(0)*MAP_ROWS as f32) as usize;
         let col = prog.get_n_effective_feats(0) as usize;
+
+
+        let br = prog.get_percent_branch(0);
+        let row = ( br*MAP_ROWS as f32) as usize;
+//        println!("row={} col={} br={}", row, col, br);
+
         (row, col)
     }
 
@@ -126,11 +158,41 @@ impl ResultMap{
 
         let col = ( feats / (feats + len))*1.25;// const 5/4 makes range 0-1
         let col = (col*MAP_COLS as f32) as usize;
-        let row = ( prog.get_percent_branch(0)*MAP_ROWS as f32) as usize;
 
+
+        let br = prog.get_percent_branch(0);
+        let row = ( br*MAP_ROWS as f32) as usize;
+//        println!("row={} col={} br={}", row, col, br);
         (row, col)
     }
 
+    fn newone(&self, prog: &Program, sq: usize, base_eff_len_max: usize, pen_config: VarPenConfig)  -> (usize, usize){
+        let eff_len = prog.get_effective_len(0) as f32;
+
+        let eff_len_step = base_eff_len_max as f32 + pen_config.penalty_at(self.recieved_count);
+
+        let loc_el = (eff_len/eff_len_step) * sq as f32;
+        let loc_el = loc_el as usize;
+
+
+        let loc_br = prog.get_percent_branch(0) *sq as f32;
+        let loc_br = loc_br as usize;
+
+
+        let feats = prog.get_n_effective_feats(0) as f32;
+        let comp =  prog.get_n_effective_comp_regs(0) as f32;
+        let loc_fc =  (feats/(feats+comp)) * sq as f32;
+        let loc_fc = loc_fc as usize;
+
+        let intron = eff_len/(prog.get_abs_len() as f32);
+        let loc_intron = intron * sq as f32;
+        let loc_intron = loc_intron as usize;
+
+
+        let row = loc_el*sq + loc_fc;
+        let col = loc_br*sq + loc_intron;
+        (row, col)
+    }
 
 
 }

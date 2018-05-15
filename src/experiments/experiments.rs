@@ -23,6 +23,7 @@ pub fn multi_trial_five_fold_tracking(config: CoreConfig){
             File::create(format!("{}/README.txt", &config.out_folder))
                 .unwrap().write(format!("{:?}", &config).as_bytes());
 
+            println!("About to start outputting to {:?}", &config.out_folder);
             let mut logger = Logger::new(params::defaults::LOG_FREQ, &config.out_folder);
             logger.full_tracking();
 
@@ -51,14 +52,14 @@ pub fn five_fold_cv_tracking_ref(logger: &mut Logger, config: &CoreConfig) {
     //manages the data set by creating partitions, and shifting them after each fold
     let mut data_manager = DataSetManager::new_rand_partition(config.data_file.clone());
 
-    println!("before trying to get refs");
+
     while let Some((test_data, cv_data)) = data_manager.next_set_refs(){ //run 5 times
         run_single_fold_tracking(test_data, cv_data, config, logger);
     }
 }
 
 fn run_single_fold_tracking(test_data: Arc<TestDataSet>, cv_data: Box<ValidationSet>, config: &CoreConfig, logger: &mut Logger) {
-    println!("running fold");
+//    println!("running fold");
     match config.pop_config {
         PopInfo::Gen(_) => {
             let mut res_map = GenPop::new(config.create_gen_pop_config(), cv_data);

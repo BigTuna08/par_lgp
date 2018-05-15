@@ -21,10 +21,10 @@ impl DataRecord{
 impl FullDataSet{
 
     pub fn new(data_file: &str) -> Box<FullDataSet>{
-        println!("Begin getting new full data set");
+//        println!("Begin getting new full data set");
 
         let mut records =  Box::new([DataRecord::new_blank(); params::N_SAMPLES]);
-        println!("records init");
+//        println!("records init");
         let f = File::open(data_file).unwrap();
 
         let mut csv_rdr = ReaderBuilder::new()
@@ -34,7 +34,7 @@ impl FullDataSet{
 //        println!("Geeting new data! {:?}", csv_rdr.headers().unwrap().len());
 
 //        let mut csv_rdr = csv::Reader::from_reader(f);
-        println!("before iter");
+//        println!("before iter");
         for (i,result) in csv_rdr.records().enumerate() {
             if let Ok(result) = result{
 //                println!("result is {:?}", result);
@@ -64,11 +64,10 @@ impl FullDataSet{
                 records[i] = DataRecord{features, class};
             }
             else {
-                println!("bad record! i={}, {:?}", i, &result);
-                panic!("");
+                panic!("bad record! i={}, {:?}", i, &result);
             }
         }
-        println!("Before returning");
+//        println!("Before returning");
 
 
         Box::new(FullDataSet{
@@ -159,18 +158,18 @@ impl DataSetManager{
 
 //        println!("getting refs!");
         if self.current_partition >= params::N_FOLDS{return None}
-        println!("in next_Set before trying to load");
+//        println!("in next_Set before trying to load");
 
         let mut test_records = &mut [DataRecord::new_blank(); params::TEST_DATA_SET_SIZE];
-        println!("got test");
+//        println!("got test");
         let mut cv_records = &mut [DataRecord::new_blank(); params::FOLD_SIZE];
 
         let mut test_dataset_i = 0;
         let mut cv_dataset_i = 0;
-        println!("got cv");
+//        println!("got cv");
         let full_set = FullDataSet::new(&self.data_file);
 
-        println!("after getting full set");
+//        println!("after getting full set");
 
         for (partition_i, partition) in self.partitions.iter().enumerate() {
 

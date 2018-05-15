@@ -12,6 +12,7 @@ pub fn get_runner(loc: &str) -> Runner{
         mode,
         mutate_i: 0,
         compare_i: 0,
+        started: false,
         vec_1_i: 0,
         vec_2_i: 0,
         vec_3_i: 0,
@@ -28,7 +29,10 @@ impl Runner{
     }
 
     pub fn next_config(&mut self) -> Option<CoreConfig>{
-        println!("starting next config ind are {} {} {} {} {}", self.mutate_i, self.compare_i, self.vec_1_i, self.vec_2_i, self.vec_3_i);
+        if !self.incr_inds(){
+            return None
+        }
+//        println!("starting next config ind are {} {} {} {} {}", self.mutate_i, self.compare_i, self.vec_1_i, self.vec_2_i, self.vec_3_i);
 
         let data_file = self.config.data_file.clone();
         let compare_prog_method = self.config.compare_methods[self.compare_i];
@@ -51,8 +55,8 @@ impl Runner{
                 })
             },
         };
-        println!("mid: ind are {} {} {} {} {}", self.mutate_i, self.compare_i, self.vec_1_i, self.vec_2_i, self.vec_3_i);
-        println!("also config is {:?}", self.config );
+//        println!("mid: ind are {} {} {} {} {}", self.mutate_i, self.compare_i, self.vec_1_i, self.vec_2_i, self.vec_3_i);
+//        println!("also config is {:?}", self.config );
 
         let out_folder =  match self.mode {//folder name is roughly mutate_compare_total_initial_other
             Mode::Map => format!("{}/{}_{}_{}_{}_{}",
@@ -70,15 +74,11 @@ impl Runner{
                                  self.config.get_random_gens(self.vec_2_i).unwrap(),
                                  self.config.get_tourn_sizes(self.vec_3_i).unwrap()),
         };
-        println!("got out f: ind are {} {} {} {} {}", self.mutate_i, self.compare_i, self.vec_1_i, self.vec_2_i, self.vec_3_i);
+//        println!("got out f: ind are {} {} {} {} {}", self.mutate_i, self.compare_i, self.vec_1_i, self.vec_2_i, self.vec_3_i);
 
-        if self.incr_inds(){
-            Some(CoreConfig{
-                out_folder, data_file, compare_prog_method, mutate_method, pop_config, n_iterations,
-            })
-        }
-        else { None }
 
+        Some(CoreConfig{
+            out_folder, data_file, compare_prog_method, mutate_method, pop_config, n_iterations,})
     }
 
     pub fn print_dry_run(&mut self){
@@ -90,6 +90,11 @@ impl Runner{
     }
 
     fn incr_inds(&mut self) -> bool{// true means continue
+        if !self.started{
+            self.started = true;
+            return true
+        }
+
         self.vec_3_i += 1;
 
         if self.vec_3_i >= self.config.v3_len(){

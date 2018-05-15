@@ -148,6 +148,8 @@ pub struct Runner{
     mutate_i: usize,
     compare_i: usize,
 
+    started: bool,
+
     //vec 1..3 have different meanings based on mode
     vec_1_i: usize,  //index of n_evals or total_gens
     vec_2_i: usize, //index of inital_pop_size or init_gens
