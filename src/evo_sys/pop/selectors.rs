@@ -19,12 +19,12 @@ impl ResultMap{
             10 => self.e_len_br(prog),
             11 => self.e_feat_br(prog),
             12 => self.e_len_feat_br(prog),
-            13 => self.newone(prog, 5, 10, VarPenConfig::new(-5.0,
-                                                         5.0,
-                                                         3.0,
-                                                         self.config.initial_pop as u64,
-                                                         self.config.initial_pop as u64,
-                                                         self.config.n_evals)),
+//            13 => self.newone(prog, 5, 10, VarPenConfig::new(-5.0,
+//                                                         5.0,
+//                                                         3.0,
+//                                                         self.config.initial_pop as u64,
+//                                                         self.config.initial_pop as u64,
+//                                                         self.config.n_evals)),
 
             14 => self.newone(prog, 5, 10, VarPenConfig::new(0.0, //no varible, protects all!!
                                                              1.0,

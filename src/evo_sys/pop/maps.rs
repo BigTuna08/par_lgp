@@ -60,11 +60,16 @@ impl ResultMap {
                 prog = Program::new_default_range();
                 tries += 1;
             }
+//            println!("** about to start mutating existing, coverage is {}, sent count is {}", self.get_percent_covered(), self.sent_count);
             prog
         }
-            else {
-                self.get_simple_mutated_genome_rand(mutation_code)
-            }
+        else if self.sent_count == self.config.initial_pop as u64 + 1{
+            println!("** about to start mutating existing, coverage is {}, sent count is {}", self.get_percent_covered(), self.sent_count);
+            Program::new_default_range()
+        }
+        else {
+            self.get_simple_mutated_genome_rand(mutation_code)
+        }
     }
 
 
@@ -278,12 +283,15 @@ impl ResultMap {
                 let inds = self.select_cell(&prog);
 
                 if self.is_in_bounds(&inds){
+                    tries = 0;
                     return prog
+                }else  {
+//                    println!("mutated to out of bounds! inds are {:?} after {} tries", &inds, tries);
                 }
             }
             tries += 1;
         }
-        self.printout_pop_info();
+        //self.printout_pop_info();
         panic!("Timed out when trying to select a parent genome from results map!!");
     }
 
@@ -299,6 +307,20 @@ impl ResultMap {
 
     fn is_in_bounds(&self, inds: &(usize, usize))-> bool{
         (inds.0 < params::params::MAP_ROWS) && (inds.1 < params::params::MAP_COLS)
+    }
+
+    fn get_percent_covered(&self)->f64{
+        let mut total = 0.0;
+        let mut exist = 0.0;
+        for row_i in 0..params::params::MAP_ROWS {
+            for col_i in 0..params::params::MAP_COLS {
+                if let Some(_) = self.prog_map[row_i][ col_i] {
+                    exist += 1.0;
+                }
+                total += 1.0;
+            }
+        }
+        exist/total
     }
 
 }

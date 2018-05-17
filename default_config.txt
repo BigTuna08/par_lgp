@@ -1,18 +1,18 @@
 // For either mode
 
 MODE: MAP                                 // MAP or GEN
-OUT_FOLDER: debug                    // any name, output folder will be created with this name
-N_ITERATIONS: 1                            // integer > 0
+OUT_FOLDER: tnew                    // any name, output folder will be created with this name
+N_ITERATIONS: 5                            // integer > 0
 
 MUTATION_METHODS: 0                       // 1 or more integers, each separated by a space
-COMPARE_METHOD: 0 1 14                     // 1 or more integers, each separated by a space
+COMPARE_METHOD: 0                      // 1 or more integers, each separated by a space
 
 DATA_FILE: inputs/data3.csv
 
 // For map mode
-N_EVALS: 20000
-INITIAL_POP_SIZES: 20000
-MAP_METHODS: 13 0
+N_EVALS: 50000 200000 500000 1000000
+INITIAL_POP_SIZES: 5000 25000 250000
+MAP_METHODS: 0 6 14
 
 // For Gen mode
 TOTAL_GENS: 10 20
