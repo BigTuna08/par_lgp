@@ -7,7 +7,11 @@ pub fn print_headers(){
     print!("]");
 }
 
-pub const DATA_HEADERS: [&'static str; 156]  = ["Ac_Orn",
+pub fn get_metabolite_by_ind(i: usize) -> &'static str{
+    &DATA_HEADERS[i]
+}
+
+const DATA_HEADERS: [&'static str; 156]  = ["Ac_Orn",
 "Ala",
 "Arg",
 "Asn",

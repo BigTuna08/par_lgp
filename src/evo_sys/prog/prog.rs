@@ -1,6 +1,7 @@
 //extern crate rand;
 
 use dataMgmt;
+use dataMgmt::metabolites;
 use params as global_params;
 use rand::{Rng, seq, thread_rng};
 
@@ -9,7 +10,7 @@ use std::fs::File;
 use std::io::Write;
 
 use super::ops;
-use super::super::{Program, Instruction, params};
+use super::super::{Program, Instruction, ExecutionRegArray, params, InstructionType};
 
 
 
@@ -79,24 +80,24 @@ impl Program{
     }
 
 
-    pub fn execute_instructions(&self, mut regs: [f32; global_params::params::MAX_REGS]) ->f32{
-        let mut skip_count = 0u8; // used to implement branches
-
-        for instr in self.instructions.iter() {
-            if skip_count > 0 {
-                skip_count -= 1;
-                continue;
-            }
-            let result = ops::OPS[instr.op as usize](regs[instr.src1 as usize], regs[instr.src2 as usize]);
-            match instr.op {
-                0 ... 5 => regs[instr.dest as usize] = result, //simple register transfer
-                6 => if result < 0.0 {skip_count = 255}, //if false, skip next n, use direct constant
-                7 => if result < 0.0 {skip_count = 1}, //false skip next 1
-                _ => panic!("invalid op! {:?}", &instr)
-            }
-        }
-        regs[0]
-    }
+//    pub fn execute_instructions(&self, mut regs: ExecutionRegArray) ->f32{
+//        let mut skip_count = 0u8; // used to implement branches
+//
+//        for instr in self.instructions.iter() {
+//            if skip_count > 0 {
+//                skip_count -= 1;
+//                continue;
+//            }
+//            let result = ops::OPS[instr.op as usize](regs[instr.src1 as usize], regs[instr.src2 as usize]);
+//            match instr.op {
+//                0 ... 5 => regs[instr.dest as usize] = result, //simple register transfer
+//                6 => if result < 0.0 {skip_count = 255}, //if false, skip next n, use direct constant
+//                7 => if result < 0.0 {skip_count = 1}, //false skip next 1
+//                _ => panic!("invalid op! {:?}", &instr)
+//            }
+//        }
+//        regs[0]
+//    }
 
 
     ////                Getters           ////
@@ -129,35 +130,133 @@ impl Program{
 //        eff_instrs
 //    }
 
+//    pub fn get_effective_instrs_good(&self, return_reg_ind: u8) -> Vec<usize>{
+//        let mut eff_regs = HashSet::new();
+//        let mut eff_instrs = Vec::new();
+//        let mut last_eff = false;
+//        eff_regs.insert(return_reg_ind);
+//
+//        for (i, instr) in self.instructions.iter().enumerate().rev(){
+//            if instr.is_branch() {
+//                if last_eff { // becuase branch only ever skips one.
+//                    eff_instrs.push(i);
+//                }
+//            }
+//            else {
+//                if eff_regs.contains(&instr.dest) {
+//                    eff_regs.remove(&instr.dest);
+//                    eff_regs.insert(instr.src1);
+//                    eff_regs.insert(instr.src2);
+//                    eff_instrs.push(i);
+//                    last_eff = true;
+//                }
+//                else {
+//                    last_eff = false;
+//                }
+//            }
+//
+//        }
+//        eff_instrs.sort();
+//        eff_instrs
+//    }
+
+
     pub fn get_effective_instrs_good(&self, return_reg_ind: u8) -> Vec<usize>{
+
         let mut eff_regs = HashSet::new();
         let mut eff_instrs = Vec::new();
         let mut last_eff = false;
         eff_regs.insert(return_reg_ind);
 
+        let end_i = self.get_exit_index(return_reg_ind);
+
         for (i, instr) in self.instructions.iter().enumerate().rev(){
-            if instr.is_branch() {
-                if last_eff { // becuase branch only ever skips one.
+            if i > end_i {continue;}
+
+            match ops::get_type(instr) {
+
+                InstructionType::Value => {
+                    if eff_regs.contains(&instr.dest) {
+                        eff_regs.remove(&instr.dest);
+                        eff_regs.insert(instr.src1);
+                        eff_regs.insert(instr.src2);
+                        eff_instrs.push(i);
+                        last_eff = true;
+                    }
+                    else {
+                        last_eff = false;
+                    }
+                },
+
+                InstructionType::Skip => {
+                    if last_eff { // becuase branch only ever skips one.
+                        eff_instrs.push(i);
+                    }
+                },
+
+                InstructionType::Terminate => {
+                    last_eff = true; //always effective
                     eff_instrs.push(i);
-                }
+                },
+
+                InstructionType::NoOp => {
+                    last_eff = false //never effective
+                },
+
             }
-            else {
-                if eff_regs.contains(&instr.dest) {
-                    eff_regs.remove(&instr.dest);
-                    eff_regs.insert(instr.src1);
-                    eff_regs.insert(instr.src2);
-                    eff_instrs.push(i);
-                    last_eff = true;
-                }
-                else {
-                    last_eff = false;
-                }
-            }
+
+//            if instr.is_branch() {
+//                if last_eff { // becuase branch only ever skips one.
+//                    eff_instrs.push(i);
+//                }
+//            }
+//                else {
+//                    if eff_regs.contains(&instr.dest) {
+//                        eff_regs.remove(&instr.dest);
+//                        eff_regs.insert(instr.src1);
+//                        eff_regs.insert(instr.src2);
+//                        eff_instrs.push(i);
+//                        last_eff = true;
+//                    }
+//                        else {
+//                            last_eff = false;
+//                        }
+//                }
 
         }
         eff_instrs.sort();
         eff_instrs
     }
+
+
+    fn get_exit_index(&self, return_reg_ind: u8) -> usize{
+
+        let mut last_br = false;
+        let mut index = 0;
+
+        for instr in self.instructions.iter() {
+            let op_type = ops::get_type(instr);
+            if let InstructionType::Skip = op_type{
+                last_br = true;
+            }
+            else {
+                if let InstructionType::Terminate = op_type{
+                    if !last_br {  //unconditional quit
+                        break;
+                    }
+                }
+                last_br = false;
+            }
+            index += 1;
+        }
+        for (i, instr) in self.instructions.iter().enumerate().rev(){
+            if i <= index && instr.dest == return_reg_ind {
+                return i
+            }
+        }
+        0 // no assignemt to return reg before uc quit
+    }
+
 
 
     pub fn get_percent_branch(&self, return_reg_ind: u8) -> f32{
@@ -275,40 +374,26 @@ impl Program{
     ////                 For Logging            ////
 
     pub fn string_instr(&self, instr: &Instruction) -> String{
-        let n_feats = self.features.len();
+
         let src1 =
-            if instr.src1 as usize >= (global_params::params::MAX_REGS - n_feats) {
-                let d = (global_params::params::MAX_REGS - instr.src1 as usize) -1; //0..n_feats
-                let fest_num = self.features[d];
-                format!("{}",&dataMgmt::metabolites::DATA_HEADERS[fest_num as usize])
-            }else {
-                format!("${}",instr.src1)
+            match self.get_global_feat_number(instr.src1) {
+                Some(num) => format!("{}", metabolites::get_metabolite_by_ind(num)),
+                None => format!("${}",instr.src1),
             };
 
         let src2 =
-            if instr.src2 as usize >= (global_params::params::MAX_REGS - n_feats) {
-                let d = global_params::params::MAX_REGS - instr.src2 as usize - 1; //0..n_feats
-                let fest_num = self.features[d];
-                format!("{}",&dataMgmt::metabolites::DATA_HEADERS[fest_num as usize])
-            }else {
-                format!("${}",instr.src2)
+            match self.get_global_feat_number(instr.src2) {
+                Some(num) => format!("{}", metabolites::get_metabolite_by_ind(num)),
+                None => format!("${}",instr.src2),
             };
 
-        if instr.is_branch(){
-            match instr.op {
-                6 => format!("quit if {} > {}", src1, src2),
-                7 => format!("skip next if {} > {}", src1, src2),
-                _ => panic!("invalid op! this part is poorly programmed"),
-            }
-        }
-        else {
-            format!("${}\t=\t{}\t{}\t{}", instr.dest, ops::OPS_NAMES[instr.op as usize], src1, src2)
-        }
+        ops::formatted_string(instr, &src1, &src2)
     }
+
 
     pub fn feat_str(&self)->String{
         self.features.iter().fold(String::new(),
-                     |mut acc, &x| {acc.push_str(&dataMgmt::metabolites::DATA_HEADERS[x as usize]); acc.push_str("\t"); acc} )
+                     |mut acc, &x| {acc.push_str(dataMgmt::metabolites::get_metabolite_by_ind(x as usize)); acc.push_str("\t"); acc} )
     }
 
 
@@ -367,6 +452,22 @@ impl Program{
             f.write(b"\n");
         }
         f.write(b"\n");
+    }
+
+    pub fn is_feature(&self, reg_num: u8) -> bool{
+        reg_num >= self.n_calc_regs
+    }
+
+    //returns none if not feature
+    pub fn get_global_feat_number(&self, reg_num: u8) -> Option<usize>{
+        if self.is_feature(reg_num){
+            let local_feat_i = global_params::params::MAX_REGS - reg_num as usize - 1; //0..n_feats
+            let global_feat_i = self.features[local_feat_i];
+            Some(global_feat_i as usize)
+        }
+        else {
+            None
+        }
     }
 
 }

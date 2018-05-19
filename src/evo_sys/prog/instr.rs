@@ -1,5 +1,5 @@
 use evo_sys::prog::get_src;
-use evo_sys::{Program, Instruction};
+use evo_sys::{Program, Instruction, InstructionResult, InstructionType};
 
 use params as global_params;
 use rand::{Rng, ThreadRng};
@@ -118,9 +118,12 @@ impl Instruction{
         self.dest == x || self.src1 == x || self.src2 == x
     }
 
-    pub fn is_branch(&self)->bool{ //should be fixed to aviod manual update if more branches are added
-        return self.op == 6 || self.op == 7
+
+    pub fn is_branch(&self)->bool{
+        if let InstructionType::Skip = super::ops::get_type(self) {true}
+        else {false}
     }
+
 }
 
 

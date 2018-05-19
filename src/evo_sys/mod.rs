@@ -31,6 +31,23 @@ pub struct Instruction{
 }
 
 
+pub enum InstructionResult{
+    Value(f32), // return floating point value
+    Skip(u8), // return # of instructions to skip
+    Terminate, // return message to terminate program
+    NoOp, // result can be ignored
+}
+
+pub enum InstructionType{
+    Value,
+    Skip,
+    Terminate,
+    NoOp,
+}
+
+pub type ProgramOperation = Fn(&Instruction) -> InstructionResult;
+pub type ExecutionRegArray = [f32; global_params::params::MAX_REGS];
+
 ////      Population structs   ////
 
 pub trait Runnable{
