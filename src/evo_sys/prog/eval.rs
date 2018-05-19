@@ -94,3 +94,15 @@ pub fn eval_program_corrects_testing_with_assert(genome: &Program, data: &DataSe
     }
     correct as f32
 }
+
+
+pub fn log_after_error(genome: &Program, file_name: &str){
+    let mut f = File::create(file_name).unwrap();
+    genome.write_header(&mut f);
+    f.write(b"\n");
+    genome.write_self_words(&mut f);
+    f.write(b"\n");
+    genome.write_effective_self_words(&mut f);
+    f.write(b"\n");
+    f.write(b"\n");
+}
