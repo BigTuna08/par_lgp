@@ -20,6 +20,7 @@ impl Program{
     ////                 New Program Methods            ////
 
     pub fn new_default_range() -> Program{
+
         Program::new_random_range(params::DEFAULT_INSTR_MIN, params::DEFAULT_INSTR_MAX,
                                   params::DEFAULT_CALC_REG_MIN, params::DEFAULT_CALC_REG_MAX,
                                   params::DEFAULT_N_OPS_MIN, params::DEFAULT_N_OPS_MAX,
