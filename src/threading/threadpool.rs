@@ -67,7 +67,7 @@ impl ThreadPool{
         self.current_job_count -= 1;
         match self.result_receiver.recv() {
             Ok(message) => message,
-            _ => panic!("Error getting result!!")
+            Err(e) => panic!("Error getting result!! error was \n{:?}", e)
         }
 
     }
@@ -118,7 +118,7 @@ fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<Message>>>, result_sender: mpsc
         if let Some(next_job) = queue.pop_front() {
             match next_job {
                 Message::Cont(mut prog) => {
-                    let fit = evo_sys::prog::eval::eval_program_corrects_testing_with_assert(&prog, data_ref)/data_size;
+                    let fit = evo_sys::prog::eval::eval_program_corrects(&prog, data_ref)/data_size;
                     prog.test_fit = Some(fit);
                     result_sender.send(EvalResult{prog} );
                 }

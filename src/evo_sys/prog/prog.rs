@@ -114,45 +114,62 @@ impl Program{
     }
 
 
-    //returns list of line numbers of effective instr, starting from 0
-//    pub fn get_effective_instrs(&self, return_reg_ind: u8) -> Vec<usize>{
-//        let mut eff_regs = HashSet::new();
-//        let mut eff_instrs = Vec::new();
-//        eff_regs.insert(return_reg_ind);
-//        for (i, instr) in self.instructions.iter().enumerate().rev(){
-//            if eff_regs.contains(&instr.dest) {
-//                eff_regs.insert(instr.src1);
-//                eff_regs.insert(instr.src2);
-//                eff_instrs.push(i);
-//            }
-//        }
-//        eff_instrs.sort();
-//        eff_instrs
-//    }
 
-//    pub fn get_effective_instrs_good(&self, return_reg_ind: u8) -> Vec<usize>{
+
+//    pub fn get_effective_instrs(&self, return_reg_ind: u8) -> Vec<usize>{
+//
 //        let mut eff_regs = HashSet::new();
 //        let mut eff_instrs = Vec::new();
 //        let mut last_eff = false;
 //        eff_regs.insert(return_reg_ind);
 //
+//        let end_i = self.get_exit_index(return_reg_ind);
+//
 //        for (i, instr) in self.instructions.iter().enumerate().rev(){
-//            if instr.is_branch() {
-//                if last_eff { // becuase branch only ever skips one.
-//                    eff_instrs.push(i);
-//                }
-//            }
-//            else {
-//                if eff_regs.contains(&instr.dest) {
-//                    eff_regs.remove(&instr.dest);
-//                    eff_regs.insert(instr.src1);
-//                    eff_regs.insert(instr.src2);
-//                    eff_instrs.push(i);
-//                    last_eff = true;
-//                }
-//                else {
-//                    last_eff = false;
-//                }
+//            if i > end_i {continue;}
+//            let follows_branch = i >= 1 && self.instructions[i-1].is_branch();
+//
+//            match ops::get_type(instr) {
+//
+//                InstructionType::Value => {
+//                    if eff_regs.contains(&instr.dest) {
+//                        if !follows_branch {
+//                            eff_regs.remove(&instr.dest);
+//                        }
+//                        eff_regs.insert(instr.src1);
+//                        eff_regs.insert(instr.src2);
+//                        eff_instrs.push(i);
+//                        last_eff = true;
+//                    }
+//                    else {
+//                        last_eff = false;
+//                    }
+//                },
+//
+//                InstructionType::Skip => {
+//                    if last_eff { // becuase branch only ever skips one.
+//                        eff_regs.insert(instr.src1);
+//                        eff_regs.insert(instr.src2);
+//                        eff_instrs.push(i);
+//                    }
+//                },
+//
+//                InstructionType::Terminate => {
+//                    if follows_branch {
+//                        if !last_eff && i < end_i -1{
+//                            eff_instrs.push(i+1);
+//                        }
+//                    }
+////                    else {
+//                        last_eff = true; //always effective
+//                        eff_instrs.push(i);
+////                    }
+//                },
+//
+//                InstructionType::NoOp => {
+//                    last_eff = false //never effective
+//                },
+//
 //            }
 //
 //        }
@@ -162,25 +179,48 @@ impl Program{
 
 
     pub fn get_effective_instrs_good(&self, return_reg_ind: u8) -> Vec<usize>{
+        if self.get_abs_len() == 0 {
+            return Vec::new()
+        }
+
+        let mut eff_instrs = HashSet::new();
+
+        for end_i in self.get_quit_set(0) {
+            self.get_effective_instrs_from_fixed_final_point(0, end_i)
+                .into_iter()
+                .for_each(|x| {eff_instrs.insert(x);})
+        }
+        let mut eff_instrs: Vec<usize> = eff_instrs.drain().collect();
+        eff_instrs.sort();
+//        println!("final set is {:?}", &eff_instrs);
+        eff_instrs
+    }
+
+
+    pub fn get_effective_instrs_from_fixed_final_point(&self, return_reg_ind: u8, end_i: usize) -> HashSet<usize>{
 
         let mut eff_regs = HashSet::new();
-        let mut eff_instrs = Vec::new();
+        let mut eff_instrs = HashSet::new();
+
         let mut last_eff = false;
         eff_regs.insert(return_reg_ind);
+        eff_instrs.insert(end_i);
 
-        let end_i = self.get_exit_index(return_reg_ind);
 
         for (i, instr) in self.instructions.iter().enumerate().rev(){
             if i > end_i {continue;}
+            let follows_branch = i >= 1 && self.instructions[i-1].is_branch();
 
             match ops::get_type(instr) {
 
                 InstructionType::Value => {
                     if eff_regs.contains(&instr.dest) {
-                        eff_regs.remove(&instr.dest);
+                        if !follows_branch {
+                            eff_regs.remove(&instr.dest);
+                        }
                         eff_regs.insert(instr.src1);
                         eff_regs.insert(instr.src2);
-                        eff_instrs.push(i);
+                        eff_instrs.insert(i);
                         last_eff = true;
                     }
                     else {
@@ -190,13 +230,14 @@ impl Program{
 
                 InstructionType::Skip => {
                     if last_eff { // becuase branch only ever skips one.
-                        eff_instrs.push(i);
+                        eff_regs.insert(instr.src1);
+                        eff_regs.insert(instr.src2);
+                        eff_instrs.insert(i);
                     }
                 },
 
                 InstructionType::Terminate => {
-                    last_eff = true; //always effective
-                    eff_instrs.push(i);
+                    last_eff = i == end_i; //asssume only effective is end_i
                 },
 
                 InstructionType::NoOp => {
@@ -204,35 +245,17 @@ impl Program{
                 },
 
             }
-
-//            if instr.is_branch() {
-//                if last_eff { // becuase branch only ever skips one.
-//                    eff_instrs.push(i);
-//                }
-//            }
-//                else {
-//                    if eff_regs.contains(&instr.dest) {
-//                        eff_regs.remove(&instr.dest);
-//                        eff_regs.insert(instr.src1);
-//                        eff_regs.insert(instr.src2);
-//                        eff_instrs.push(i);
-//                        last_eff = true;
-//                    }
-//                        else {
-//                            last_eff = false;
-//                        }
-//                }
-
         }
-        eff_instrs.sort();
+//        println!("from end i {} set is {:?}", end_i, &eff_instrs);
         eff_instrs
     }
+
 
 
     fn get_exit_index(&self, return_reg_ind: u8) -> usize{
 
         let mut last_br = false;
-        let mut index = 0;
+        let mut first_uc_quit_index = 0;
 
         for instr in self.instructions.iter() {
             let op_type = ops::get_type(instr);
@@ -247,14 +270,32 @@ impl Program{
                 }
                 last_br = false;
             }
-            index += 1;
+            first_uc_quit_index += 1;
         }
         for (i, instr) in self.instructions.iter().enumerate().rev(){
-            if i <= index && instr.dest == return_reg_ind {
+            if i <= first_uc_quit_index && instr.dest == return_reg_ind {
                 return i
             }
         }
         0 // no assignemt to return reg before uc quit
+    }
+
+
+    //return index of all possible final instruction indexs upto and including prog termination point
+    fn get_quit_set(&self, return_reg_ind: u8) -> HashSet<usize>{
+        let last_ind = self.get_exit_index(return_reg_ind);
+        let mut quit_set = HashSet::new();
+        quit_set.insert(last_ind);
+
+        for  (i, instr) in self.instructions.iter().enumerate() {
+            if i == last_ind {
+                break;
+            }
+            if let InstructionType::Terminate =  ops::get_type(instr){
+                quit_set.insert(i);
+            }
+        }
+        quit_set
     }
 
 
@@ -356,6 +397,8 @@ impl Program{
     pub fn get_n_effective_comp_regs(&self, return_reg_ind: u8) -> usize{
         let mut eff_regs = HashSet::new();
         eff_regs.insert(return_reg_ind);
+//        println!("prog abs len {}", self.get_abs_len());
+//        println!("prog eff len {}\n", self.get_effective_len(0));
         for instr_i in self.get_effective_instrs_good(0){
             let instr = self.instructions[instr_i];
             if instr.op == 6 {
@@ -410,7 +453,7 @@ impl Program{
         f.write(b"# Score on training data: ");
         f.write(self.test_fit.unwrap().to_string().as_bytes());
         f.write(b"\n");
-        f.write(b"# Score on training data: ");
+        f.write(b"# Score on validation data: ");
         f.write(self.cv_fit.unwrap().to_string().as_bytes());
         f.write(b"\n");
         f.write(b"# Len: ");

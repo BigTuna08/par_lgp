@@ -18,7 +18,7 @@ fn main() {
     let start = PreciseTime::now();
 
 
-
+    println!("SINGLE THREAD FOR DEBUG");
 //
     let mut args: Vec<String> = env::args().collect();
     println!("ARGS {:?}", args);

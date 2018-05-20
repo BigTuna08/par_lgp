@@ -3,6 +3,13 @@ use params;
 use super::super::{Program, ExecutionRegArray, InstructionResult};
 use super::ops;
 
+use std::fs::File;
+use std::io::Write;
+use std::{thread, time};
+
+
+
+
 pub fn eval_program_corrects(genome: &Program, data: &DataSet) -> f32 {
 
     let mut correct = 0.0f32;
@@ -21,6 +28,7 @@ pub fn eval_program_corrects(genome: &Program, data: &DataSet) -> f32 {
 
         for (i, feature) in genome.features.iter().enumerate() { //load features
             regs[params::params::MAX_REGS - 1 - i] = record.features[*feature as usize]
+
         }
 
         let prog_output = run_prog(&compressed_prog, &mut regs);
@@ -81,13 +89,23 @@ pub fn eval_program_corrects_testing_with_assert(genome: &Program, data: &DataSe
         let mut regs2 = initial_regs.clone();
 
         for (i, feature) in genome.features.iter().enumerate() { //load features
-            regs[params::params::MAX_REGS - 1 - i] = record.features[*feature as usize]
+            regs[params::params::MAX_REGS - 1 - i] = record.features[*feature as usize];
+            regs2[params::params::MAX_REGS - 1 - i] = record.features[*feature as usize];
         }
 
         let c_prog_output = run_prog(&compressed_prog, &mut regs);
         let prog_output = run_prog(&genome, &mut regs2);
-        println!("reg={}\tcomp={}", prog_output, c_prog_output);
-        assert_eq!(prog_output, c_prog_output);
+//        println!("reg={}\tcomp={}", prog_output, c_prog_output);
+//        log_after_error(genome, &format!("err-{}-{}.txt", prog_output, c_prog_output));
+        if (prog_output - c_prog_output).abs() > params::params::EPS{
+            println!("logging bad!");
+            log_after_error(genome, &format!("err-{}-{}.txt", prog_output, c_prog_output));
+
+//            let ten_millis = time::Duration::from_millis(10);
+//            thread::sleep(ten_millis);
+            panic!("bad excision by {}", (prog_output-c_prog_output).abs());
+        }
+//        assert_eq!(prog_output, c_prog_output);
 
 //        let classification_result = c_prog_output >= 0.0;
 //        if classification_result == record.class {correct += 1.0;}

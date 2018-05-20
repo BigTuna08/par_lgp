@@ -4,9 +4,9 @@ pub const MAX_REGS: usize = 255; //was 128, risk of crashing if less than N_FEAT
 
 pub const N_OPS: u8 = 8;
 
-pub const N_THREADS: usize = 4;
+pub const N_THREADS: usize = 1;
 pub const WORKER_QUEUE_SIZE: usize = 15;
-pub const THREAD_POOL_MAX: u64 = 10000;
+pub const THREAD_POOL_MAX: u64 = 100;
 
 
 pub const EPS: f32 = 1e-6;
