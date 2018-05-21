@@ -22,11 +22,11 @@ impl ResultMap{
 
     }
     pub fn run_all_tracking(&mut self, test_data: Arc<TestDataSet>, logger: &mut Logger){
-        let mut pool = ThreadPool::new(params::params::N_THREADS, test_data);
+        let mut pool = ThreadPool::new_default( test_data);
         let mutate_method = self.config.mutate_method;
 
         while !self.is_finished() {
-            if self.can_send() {
+            if pool.can_recieve() {
                 pool.add_task(Message::Cont(self.next_new_prog(mutate_method)));
             }
                 else {
@@ -104,12 +104,12 @@ impl ResultMap {
 
     }
 
-    pub fn can_send(&self)->bool{
-        if self.pending_evals() >= params::params::THREAD_POOL_MAX{
-            return false;
-        }
-        (self.recieved_count > 0) || (self.sent_count < self.config.initial_pop as u64)
-    }
+//    pub fn can_send(&self)->bool{
+//        if self.pending_evals() >= params::params::THREAD_POOL_MAX{
+//            return false;
+//        }
+//        (self.recieved_count > 0) || (self.sent_count < self.config.initial_pop as u64)
+//    }
 
 
 

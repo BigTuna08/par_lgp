@@ -1,13 +1,15 @@
 pub const MAP_ROWS: usize = 25;
 pub const MAP_COLS: usize = 25;
+
 pub const MAX_REGS: usize = 255; //was 128, risk of crashing if less than N_FEATURES, during feature loading. if > 256 will also crash!
 
 pub const N_OPS: u8 = 8;
 
-pub const N_THREADS: usize = 1;
-pub const WORKER_QUEUE_SIZE: usize = 15;
-pub const THREAD_POOL_MAX: u64 = 100;
-
+//pub const N_THREADS: usize = 4;
+//pub const WORKER_QUEUE_SIZE: usize = 15;
+//pub const THREAD_POOL_MAX: u64 = 10000;
+//
+//pub const LOG_FREQ: u32 = 10_000;
 
 pub const EPS: f32 = 1e-6;
 pub const DUPLICATE_TIME_OUT: u32 = 100_000; //when trying to generate new number, quit after this many times

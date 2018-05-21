@@ -24,7 +24,7 @@ pub fn multi_trial_five_fold_tracking(config: CoreConfig){
                 .unwrap().write(format!("{:?}", &config).as_bytes());
 
             println!("About to start outputting to {:?}", &config.out_folder);
-            let mut logger = Logger::new(params::defaults::LOG_FREQ, &config.out_folder);
+            let mut logger = Logger::new(&config.out_folder);
             logger.full_tracking();
 
             for _ in 0..config.n_iterations{

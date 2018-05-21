@@ -6,6 +6,8 @@ use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc;
 use std::thread;
+use ThreadDefaults;
+use config::process_thread_defaults;
 //use std::time::Duration;
 
 
@@ -14,34 +16,35 @@ pub struct ThreadPool {
     result_receiver: mpsc::Receiver<EvalResult>,
     handles: Vec<Option<thread::JoinHandle<()>>>,
     current_job_count: u32,
+    config: ThreadDefaults,
 }
 
 
 impl ThreadPool{
 
-    pub fn new(size: usize, data_ref: Arc<TestDataSet>) -> ThreadPool {
-        let mut handles = Vec::with_capacity(size);
+    // uses settings in configs/threadding.txt
+    pub fn new_default(data_ref: Arc<TestDataSet>) -> ThreadPool {
+        let config = process_thread_defaults("configs/threadding.txt");
 
+        let mut handles = Vec::with_capacity(config.n_worker_threads as usize);
         let (job_sender, job_receiver) = mpsc::channel();
         let (result_sender, result_receiver) = mpsc::channel();
-
         let job_receiver = Arc::new(Mutex::new(job_receiver)); //clone so all threads can receive
 
-//        let data_ref = Arc::new(data_set);
-
-        for _ in 0..size{
+        for _ in 0..config.n_worker_threads{
             let rx = job_receiver.clone();
             let tx = result_sender.clone();
             let dr = data_ref.clone();
+            let q_size = config.worker_queue_size as usize;
 
             let handle = thread::spawn(move ||{
-                worker(rx, tx, &dr);
+                worker(rx, tx, &dr, q_size );
             });
             handles.push(Some(handle));
         }
 
         ThreadPool{
-            job_sender, result_receiver, handles, current_job_count:0// evaluator// data_set
+            job_sender, result_receiver, handles, current_job_count:0, config// evaluator// data_set
         }
 
     }
@@ -73,7 +76,7 @@ impl ThreadPool{
     }
 
     pub fn terminate(&mut self){
-        for _ in 0..self.handles.len()*params::params::WORKER_QUEUE_SIZE {  //make sure to issue enough reques
+        for _ in 0..self.handles.len()* self.config.worker_queue_size as usize{  //make sure to issue enough reques
             self.job_sender.send(Message::Quit);
         }
 
@@ -86,13 +89,16 @@ impl ThreadPool{
         self.current_job_count
     }
 
+    pub fn can_recieve(&self) -> bool{
+        self.current_job_count < self.config.cap
+    }
+
 }
 
-fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<Message>>>, result_sender: mpsc::Sender<EvalResult>, data_ref: &TestDataSet){
-    let mut queue = VecDeque::with_capacity(params::params::WORKER_QUEUE_SIZE);
+fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<Message>>>, result_sender: mpsc::Sender<EvalResult>, data_ref: &TestDataSet, queue_size: usize){
+    let mut queue = VecDeque::with_capacity(queue_size);
     let data_size = data_ref.records.len() as f32;
 
-    const refill_after: usize = params::params::WORKER_QUEUE_SIZE/3 + 1;
 
     loop {
         match queue.len() {
@@ -100,14 +106,14 @@ fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<Message>>>, result_sender: mpsc
                 let job_lock = job_receiver.lock().unwrap();
                 while let Ok(job) = job_lock.try_recv() {
                     queue.push_back(job);
-                    if queue.len() >= params::params::WORKER_QUEUE_SIZE {break;}
+                    if queue.len() >= queue_size {break;}
                 }
             },
-            1 ... refill_after => { //get jobs if receiver not locked
+            1 ... 6 => { //get jobs if receiver not locked
                 if let Ok(job_lock) = job_receiver.try_lock(){
                     while let Ok(job) = job_lock.try_recv() {
                         queue.push_back(job);
-                        if queue.len() >= params::params::WORKER_QUEUE_SIZE {break;}
+                        if queue.len() >= queue_size {break;}
                     }
 
                 }

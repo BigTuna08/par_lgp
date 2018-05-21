@@ -12,6 +12,8 @@ use std::fs::create_dir;
 use time::PreciseTime;
 use parLGP::config::get_runner;
 
+use std::collections::HashMap;
+
 fn main() {
 
 
@@ -23,7 +25,7 @@ fn main() {
     let mut args: Vec<String> = env::args().collect();
     println!("ARGS {:?}", args);
 
-    let mut runner = get_runner("default_config.txt");
+    let mut runner = get_runner("configs/experiment.txt");
 
     println!("runner {:?}", runner);
     runner.run_all_configs();
@@ -38,6 +40,15 @@ fn main() {
 
     let end = PreciseTime::now();
     println!("{} seconds full program execution.", start.to(end));
+
+
+//
+//    let m = parLGP::config::process_config_file("configs/experiment.txt");
+//
+//    for v in m.keys(){
+//        println!("{}: {:?}", v, m.get(v));
+//    }
+
 }
 
 

@@ -23,7 +23,7 @@ impl GenPop{
 
     }
     pub fn run_all_tracking(&mut self, test_data: Arc<TestDataSet>, logger: &mut Logger){
-        let mut pool = ThreadPool::new(global_params::N_THREADS, test_data);
+        let mut pool = ThreadPool::new_default(test_data);
         let t_size = self.config.tourn_size as usize;
         let mut_method = self.config.mutate_method;
         self.initialize(&mut pool);

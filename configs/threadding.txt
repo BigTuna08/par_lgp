@@ -1,0 +1,10 @@
+// settings influencing the speed of system (not results) //
+
+
+// performance
+
+N_WORKER_THREADS:  2      // number of worker threads to spawn for evaluations
+WORKER_QUEUE_SIZE:  15  // number of programs a worker thread can have in its queue
+THREAD_POOL_MAX:  10000  // max number of evaluation requests the threadpool can hold
+
+

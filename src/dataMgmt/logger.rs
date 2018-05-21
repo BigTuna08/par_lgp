@@ -7,6 +7,8 @@ use std::fs::create_dir;
 use std::fs::File;
 use std::io::Write;
 
+use config::get_log_freq;
+
 use super::{FileSet, Logger};
 
 use GenoEval;
@@ -54,7 +56,8 @@ impl FileSet{
 
 
 impl Logger{
-    pub fn new(freq: u32, root_dir: &str) -> Logger {
+    pub fn new(root_dir: &str) -> Logger {
+        let freq = get_log_freq("configs/experiment.txt");
         create_dir(format!("{}/genos", root_dir));
         create_dir(format!("{}/cv_fit_maps", root_dir));
         create_dir(format!("{}/test_fit_maps", root_dir));

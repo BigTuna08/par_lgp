@@ -42,7 +42,7 @@ impl CoreConfig{
                     select_cell_method: info.select_cell_method,
                     initial_pop: info.initial_pop,
                     n_evals: info.n_evals,
-                    prog_defaults: config::process_prog_defaults("prog_config.txt")
+                    prog_defaults: config::process_prog_defaults("configs/prog_defaults.txt")
                 }
             },
             PopInfo::Gen(_) => panic!("Not in gen mode!!")
@@ -63,7 +63,7 @@ impl CoreConfig{
                     tourn_size: info.tourn_size,
                     total_gens: info.total_gens,
                     random_gens: info.random_gens,
-                    prog_defaults: config::process_prog_defaults("prog_config.txt")
+                    prog_defaults: config::process_prog_defaults("configs/prog_defaults.txt")
                 }
             }
         }
@@ -134,6 +134,15 @@ pub struct ProgDefaults{
     pub INITIAL_FEAT_MAX: u8,
 }
 
+
+
+#[derive(Debug)]
+pub struct ThreadDefaults{
+    n_worker_threads: u8,
+    worker_queue_size: u16,
+    cap: u32,
+}
+
 #[derive(Copy, Clone, Debug)]
 pub enum Mode{
     Map,
@@ -149,14 +158,15 @@ pub struct ConfigFile{
     mutate_methods: Vec<u8>,
     compare_methods: Vec<u8>,
 
-    n_evals: Option<Vec<u64>>,
-    inital_pop_size: Option<Vec<u32>>,
-    map_methods: Option<Vec<u8>>,
+    n_evals: Vec<u64>,
+    inital_pop_size: Vec<u32>,
+    map_methods: Vec<u8>,
 
-    total_gens: Option<Vec<u32>>,
-    random_gens: Option<Vec<u32>>,
-    tourn_sizes: Option<Vec<u16>>,
+    total_gens: Vec<u32>,
+    random_gens: Vec<u32>,
+    tourn_sizes: Vec<u16>,
 }
+
 
 
 #[derive(Debug)]
