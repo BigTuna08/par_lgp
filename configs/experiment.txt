@@ -8,7 +8,7 @@ OUT_FOLDER: debug2                    // any name, output folder will be created
 N_ITERATIONS: 1                            // integer > 0
 
 MUTATION_METHODS: 0                       // 1 or more integers, each separated by a space
-COMPARE_METHOD: 0                      // 1 or more integers, each separated by a space
+COMPARE_METHODS: 0                      // 1 or more integers, each separated by a space
 
 DATA_FILE: inputs/data3.csv
 
