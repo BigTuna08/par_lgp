@@ -51,21 +51,29 @@ impl ResultMap {
     }
 
 
+    pub fn new_random_prog(&self) -> Program{
+        Program::new_random_range(self.config.prog_defaults.INITIAL_INSTR_MIN,
+                                  self.config.prog_defaults.INITIAL_INSTR_MIN,
+                                  self.config.prog_defaults.INITIAL_CALC_REG_MIN,
+                                  self.config.prog_defaults.INITIAL_CALC_REG_MAX,
+                                  self.config.prog_defaults.INITIAL_N_OPS_MIN,
+                                  self.config.prog_defaults.INITIAL_N_OPS_MAX,
+                                  self.config.prog_defaults.INITIAL_FEAT_MIN,
+                                  self.config.prog_defaults.INITIAL_FEAT_MAX,)
+    }
+
+
     pub fn next_new_prog(&mut self, mutation_code: u8) -> Program{
         self.sent_count += 1;
         if self.sent_count <= self.config.initial_pop as u64{
-            let mut prog = Program::new_default_range();
+            let mut prog = self.new_random_prog();
             let mut tries = 0;
             while !self.is_in_bounds(&self.select_cell(&prog)) && tries < params::params::DUPLICATE_TIME_OUT{
-                prog = Program::new_default_range();
+                prog = self.new_random_prog();
                 tries += 1;
             }
 //            println!("** about to start mutating existing, coverage is {}, sent count is {}", self.get_percent_covered(), self.sent_count);
             prog
-        }
-        else if self.sent_count == self.config.initial_pop as u64 + 1{
-            println!("** about to start mutating existing, coverage is {}, sent count is {}", self.get_percent_covered(), self.sent_count);
-            Program::new_default_range()
         }
         else {
             self.get_simple_mutated_genome_rand(mutation_code)

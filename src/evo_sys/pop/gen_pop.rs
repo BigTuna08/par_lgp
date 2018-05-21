@@ -61,7 +61,7 @@ impl GenPop{
 
     pub fn initialize(&mut self, thread_pool: &mut ThreadPool){
         for _ in 0..params::GEN_POP_SIZE{
-            thread_pool.add_task(Message::Cont(Program::new_default_range()));
+            thread_pool.add_task(Message::Cont(self.new_random_prog()));
         }
 
         for _ in 0..params::GEN_POP_SIZE*2{
@@ -80,7 +80,7 @@ impl GenPop{
         for _ in 0..n_gens{
 
             for _ in 0..params::GEN_POP_SIZE{
-                thread_pool.add_task(Message::Cont(Program::new_default_range()));
+                thread_pool.add_task(Message::Cont(self.new_random_prog()));
             }
 
 
@@ -93,6 +93,18 @@ impl GenPop{
         }
 
 
+    }
+
+
+    pub fn new_random_prog(&self) -> Program{
+        Program::new_random_range(self.config.prog_defaults.INITIAL_INSTR_MIN,
+                                  self.config.prog_defaults.INITIAL_INSTR_MIN,
+                                  self.config.prog_defaults.INITIAL_CALC_REG_MIN,
+                                  self.config.prog_defaults.INITIAL_CALC_REG_MAX,
+                                  self.config.prog_defaults.INITIAL_N_OPS_MIN,
+                                  self.config.prog_defaults.INITIAL_N_OPS_MAX,
+                                  self.config.prog_defaults.INITIAL_FEAT_MIN,
+                                  self.config.prog_defaults.INITIAL_FEAT_MAX,)
     }
 
 

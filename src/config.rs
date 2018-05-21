@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::prelude::*;
-use {CoreConfig, PopInfo, MapInfo, GenPopInfo, Runner, ConfigFile, Mode};
+use {CoreConfig, PopInfo, MapInfo, GenPopInfo, Runner, ConfigFile, Mode, ProgDefaults};
 use std;
 use experiments::experiments;
 
@@ -206,6 +206,65 @@ impl ConfigFile{
 
 }
 
+
+pub fn process_prog_defaults(loc: &str) -> ProgDefaults {
+    let mut INITIAL_INSTR_MIN = None;
+    let mut INITIAL_INSTR_MAX = None;
+    let mut INITIAL_CALC_REG_MIN = None;
+    let mut INITIAL_CALC_REG_MAX = None;
+    let mut INITIAL_N_OPS_MIN = None;
+    let mut INITIAL_N_OPS_MAX = None;
+    let mut INITIAL_FEAT_MIN = None;
+    let mut INITIAL_FEAT_MAX = None;
+
+    let mut f = File::open("prog_config.txt").expect("error opening prog_config file!");
+    let mut c = String::new();
+    f.read_to_string(&mut c);
+    for line in c.lines() {
+        let mut parts = line.split_whitespace();
+        let first = parts.next();
+        match first {
+            None => (),
+            Some(text) if text.eq_ignore_ascii_case("INITIAL_INSTR_MIN:") => {
+                INITIAL_INSTR_MIN = Some(get_next_usize(&mut parts))
+            },
+            Some(text) if text.eq_ignore_ascii_case("INITIAL_INSTR_MAX:") => {
+                INITIAL_INSTR_MAX = Some(get_next_usize(&mut parts))
+            },
+            Some(text) if text.eq_ignore_ascii_case("INITIAL_CALC_REG_MIN:") => {
+                INITIAL_CALC_REG_MIN = Some(get_next_u8(&mut parts))
+            },
+            Some(text) if text.eq_ignore_ascii_case("INITIAL_CALC_REG_MAX:") => {
+                INITIAL_CALC_REG_MAX = Some(get_next_u8(&mut parts))
+            },
+            Some(text) if text.eq_ignore_ascii_case("INITIAL_N_OPS_MIN:") => {
+                INITIAL_N_OPS_MIN = Some(get_next_u8(&mut parts))
+            },
+            Some(text) if text.eq_ignore_ascii_case("INITIAL_N_OPS_MAX:") => {
+                INITIAL_N_OPS_MAX = Some(get_next_u8(&mut parts))
+            },
+            Some(text) if text.eq_ignore_ascii_case("INITIAL_FEAT_MIN:") => {
+                INITIAL_FEAT_MIN = Some(get_next_u8(&mut parts))
+            },
+            Some(text) if text.eq_ignore_ascii_case("INITIAL_FEAT_MAX:") => {
+                INITIAL_FEAT_MAX = Some(get_next_u8(&mut parts))
+            }
+            _ => (),
+        }
+    }
+    ProgDefaults{
+        INITIAL_INSTR_MIN: INITIAL_INSTR_MIN.unwrap(),
+        INITIAL_INSTR_MAX: INITIAL_INSTR_MAX.unwrap(),
+        INITIAL_CALC_REG_MIN: INITIAL_CALC_REG_MIN.unwrap(),
+        INITIAL_CALC_REG_MAX: INITIAL_CALC_REG_MAX.unwrap(),
+        INITIAL_N_OPS_MIN: INITIAL_N_OPS_MIN.unwrap(),
+        INITIAL_N_OPS_MAX: INITIAL_N_OPS_MAX.unwrap(),
+        INITIAL_FEAT_MIN: INITIAL_FEAT_MIN.unwrap(),
+        INITIAL_FEAT_MAX: INITIAL_FEAT_MAX.unwrap(),
+    }
+}
+
+
 fn process_config(loc: &str) -> ConfigFile{
 
     let mut mode = None;
@@ -332,6 +391,29 @@ fn get_next_u32(parts: &mut std::str::SplitWhitespace) -> u32{
     }
     panic!("error getting u32!!")
 }
+
+fn get_next_usize(parts: &mut std::str::SplitWhitespace) -> usize{
+    if let Some(text) = parts.next() {
+        return match text.parse::<usize>() {
+            Ok(val) => val,
+            Err(e) => panic!("Error reading value for number of iterations. Value was {}. \
+            \n Err was {:?}", text, e),
+        }
+    }
+    panic!("error getting u32!!")
+}
+
+fn get_next_u8(parts: &mut std::str::SplitWhitespace) -> u8{
+    if let Some(text) = parts.next() {
+        return match text.parse::<u8>() {
+            Ok(val) => val,
+            Err(e) => panic!("Error reading value for number of iterations. Value was {}. \
+            \n Err was {:?}", text, e),
+        }
+    }
+    panic!("error getting u32!!")
+}
+
 
 fn get_option_list<T: std::str::FromStr>(parts: &mut std::str::SplitWhitespace) -> Vec<T>{
     let mut list = Vec::new();

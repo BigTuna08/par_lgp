@@ -42,6 +42,7 @@ impl CoreConfig{
                     select_cell_method: info.select_cell_method,
                     initial_pop: info.initial_pop,
                     n_evals: info.n_evals,
+                    prog_defaults: config::process_prog_defaults("prog_config.txt")
                 }
             },
             PopInfo::Gen(_) => panic!("Not in gen mode!!")
@@ -62,6 +63,7 @@ impl CoreConfig{
                     tourn_size: info.tourn_size,
                     total_gens: info.total_gens,
                     random_gens: info.random_gens,
+                    prog_defaults: config::process_prog_defaults("prog_config.txt")
                 }
             }
         }
@@ -99,6 +101,7 @@ pub struct ResultMapConfig{
     select_cell_method: u8,
     initial_pop: u32,
     n_evals: u64,
+    prog_defaults: ProgDefaults,
 }
 
 
@@ -113,8 +116,23 @@ pub struct GenPopConfig{
     tourn_size: u16,
     total_gens: u32,
     random_gens: u32,
+    prog_defaults: ProgDefaults,
 }
 
+#[derive(Debug)]
+pub struct ProgDefaults{
+    pub INITIAL_INSTR_MIN: usize,
+    pub INITIAL_INSTR_MAX: usize,
+
+    pub INITIAL_CALC_REG_MIN: u8,
+    pub INITIAL_CALC_REG_MAX: u8,
+
+    pub INITIAL_N_OPS_MIN: u8,
+    pub INITIAL_N_OPS_MAX: u8,
+
+    pub INITIAL_FEAT_MIN: u8,
+    pub INITIAL_FEAT_MAX: u8,
+}
 
 #[derive(Copy, Clone, Debug)]
 pub enum Mode{

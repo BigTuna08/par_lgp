@@ -21,7 +21,7 @@ pub const MUT_INSTR_COPY_RATE: u32 = 20; // was 200
 
 
 
-///     Defaults for creating random program   ////
+//     Defaults for creating random program   ////
 
 //pub const DEFAULT_INSTR_MIN: usize = 1;
 //pub const DEFAULT_INSTR_MAX: usize = 20;

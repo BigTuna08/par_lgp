@@ -19,13 +19,14 @@ impl Program{
 
     ////                 New Program Methods            ////
 
-    pub fn new_default_range() -> Program{
-
-        Program::new_random_range(params::DEFAULT_INSTR_MIN, params::DEFAULT_INSTR_MAX,
-                                  params::DEFAULT_CALC_REG_MIN, params::DEFAULT_CALC_REG_MAX,
-                                  params::DEFAULT_N_OPS_MIN, params::DEFAULT_N_OPS_MAX,
-                                  params::DEFAULT_FEAT_MIN, params::DEFAULT_FEAT_MAX)
-    }
+//    pub fn new_default_range() -> Program{
+//
+//
+////        Program::new_random_range(INITIAL_INSTR_MIN.unwrap(), INITIAL_INSTR_MAX.unwrap(),
+////                                  INITIAL_CALC_REG_MIN.unwrap(), INITIAL_CALC_REG_MAX.unwrap(),
+////                                  INITIAL_N_OPS_MIN.unwrap(), INITIAL_N_OPS_MAX.unwrap(),
+////                                  INITIAL_FEAT_MIN.unwrap(), INITIAL_FEAT_MAX.unwrap())
+//    }
 
 
     pub fn new_random_range(instr_min: usize, instr_max: usize, calc_regs_min: u8,
