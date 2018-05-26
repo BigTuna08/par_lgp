@@ -20,9 +20,9 @@ pub fn eval_program_corrects(genome: &Program, data: &DataSet) -> f32 {
     let mut negative = false;
     let mut switch_sign_next = true;
 
-    for i in 1..genome.n_calc_regs{
+    for i in 1..genome.n_calc_regs as usize{
         let val = match negative {
-            true => -(i+1) as f32,
+            true => -((i+1) as f32),
             false => (i+1) as f32,
         };
 
