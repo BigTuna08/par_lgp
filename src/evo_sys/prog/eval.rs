@@ -17,11 +17,28 @@ pub fn eval_program_corrects(genome: &Program, data: &DataSet) -> f32 {
     let mut initial_regs = [0.0f32; params::params::MAX_REGS];
 
 
-    let mut reg_val = 0.1;
-    for reg in initial_regs.iter_mut() { //semi random initilize regs
-        *reg = reg_val;
-        reg_val = -(reg_val + 0.05);
+    let mut negative = false;
+    let mut switch_sign_next = true;
+
+    for i in 1..genome.n_calc_regs{
+        let val = match negative {
+            true => -(i+1) as f32,
+            false => (i+1) as f32,
+        };
+
+        if i % 2 == 0 { initial_regs[i] = 1.0/val; }
+        else {initial_regs[i] = val; }
+
+        if switch_sign_next{ negative = !negative }
+
+        switch_sign_next = !switch_sign_next //switch every other
     }
+
+//    let mut reg_val = 0.1;
+//    for reg in initial_regs.iter_mut() { //semi random initilize regs
+//        *reg = reg_val;
+//        reg_val = -(reg_val + 0.05);
+//    }
 
     for record in data.record_iter(){
         let mut regs = initial_regs.clone();
@@ -32,9 +49,17 @@ pub fn eval_program_corrects(genome: &Program, data: &DataSet) -> f32 {
         }
 
         let prog_output = run_prog(&compressed_prog, &mut regs);
+        let indetermine_score = 0.5;
 
-        let classification_result = prog_output >= 0.0;
-        if classification_result == record.class {correct += 1.0;}
+        if prog_output.abs() < params::params::EPS {
+            correct += indetermine_score;
+        }
+        else {
+            let classification_result = prog_output > 0.0;
+            if classification_result == record.class {correct += 1.0;}
+        }
+
+
     }
     correct as f32
 }
