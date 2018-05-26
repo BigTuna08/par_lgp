@@ -4,10 +4,10 @@ MODE: MAP   // Sets population type. Options are MAP or GEN
 //     *** Effects both modes  ***
 
 
-OUT_FOLDER: debug2                    // any name, output folder will be created with this name
+OUT_FOLDER: 1iterlong                    // any name, output folder will be created with this name
 N_ITERATIONS: 1                            // integer > 0
 
-MUTATION_METHODS: 0                       // 1 or more integers, each separated by a space
+MUTATION_METHODS: 0                      // 1 or more integers, each separated by a space
 COMPARE_METHODS: 0                      // 1 or more integers, each separated by a space
 
 DATA_FILE: inputs/data3.csv
@@ -17,14 +17,14 @@ LOG_FREQ: 10000                     // # of evaluatoions between logging (might 
 
 //    ***  For Map mode  ***
 
-N_EVALS: 200000
-INITIAL_POP_SIZES: 10000
-MAP_METHODS: 0 6 14
+N_EVALS: 2000000 10000000
+INITIAL_POP_SIZES: 500000 2000000
+MAP_METHODS: 0
 
 
 
 //    ***  For Gen mode  ***
 
-TOTAL_GENS: 10 20
-INIT_GENS: 0 5 10
+TOTAL_GENS: 100 500 1000
+INIT_GENS: 50 100 500
 TOURN_SIZE: 4 16
