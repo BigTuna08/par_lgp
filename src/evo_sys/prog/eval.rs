@@ -33,6 +33,13 @@ pub fn eval_program_corrects(genome: &Program, data: &DataSet) -> f32 {
 
         switch_sign_next = !switch_sign_next //switch every other
     }
+//
+//    if genome.n_calc_regs > 30{
+//        println!("regs {:?}", &initial_regs[0..31]);
+//        panic!("done");
+//    }
+
+
 
 //    let mut reg_val = 0.1;
 //    for reg in initial_regs.iter_mut() { //semi random initilize regs

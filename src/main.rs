@@ -27,8 +27,10 @@ fn main() {
 
     let mut runner = Runner::new("configs/experiment.txt");
 
-    println!("runner {:?}", runner);
-    runner.run_all_configs();
+
+    test();
+//    println!("runner {:?}", runner);
+//    runner.run_all_configs();
 //    let mnger = parLGP::experiments::mgmt::new(args);
 //    println!("mnger {:?}", mnger);
 
@@ -48,6 +50,19 @@ fn main() {
 //    for v in m.keys(){
 //        println!("{}: {:?}", v, m.get(v));
 //    }
+
+}
+
+
+fn test(){
+    let x = 4.0;
+    let y = 0.0;
+    let z = x / y;
+    let w = y.log(0.0);
+
+    println!("{:?}", w > 0.0);
+    println!("{:?}", w < 0.0);
+    println!("{:?}", w == 0.0);
 
 }
 

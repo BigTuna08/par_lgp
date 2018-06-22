@@ -40,19 +40,18 @@ impl FullDataSet{
 //                println!("result is {:?}", result);
                 let mut result_iter = result.iter();
 
-                let mut class = false;
+                result_iter.next(); //skip first 2
+                result_iter.next();
 
+                let class = match result_iter.next().unwrap() {
+                    "0" => false,
+                    "1" => true,
+                    _ => panic!("Invalid classification field!!")
+                };
 
                 let mut features = [0.0f32; params::N_FEATURES as usize];
 
                 for (j, next_entry) in result_iter.enumerate() {
-                    if j == 5 {
-                        class = match next_entry {
-                            "0" => false,
-                            "1" => true,
-                            _ => panic!("Invalid classification field!!")
-                        };
-                    }
                     match next_entry.parse::<f32>() {
                         Ok(entry) => features[j] = entry,
                         Err(e) => {

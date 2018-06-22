@@ -19,14 +19,6 @@ impl Program{
 
     ////                 New Program Methods            ////
 
-//    pub fn new_default_range() -> Program{
-//
-//
-////        Program::new_random_range(INITIAL_INSTR_MIN.unwrap(), INITIAL_INSTR_MAX.unwrap(),
-////                                  INITIAL_CALC_REG_MIN.unwrap(), INITIAL_CALC_REG_MAX.unwrap(),
-////                                  INITIAL_N_OPS_MIN.unwrap(), INITIAL_N_OPS_MAX.unwrap(),
-////                                  INITIAL_FEAT_MIN.unwrap(), INITIAL_FEAT_MAX.unwrap())
-//    }
 
 
     pub fn new_random_range(instr_min: usize, instr_max: usize, calc_regs_min: u8,
@@ -82,25 +74,6 @@ impl Program{
     }
 
 
-//    pub fn execute_instructions(&self, mut regs: ExecutionRegArray) ->f32{
-//        let mut skip_count = 0u8; // used to implement branches
-//
-//        for instr in self.instructions.iter() {
-//            if skip_count > 0 {
-//                skip_count -= 1;
-//                continue;
-//            }
-//            let result = ops::OPS[instr.op as usize](regs[instr.src1 as usize], regs[instr.src2 as usize]);
-//            match instr.op {
-//                0 ... 5 => regs[instr.dest as usize] = result, //simple register transfer
-//                6 => if result < 0.0 {skip_count = 255}, //if false, skip next n, use direct constant
-//                7 => if result < 0.0 {skip_count = 1}, //false skip next 1
-//                _ => panic!("invalid op! {:?}", &instr)
-//            }
-//        }
-//        regs[0]
-//    }
-
 
     ////                Getters           ////
 
@@ -115,69 +88,6 @@ impl Program{
         self.instructions.len()
     }
 
-
-
-
-//    pub fn get_effective_instrs(&self, return_reg_ind: u8) -> Vec<usize>{
-//
-//        let mut eff_regs = HashSet::new();
-//        let mut eff_instrs = Vec::new();
-//        let mut last_eff = false;
-//        eff_regs.insert(return_reg_ind);
-//
-//        let end_i = self.get_exit_index(return_reg_ind);
-//
-//        for (i, instr) in self.instructions.iter().enumerate().rev(){
-//            if i > end_i {continue;}
-//            let follows_branch = i >= 1 && self.instructions[i-1].is_branch();
-//
-//            match ops::get_type(instr) {
-//
-//                InstructionType::Value => {
-//                    if eff_regs.contains(&instr.dest) {
-//                        if !follows_branch {
-//                            eff_regs.remove(&instr.dest);
-//                        }
-//                        eff_regs.insert(instr.src1);
-//                        eff_regs.insert(instr.src2);
-//                        eff_instrs.push(i);
-//                        last_eff = true;
-//                    }
-//                    else {
-//                        last_eff = false;
-//                    }
-//                },
-//
-//                InstructionType::Skip => {
-//                    if last_eff { // becuase branch only ever skips one.
-//                        eff_regs.insert(instr.src1);
-//                        eff_regs.insert(instr.src2);
-//                        eff_instrs.push(i);
-//                    }
-//                },
-//
-//                InstructionType::Terminate => {
-//                    if follows_branch {
-//                        if !last_eff && i < end_i -1{
-//                            eff_instrs.push(i+1);
-//                        }
-//                    }
-////                    else {
-//                        last_eff = true; //always effective
-//                        eff_instrs.push(i);
-////                    }
-//                },
-//
-//                InstructionType::NoOp => {
-//                    last_eff = false //never effective
-//                },
-//
-//            }
-//
-//        }
-//        eff_instrs.sort();
-//        eff_instrs
-//    }
 
 
     pub fn get_effective_instrs_good(&self, return_reg_ind: u8) -> Vec<usize>{

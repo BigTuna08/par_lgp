@@ -10,7 +10,7 @@ N_ITERATIONS: 5                            // integer > 0
 MUTATION_METHODS: 0                      // 1 or more integers, each separated by a space
 COMPARE_METHODS: 0                      // 1 or more integers, each separated by a space
 
-DATA_FILE: inputs/data3.csv
+DATA_FILE: inputs/normalized_training_py.txt
 
 LOG_FREQ: 10000                     // # of evaluatoions between logging (might not work with gen??)
 
