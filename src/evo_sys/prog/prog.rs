@@ -44,7 +44,8 @@ impl Program{
             instructions.push(Instruction::new_random(n_calc_regs, n_feats, n_ops, &mut rng));
         }
 
-        Program{ n_calc_regs, features, instructions, test_fit:None, cv_fit:None}
+        Program{ n_calc_regs, features, instructions, test_fit:None, cv_fit:None, pos_missed: None,
+            neg_missed: None,}
     }
 
 
@@ -54,7 +55,10 @@ impl Program{
             features:Vec::new(),
             instructions:Vec::new(),
             test_fit: Some(global_params::params::MIN_FIT),
-            cv_fit:Some(global_params::params::MIN_FIT), }
+            cv_fit:Some(global_params::params::MIN_FIT),
+            pos_missed: None,
+            neg_missed: None,
+        }
     }
 
 
@@ -70,6 +74,8 @@ impl Program{
             instructions: instrs,
             test_fit:None,
             cv_fit: None,
+            pos_missed: None,
+            neg_missed: None,
         }
     }
 
@@ -345,6 +351,38 @@ impl Program{
         ops::formatted_string(instr, &src1, &src2)
     }
 
+    pub fn string_instr_better(&self, instr: &Instruction, used: &mut Vec<u8>) -> String{
+
+        let src1 =
+            match self.get_global_feat_number(instr.src1) {
+                Some(num) => format!("{}", metabolites::get_metabolite_by_ind(num)),
+                None => {
+                    if used.contains(&instr.src1){
+                        format!("${}",instr.src1)
+                    }
+                    else {
+                        format!("{}",super::registers::PROG_REG[instr.src1 as usize])
+                    }
+                },
+            };
+
+        let src2 =
+            match self.get_global_feat_number(instr.src2) {
+                Some(num) => format!("{}", metabolites::get_metabolite_by_ind(num)),
+                None => {
+                    if used.contains(&instr.src2){
+                        format!("${}",instr.src2)
+                    }
+                        else {
+                            format!("{}",super::registers::PROG_REG[instr.src2 as usize])
+                        }
+                },
+            };
+        used.push(instr.dest);
+
+        ops::formatted_string(instr, &src1, &src2)
+    }
+
 
     pub fn feat_str(&self)->String{
         self.features.iter().fold(String::new(),
@@ -399,6 +437,18 @@ impl Program{
 
 
     pub fn write_effective_self_words(&self, f: &mut File){
+        let mut used_srcs = Vec::new();
+        f.write(b"## Effective instructions ## \n");
+        for instr_i in self.get_effective_instrs_good(0){
+            let instr = self.instructions[instr_i];
+            let instr_str = self.string_instr_better(&instr, &mut used_srcs);
+            f.write(instr_str.as_bytes());
+            f.write(b"\n");
+        }
+        f.write(b"\n");
+    }
+
+    pub fn write_effective_self_words_old(&self, f: &mut File){
         f.write(b"## Effective instructions ## \n");
         for instr_i in self.get_effective_instrs_good(0){
             let instr = self.instructions[instr_i];

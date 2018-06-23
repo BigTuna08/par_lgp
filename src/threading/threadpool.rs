@@ -124,8 +124,10 @@ fn worker(job_receiver: Arc<Mutex<mpsc::Receiver<Message>>>, result_sender: mpsc
         if let Some(next_job) = queue.pop_front() {
             match next_job {
                 Message::Cont(mut prog) => {
-                    let fit = evo_sys::prog::eval::eval_program_corrects(&prog, data_ref)/data_size;
-                    prog.test_fit = Some(fit);
+                    let (fit, pos_missed, neg_missed) = evo_sys::prog::eval::eval_program_corrects_pos_neg(&prog, data_ref);
+                    prog.test_fit = Some(fit/data_size);
+                    prog.pos_missed = Some(pos_missed);
+                    prog.neg_missed = Some(neg_missed);
                     result_sender.send(EvalResult{prog} );
                 }
                 Message::Quit => break,

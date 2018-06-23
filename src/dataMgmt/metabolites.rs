@@ -1,5 +1,6 @@
-pub fn print_headers(){
-    let h = super::dataset::get_headers(super::params::DATA);
+pub fn print_headers(data_file: &str){
+    let h = super::dataset::get_headers2(data_file); // 2  is for new data file
+    println!("h is {:?}", h);
     print!("headers = [");
     for n in h.iter(){
         println!("\"{}\",",n);
@@ -11,7 +12,15 @@ pub fn get_metabolite_by_ind(i: usize) -> &'static str{
     &DATA_HEADERS[i]
 }
 
-const DATA_HEADERS: [&'static str; 156]  = ["Ac_Orn",
+
+const DATA_HEADERS: [&'static str; 5]  = ["f1",
+    "f2",
+    "f3",
+    "f4",
+    "f5",
+];
+
+const DATA_HEADERS_old: [&'static str; 156]  = ["Ac_Orn",
 "Ala",
 "Arg",
 "Asn",

@@ -1,7 +1,7 @@
-pub const MAP_ROWS: usize = 25;
-pub const MAP_COLS: usize = 25;
+pub const MAP_ROWS: usize = 50;
+pub const MAP_COLS: usize = 50;
 
-pub const MAX_REGS: usize = 255; //was 128, risk of crashing if less than N_FEATURES, during feature loading. if > 256 will also crash!
+pub const MAX_REGS: usize = 25; //was 128, risk of crashing if less than N_FEATURES, during feature loading. if > 256 will also crash!
 
 pub const N_OPS: u8 = 8;
 

@@ -2,6 +2,7 @@ pub mod ops;
 pub mod eval;
 pub mod prog;
 pub mod mutation;
+pub mod registers;
 mod instr;
 
 use params as global_params;

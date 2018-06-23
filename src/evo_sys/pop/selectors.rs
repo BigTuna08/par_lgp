@@ -32,6 +32,8 @@ impl ResultMap{
                                                              self.config.n_evals,
                                                              self.config.n_evals,
                                                              self.config.n_evals)),
+            15 => self.pos_neg(prog),
+            16 => self.pos_neg_len(prog),
 
             _ => panic!("Invalid get location method!! \n{:?}", self.config),
         }
@@ -192,6 +194,25 @@ impl ResultMap{
         let row = loc_el*sq + loc_fc;
         let col = loc_br*sq + loc_intron;
         (row, col)
+    }
+
+    fn pos_neg(&self, prog: &Program) -> (usize, usize){
+        match prog.pos_missed {
+            Some(p) => (p as usize, prog.neg_missed.unwrap() as usize),
+            None => (0,0), // before eval
+        }
+
+    }
+
+    fn pos_neg_len(&self, prog: &Program) -> (usize, usize){
+        match prog.pos_missed {
+            Some(p) => {
+                let f = p as f32 / ((prog.neg_missed.unwrap() + p) as f32) ;
+                (prog.get_effective_len(0), (f*MAP_COLS as f32) as usize)
+            },
+            None => (0,0), // before eval
+        }
+
     }
 
 

@@ -52,7 +52,8 @@ impl Program{
                 }
         }).collect();
 
-        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None}
+        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None, pos_missed: None,
+            neg_missed: None,}
     }
 
 
@@ -71,7 +72,8 @@ impl Program{
         }
         instructions.shrink_to_fit();
 
-        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None}
+        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None, pos_missed: None,
+        neg_missed: None,}
     }
 
 
@@ -89,7 +91,8 @@ impl Program{
             }
         }
         instructions.shrink_to_fit();
-        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None}
+        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None, pos_missed: None,
+        neg_missed: None,}
     }
 
 
@@ -97,6 +100,10 @@ impl Program{
     // in future may want to find a way to distribute some work to new reg while
     // maintaining the programs correctness
     pub fn ins_comp_copy(&self) -> Program{
+        if self.features.len() + self.n_calc_regs as usize> global_params::params::MAX_REGS - 2 { //just do micro mutation
+            return self.mut_instr_copy()
+        }
+
         let features = self.features.clone();
         let n_calc_regs = self.n_calc_regs +1;
 
@@ -106,7 +113,8 @@ impl Program{
             instructions.push(instr.clone());
         }
 
-        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None}
+        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None, pos_missed: None,
+        neg_missed: None,}
     }
 
 
@@ -126,7 +134,8 @@ impl Program{
             }
         }
         instructions.shrink_to_fit();
-        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None}
+        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None, pos_missed: None,
+        neg_missed: None,}
     }
 
 
@@ -156,7 +165,8 @@ impl Program{
             instructions.push(instr.clone());
         }
 
-        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None}
+        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None, pos_missed: None,
+        neg_missed: None,}
     }
 
 
@@ -181,7 +191,8 @@ impl Program{
             }
         }
         instructions.shrink_to_fit();
-        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None}
+        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None, pos_missed: None,
+        neg_missed: None,}
     }
 
 
@@ -217,6 +228,7 @@ impl Program{
             instructions.push(instr.clone());
         }
 
-        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None}
+        Program{n_calc_regs, features, instructions, test_fit:None, cv_fit:None, pos_missed: None,
+        neg_missed: None,}
     }
 }

@@ -27,10 +27,12 @@ fn main() {
 
     let mut runner = Runner::new("configs/experiment.txt");
 
+//    parLGP::dataMgmt::metabolites::print_headers("inputs/new.txt");
+//    test();
+//    parLGP::evo_sys::prog::registers::make_regs();
 
-    test();
-//    println!("runner {:?}", runner);
-//    runner.run_all_configs();
+    println!("runner {:?}", runner);
+    runner.run_all_configs();
 //    let mnger = parLGP::experiments::mgmt::new(args);
 //    println!("mnger {:?}", mnger);
 
@@ -56,14 +58,14 @@ fn main() {
 
 fn test(){
     let x = 4.0;
-    let y = 0.0;
+    let y = 0.0f64;
     let z = x / y;
     let w = y.log(0.0);
 
     println!("{:?}", w > 0.0);
     println!("{:?}", w < 0.0);
     println!("{:?}", w == 0.0);
-
+    println!("{:?}", w);
 }
 
 

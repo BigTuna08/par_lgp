@@ -14,6 +14,42 @@ use std::fs::create_dir_all;
 use std::sync::Arc;
 
 
+//pub fn multi_trial_fullset_tracking(config: CoreConfig){
+//
+////    let root_out_dir = format!("{}/s{}_c{}", config.out_folder, config.select_cell_method, config.compare_prog_method);
+//
+//    match create_dir_all(&config.out_folder) {
+//        Ok(_) =>{
+//            File::create(format!("{}/README.txt", &config.out_folder))
+//                .unwrap().write(format!("{:?}", &config).as_bytes());
+//
+//            println!("About to start outputting to {:?}", &config.out_folder);
+//            let mut logger = Logger::new(&config.out_folder);
+//            logger.full_tracking();
+//
+//            for _ in 0..config.n_iterations {
+//                five_fold_cv_tracking_ref(&mut logger, &config);
+//
+//                let mut data_manager = DataSetManager::new_rand_partition(config.data_file.clone());
+//
+//                match &config.pop_config {
+//                    PopInfo::Gen(_) => {
+//                        let mut res_map = GenPop::new(config.create_gen_pop_config(), cv_data);
+//                        res_map.run_all_tracking(test_data, &mut logger);
+//                        logger.finish_fold_pop(res_map);
+//                    },
+//                    PopInfo::Map(_) => {
+//                        let mut pop = ResultMap::new(config.create_result_map_config(), cv_data);
+//                        pop.run_all_tracking(test_data, &mut logger);
+//                        logger.finish_fold(pop);
+//                    },
+//                }
+//            }
+//        }
+//        Err(e) => panic!("Problem creating out dir! {:?}\n Err is {:?}", &config.out_folder, e)
+//    }
+//}
+
 pub fn multi_trial_five_fold_tracking(config: CoreConfig){
 
 //    let root_out_dir = format!("{}/s{}_c{}", config.out_folder, config.select_cell_method, config.compare_prog_method);

@@ -4,22 +4,22 @@ MODE: MAP   // Sets population type. Options are MAP or GEN
 //     *** Effects both modes  ***
 
 
-OUT_FOLDER: 5iterlong                    // any name, output folder will be created with this name
-N_ITERATIONS: 5                            // integer > 0
+OUT_FOLDER: test-progs                    // any name, output folder will be created with this name
+N_ITERATIONS: 3                            // integer > 0
 
 MUTATION_METHODS: 0                      // 1 or more integers, each separated by a space
 COMPARE_METHODS: 0                      // 1 or more integers, each separated by a space
 
-DATA_FILE: inputs/normalized_training_py.txt
+DATA_FILE: inputs/new.txt
 
 LOG_FREQ: 10000                     // # of evaluatoions between logging (might not work with gen??)
 
 
 //    ***  For Map mode  ***
 
-N_EVALS: 5000000 10000000
-INITIAL_POP_SIZES: 500000 5000000
-MAP_METHODS: 0
+N_EVALS:  1000000 5000000 10000000 50000000
+INITIAL_POP_SIZES: 100000 200000
+MAP_METHODS: 15 16
 
 
 

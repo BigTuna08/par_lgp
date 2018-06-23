@@ -19,6 +19,8 @@ pub struct Program{
     pub instructions: Vec<Instruction>,
     pub test_fit: Option<f32>,
     pub cv_fit: Option<f32>,
+    pub pos_missed: Option<u8>,
+    pub neg_missed: Option<u8>,
 }
 
 
