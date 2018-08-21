@@ -40,18 +40,20 @@ impl FullDataSet{
 //                println!("result is {:?}", result);
                 let mut result_iter = result.iter();
 
-                result_iter.next(); //skip first 2
-                result_iter.next();
+                let mut class = false;
 
-                let class = match result_iter.next().unwrap() {
-                    "0" => false,
-                    "1" => true,
-                    _ => panic!("Invalid classification field!!")
-                };
 
                 let mut features = [0.0f32; params::N_FEATURES as usize];
 
                 for (j, next_entry) in result_iter.enumerate() {
+                    if j == 5 {
+                        class = match next_entry {
+                            "0" => false,
+                            "1" => true,
+                            _ => panic!("Invalid classification field!!")
+                        };
+                        continue;
+                    }
                     match next_entry.parse::<f32>() {
                         Ok(entry) => features[j] = entry,
                         Err(e) => {
@@ -78,7 +80,7 @@ impl FullDataSet{
 
 
 pub fn gen_partitions() -> Vec<Partition> {
-    let n_fold = 5;
+    let n_fold = params::N_FOLDS as usize;
     let mut rng = rand::thread_rng();
 
     let mut chosen = Vec::with_capacity(params::N_SAMPLES);
@@ -112,6 +114,7 @@ pub fn gen_partitions() -> Vec<Partition> {
                 panic!("Error generating data set!");
             }
         }
+        println!("Added {}", n_fold);
         partitions.push(Partition{cases, controls});
     }
     partitions
@@ -127,6 +130,25 @@ pub fn get_headers(data_file: &str) -> Vec<String> {
                     full_iter.next();
                     full_iter.next();
                     full_iter.next();
+                    full_iter.map(|x|  x.to_string()).collect()
+                }
+                Err(e) =>panic!("couldnt get file headers!! error is :{:?}", e)
+            }
+        }
+        Err(e) => panic!("couldnt open file to get headers!! error is :{:?}", e)
+    }
+}
+
+
+pub fn get_headers2(data_file: &str) -> Vec<String> {
+    match File::open(data_file){
+        Ok(f) => {
+            let mut csv_rdr = ReaderBuilder::new()
+                .delimiter(b'\t')
+                .from_reader(f);
+            match csv_rdr.headers() {
+                Ok(headers) => {
+                    let mut full_iter = headers.iter();
                     full_iter.map(|x|  x.to_string()).collect()
                 }
                 Err(e) =>panic!("couldnt get file headers!! error is :{:?}", e)
@@ -209,7 +231,7 @@ impl DataSetManager{
         let mut test_dataset_i = 0;
         let mut cv_dataset_i = 0;
 
-        let full_set = FullDataSet::new(params::DATA);
+        let full_set = FullDataSet::new(&self.data_file);
 
         for (partition_i, partition) in self.partitions.iter().enumerate() {
 
