@@ -20,6 +20,15 @@ pub fn get_metabolite_by_ind(i: usize) -> &'static str{
 //    "f5",
 //];
 
+pub fn get_metabolite_index(name: &str) -> usize {
+    for i in 0..DATA_HEADERS.len(){
+        if DATA_HEADERS[i] == name {
+            return i
+        }
+    }
+    panic!("no metabolite named {}", name)
+}
+
 const DATA_HEADERS: [&'static str; 156]  = ["Ac_Orn",
 "Ala",
 "Arg",

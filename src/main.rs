@@ -14,45 +14,40 @@ use parLGP::Runner;
 
 use std::collections::HashMap;
 
+
+//    parLGP::dataMgmt::metabolites::print_headers("inputs/new.txt");
+//    parLGP::evo_sys::prog::registers::make_regs();
 fn main() {
 
 
     let start = PreciseTime::now();
-
-
     println!("SINGLE THREAD FOR DEBUG");
-//
+
+
     let mut args: Vec<String> = env::args().collect();
     println!("ARGS {:?}", args);
 
-    let mut runner = Runner::new("configs/experiment.txt");
 
-//    parLGP::dataMgmt::metabolites::print_headers("inputs/new.txt");
-//    test();
-//    parLGP::evo_sys::prog::registers::make_regs();
+//    println!("metabolite i is {}", parLGP::dataMgmt::metabolites::get_metabolite_index("Arg"));
 
-    println!("runner {:?}", runner);
-    runner.run_all_configs();
-//    let mnger = parLGP::experiments::mgmt::new(args);
-//    println!("mnger {:?}", mnger);
+    let data = parLGP::dataMgmt::FullDataSet::new("inputs/data3.csv");
 
-//    parLGP::evo_sys::pop::test();
 
-//    mnger.run_all();
-//    comp_times();
-//    parLGP::evo_sys::pop::test();
+    let m1 = "total_DMA";
+    let m2 = "Ser";
+    println!("{} < {} ratio= {}", m1, m2, parLGP::dataAnal::get_comparison_ratio(m1,m2, &*data) );
+    println!("case: {} < {} ratio= {}", m1, m2, parLGP::dataAnal::get_conditional_comparison_ratio(m1,m2, &*data, true) );
+    println!("not : {} < {} ratio= {}", m1, m2, parLGP::dataAnal::get_conditional_comparison_ratio(m1,m2, &*data, false) );
+
+    println!("ratio= {}", parLGP::dataAnal::get_less_than_ratio("Arg", -0.333, &*data) );
+
+//    let mut runner = Runner::new("configs/experiment.txt");
+//    println!("runner {:?}", runner);
+//    runner.run_all_configs();
+
 
     let end = PreciseTime::now();
     println!("{} seconds full program execution.", start.to(end));
-
-
-//
-//    let m = parLGP::config::process_config_file("configs/experiment.txt");
-//
-//    for v in m.keys(){
-//        println!("{}: {:?}", v, m.get(v));
-//    }
-
 }
 
 

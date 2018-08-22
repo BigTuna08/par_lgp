@@ -8,6 +8,7 @@ pub mod params;
 pub mod evo_sys;
 pub mod threading;
 pub mod dataMgmt;
+pub mod dataAnal;
 pub mod experiments;
 pub mod config;
 pub mod serv;
