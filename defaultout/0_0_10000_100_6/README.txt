@@ -1,1 +1,0 @@
-CoreConfig { pop_config: Map(MapInfo { select_cell_method: 0, initial_pop: 100, n_evals: 50000 }), out_folder: "defaultout/0_0_10000_100_6", data_file: "inputs/data.csv", compare_prog_method: 0, mutate_method: 0, n_iterations: 1 }
