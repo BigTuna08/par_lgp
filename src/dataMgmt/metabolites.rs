@@ -8,6 +8,18 @@ pub fn print_headers(data_file: &str){
     print!("]");
 }
 
+
+pub fn print_metabolite_inds(){
+    let key_metabolites = ["Arg", "Orn", "C18_2", "Ac_Orn", "C18"];
+
+    print!("let metabolite_inds = [");
+    for n in key_metabolites.iter(){
+        print!("{},",get_metabolite_index(n));
+    }
+    print!("]\n");
+}
+
+
 pub fn get_metabolite_by_ind(i: usize) -> &'static str{
     &DATA_HEADERS[i]
 }

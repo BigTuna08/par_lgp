@@ -34,6 +34,7 @@ impl ResultMap{
                                                              self.config.n_evals)),
             15 => self.pos_neg(prog),
             16 => self.pos_neg_len(prog),
+            17 => self.metabolite_len(prog),
 
             _ => panic!("Invalid get location method!! \n{:?}", self.config),
         }
@@ -215,6 +216,20 @@ impl ResultMap{
 
     }
 
+    fn metabolite_len(&self, prog: &Program) -> (usize, usize){
+        const metabolite_inds: [u8; 5] = [2,140,25,0,22,];
+        let prog_mets = prog.get_effective_feats(0);
 
+        let mut y = 0;
+        let mut y_inc = 1;
+        for mi in metabolite_inds.iter() {
+            if prog_mets.contains(mi){
+                y += y_inc;
+            }
+            y_inc *= 2;
+        }
+
+        (prog.get_effective_len(0), y)
+    }
 }
 
