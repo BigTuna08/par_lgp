@@ -10,7 +10,7 @@ pub fn print_headers(data_file: &str){
 
 
 pub fn print_metabolite_inds(){
-    let key_metabolites = ["Arg", "Orn", "C18_2", "Ac_Orn", "C18"];
+    let key_metabolites = ["Arg", "Orn", "Ac_Orn", "C18", "C18_1", "C18_2", "lysoPC_a_C28_1"];
 
     print!("let metabolite_inds = [");
     for n in key_metabolites.iter(){

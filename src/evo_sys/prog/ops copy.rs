@@ -9,10 +9,10 @@ pub fn execute_op(instr: &Instruction, regs: &ExecutionRegArray) -> InstructionR
         1 => subt(instr, regs),
         2 => mult(instr, regs),
         3 => pdiv(instr, regs),
-//        4 => pow(instr, regs),
-//        5 => log(instr, regs),
-        4 => big(instr, regs),
-        5 => kill(instr, regs),
+        4 => pow(instr, regs),
+        5 => log(instr, regs),
+        6 => big(instr, regs),
+        7 => kill(instr, regs),
         _ => panic!("invalid op # {} (during execution) ", instr.op),
     }
 }
@@ -24,9 +24,9 @@ pub fn get_type(instr: &Instruction) -> InstructionType{
         1 => InstructionType::Value,
         2 => InstructionType::Value,
         3 => InstructionType::Value,
-//        4 => InstructionType::Value,
-//        5 => InstructionType::Value,
-        4 => {
+        4 => InstructionType::Value,
+        5 => InstructionType::Value,
+        6 => {
             if instr.src1 == instr.src2 { // x > x is never true
                 InstructionType::NoOp
             }
@@ -34,7 +34,7 @@ pub fn get_type(instr: &Instruction) -> InstructionType{
                 InstructionType::Skip
             }
         }
-        5 => InstructionType::Terminate,
+        7 => InstructionType::Terminate,
         _ => panic!("invalid op # {} (getting type)", instr.op),
     }
 }
@@ -46,10 +46,10 @@ pub fn get_name(instr: &Instruction) -> &str{
         1 => "subt",
         2 => "mult",
         3 => "pdiv",
-//        4 => "pow",
-//        5 => "log",
-        4 => "big",
-        5 => "kill",
+        4 => "pow",
+        5 => "log",
+        6 => "big",
+        7 => "kill",
         _ => panic!("invalid op # {} (getting name)", instr.op),
     }
 }
@@ -59,12 +59,12 @@ pub fn formatted_string(instr: &Instruction, src1: &str, src2: &str) -> String{
         InstructionType::Value => format!("${}\t=\t{}\t{}\t{}", instr.dest, get_name(instr), src1, src2),
 
         InstructionType::Skip => match instr.op {
-            4 => format!("Skip next if {}\t>\t{}", src1, src2),
+            6 => format!("Skip next if {}\t>\t{}", src1, src2),
             _ => panic!("invalid op code for skip instr! {} (formatted string)")
         }
 
         InstructionType::Terminate => match instr.op {
-            5 => format!("QUIT"),
+            7 => format!("QUIT"),
             _ => panic!("invalid op code for terminate instr! {} (formatted string)")
         }
 

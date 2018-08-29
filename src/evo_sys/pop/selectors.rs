@@ -217,7 +217,7 @@ impl ResultMap{
     }
 
     fn metabolite_len(&self, prog: &Program) -> (usize, usize){
-        const metabolite_inds: [u8; 5] = [2,140,25,0,22,];
+        const metabolite_inds: [u8; 7] = [2,140,0,22,23,25,66,];
         let prog_mets = prog.get_effective_feats(0);
 
         let mut y = 0;

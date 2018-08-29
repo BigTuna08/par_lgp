@@ -1,5 +1,5 @@
 
-
+# gets # of time each op appears in file
 def get_op_freqs(fname):
     freqs = {}
     with open(fname) as f:
@@ -23,7 +23,7 @@ def get_op_freqs(fname):
     return freqs
 
 
-
+# gets # of times each full instruction occurs 
 def get_instr_freqs(fname):
     freqs = {}
     with open(fname) as f:
@@ -44,7 +44,7 @@ def get_instr_freqs(fname):
     return freqs
 
 
-the_file = "../results/5iterlong/0_0_10000000_500000_0/genos/iter0-fold4.txt"
+the_file = "../results/long/0_0_25000000_2500000_17/genos/iter0-fold0.txt"
 
 ### for ops
 fr = get_op_freqs(the_file)
@@ -54,7 +54,7 @@ for f in fr:
 s = list(fr.keys())
 s.sort()
 for f in s:
-    print(f, '{0:.0f}'.format(fr[f]*100/sum))
+    print(f, '{0:.0f}'.format(fr[f]*100/sum)) # as proportion of total
 
 
 print("\n\n\n")

@@ -1,5 +1,5 @@
-r = 20
-c = 32
+r = 15
+c = 128
 
 print("[", end = "")
 for i in range(r):
