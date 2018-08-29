@@ -80,6 +80,14 @@ impl Program{
     }
 
 
+//    fn get_used_metabolites(&self, instrs: &Vec<Instruction>) -> Vec<u8> {
+//        let mut used = HashSet::new();
+//        for instr in instrs.iter(){
+//
+//        }
+//    }
+
+
 
     ////                Getters           ////
 
@@ -297,13 +305,16 @@ impl Program{
 
         for instr_i in self.get_effective_instrs_good(0){
             let instr = self.instructions[instr_i];
-            if instr.op == 6 {
-                eff_regs.insert(instr.src1);
-            }
-                else {
-                    eff_regs.insert(instr.src1);
-                    eff_regs.insert(instr.src2);
-                }
+//            if instr.op == 6 {    <- not sure why this was here, old op?
+//                eff_regs.insert(instr.src1);
+//            }
+//                else {
+//                    eff_regs.insert(instr.src1);
+//                    eff_regs.insert(instr.src2);
+//                }
+            eff_regs.insert(instr.src1);
+            eff_regs.insert(instr.src2);
+
         }
 //        println!("second ind={} len={} regs{:?}", return_reg_ind, eff_regs.len(), &eff_regs);
         eff_regs.retain(|&x|  x >= (global_params::params::MAX_REGS - self.features.len()) as u8);
