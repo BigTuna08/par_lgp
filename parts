@@ -1,0 +1,76 @@
+
+
+$6 =   add -0.33333334 Arg
+$4  =   add 0.16666667  SM_C16_1
+$0  =   subt    -0.33333334 Ac_Orn
+[True] $4 >   C18
+[True] $6 >   $0
+[True] Arg    >   $0
+
+
+$6 =   add -0.33333334 Arg
+$4  =   add 0.16666667  SM_C16_1
+$0  =   subt    -0.33333334 Ac_Orn
+[False] $4 >   C18
+$6  =   add 0.016393442 PC_aa_C42_6
+[True] $6 >   $0
+[True] Arg    >   $0
+
+
+$6 =   add -0.33333334 Arg
+$4  =   add 0.16666667  SM_C16_1
+$0  =   subt    -0.33333334 Ac_Orn
+[True] $4 >   C18
+[False] $6 >   $0
+$0  =   add Orn -0.06666667
+[True] Arg    >   $0
+
+
+$6 =   add -0.33333334 Arg
+$4  =   add 0.16666667  SM_C16_1
+$0  =   subt    -0.33333334 Ac_Orn
+[False] $4 >   C18
+$6  =   add 0.016393442 PC_aa_C42_6
+[False] $6 >   $0
+$0  =   add Orn -0.06666667
+[True] Arg    >   $0
+
+
+$6 =   add -0.33333334 Arg
+$4  =   add 0.16666667  SM_C16_1
+$0  =   subt    -0.33333334 Ac_Orn
+[True] $4 >   C18
+[True] $6 >   $0
+[False] Arg    >   $0
+$0  =   mult    $0  $0
+
+
+$6 =   add -0.33333334 Arg
+$4  =   add 0.16666667  SM_C16_1
+$0  =   subt    -0.33333334 Ac_Orn
+[False] $4 >   C18
+$6  =   add 0.016393442 PC_aa_C42_6
+[True] $6 >   $0
+[False] Arg    >   $0
+$0  =   mult    $0  $0
+
+
+$6 =   add -0.33333334 Arg
+$4  =   add 0.16666667  SM_C16_1
+$0  =   subt    -0.33333334 Ac_Orn
+[True] $4 >   C18
+[False] $6 >   $0
+$0  =   add Orn -0.06666667
+[False] Arg    >   $0
+$0  =   mult    $0  $0
+
+
+$6 =   add -0.33333334 Arg
+$4  =   add 0.16666667  SM_C16_1
+$0  =   subt    -0.33333334 Ac_Orn
+[False] $4 >   C18
+$6  =   add 0.016393442 PC_aa_C42_6
+[False] $6 >   $0
+$0  =   add Orn -0.06666667
+[False] Arg    >   $0
+$0  =   mult    $0  $0

@@ -11,6 +11,7 @@ test_prog = [
 ]
 
 
+
 def decomp(prog_lines):
     branch_i = []
     for i, line in enumerate(prog_lines):
@@ -36,10 +37,10 @@ def decomp(prog_lines):
             elif "QUIT" in instr:
                 break
             else:
-                print("appending ", instr)
+                # print("appending ", instr)
                 sub_prog.append(instr)
 
-        print("\ndone prog\n")
+        # print("\ndone prog\n")
         sub_progs.append(sub_prog)
 
     return sub_progs
@@ -132,14 +133,17 @@ def simplify2(prog_lines):
 # extract("results/aug2/0_0_250000_25000_0/genos/iter0-fold4.txt")
 subs = decomp(test_prog)
 
-for sp in subs:
-    # print("\n\norig \n")
-    # for line in sp:
-    #     print(line)
+with open("../parts", 'w') as out_f:
+    for sp in subs:
+        print("\n", file=out_f)
+        for line in sp:
+            print(line, file=out_f)
+
     # print("\nsimp \n")
-    # for line in simplify2(sp):
+    # for line in simplify1(sp):
     #     print(line)
-    simplify2(sp)
+
+    # simplify2(sp)
 
 # extract("../results/test/0_0_25000_1000_17/genos/iter0-fold2.txt")
 
