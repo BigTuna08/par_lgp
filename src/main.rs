@@ -36,21 +36,21 @@ fn main() {
 //    let data = parLGP::dataMgmt::FullDataSet::new("inputs/data3.csv");
 //
 //
-//    let m1 = ValueType::Metabolite("total_DMA".to_string());
-//    let m2 =  ValueType::Metabolite("Ser".to_string());
+    let m1 = ValueType::Metabolite("total_DMA".to_string());
+    let m2 =  ValueType::Metabolite("Ser".to_string());
 //
-//    println!("ratio= {}", parLGP::dataAnal::get_comparison_ratio(m1,m2, &*data) );
+    println!("ratio= {}", parLGP::dataAnal::get_comparison_ratio(m1,m2, &*data) );
 
 
 
-//    println!("case: {:?} < {:?} ratio= {}", m1, m2, parLGP::dataAnal::get_conditional_comparison_ratio(m1,m2, &*data, true) );
-//    println!("not : {:?} < {:?} ratio= {}", m1, m2, parLGP::dataAnal::get_conditional_comparison_ratio(m1,m2, &*data, false) );
+    println!("case: {:?} < {:?} ratio= {}", m1, m2, parLGP::dataAnal::get_conditional_comparison_ratio(m1,m2, &*data, true) );
+    println!("not : {:?} < {:?} ratio= {}", m1, m2, parLGP::dataAnal::get_conditional_comparison_ratio(m1,m2, &*data, false) );
 //
 //    println!("ratio= {}", parLGP::dataAnal::get_less_than_ratio("Arg", -0.333, &*data) );
 
-    let mut runner = Runner::new("configs/experiment.txt");
-    println!("runner {:?}", runner);
-    runner.run_all_configs();
+//    let mut runner = Runner::new("configs/experiment.txt");
+//    println!("runner {:?}", runner);
+//    runner.run_all_configs();
 
 
     let end = PreciseTime::now();

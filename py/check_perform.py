@@ -1,7 +1,7 @@
 import csv
 
 DATA_FILE = 'inputs/data3.csv'
-PROG_FILE = 'parts'
+PROG_FILE = 'outs'
 OUT_FILE = PROG_FILE + "-perform"
 
 SKIPS = ["=", "add", "[True]", ">", "[False]", "<", "subt", "mult", "pdiv"]
@@ -43,6 +43,7 @@ def run_prog(prog_lines):
         regs = {}
         for line in prog_lines:
             # print("line: ", line, end=" ")
+            print("line: ", line)
             parts = line.split()
             if "$" in parts[0]:
                 v1, v2 = get_vals(regs, m_inds, parts, row)
@@ -67,7 +68,7 @@ def run_prog(prog_lines):
                 pass
                 # print("skiped")
 
-        # print(regs["$0"], row[2])
+        print()
         if regs["$0"] > 0 and row[2] == "1":
             correct += 1
         elif regs["$0"] < 0 and row[2] == "0":
@@ -81,18 +82,25 @@ def run_prog(prog_lines):
 
 
 def get_vals(regs, m_inds, parts, row):
+    # b = "$0" not in regs.keys()
+    # b2 = parts[4] is "$0"
+    # print("parts is: ", parts, b, b2, parts[4], regs.keys())
     v1, v2 = None, None
     try:
         v1 = float(parts[3])
     except:
-        if "$" in parts[3]:
+        if parts[3] is "$0" and "$0" not in regs.keys():
+            v1 = 0
+        elif "$" in parts[3]:
             v1 = regs[parts[3]]
         else:
             v1 = float(row[m_inds[parts[3]]])
     try:
         v2 = float(parts[4])
     except:
-        if "$" in parts[4]:
+        if parts[4] == "$0" and "$0" not in regs.keys():
+            v2 = 0
+        elif "$" in parts[4]:
             v2 = regs[parts[4]]
         else:
             v2 = float(row[m_inds[parts[4]]])
@@ -152,9 +160,20 @@ if __name__ == '__main__':
     with open(OUT_FILE, "w") as f:
         ps = get_progs()
 
+        error_progs = []
         for p in ps:
-            res = run_prog(p)
-            for line in p:
-                print(line, file=f)
-            print(res, "\n", file=f)
+            try:
+                res = run_prog(p)
+                for line in p:
+                    print(line, file=f)
+                print(res, "\n", file=f)
+            except:
+                error_progs.append(p)
+
+        print("\n\n****************************\tERRORS IN " + str(len(error_progs)) + " progs\t*******************************\n")
+        # for p in error_progs:
+        #     for line in p:
+        #         print(line)
+        #     print()
+
 

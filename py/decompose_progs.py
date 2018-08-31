@@ -124,20 +124,18 @@ def simplify2(prog_lines):
         new_lines.append(to_replace)
 
 
-    print("\n*************")
-    print(last_r0, "\nIF")
-    for c in conditions:
-        print(c)
-
 
 # extract("results/aug2/0_0_250000_25000_0/genos/iter0-fold4.txt")
-subs = decomp(test_prog)
 
-with open("../parts", 'w') as out_f:
-    for sp in subs:
-        print("\n", file=out_f)
-        for line in sp:
-            print(line, file=out_f)
+
+if __name__ == '__main__':
+    subs = decomp(test_prog)
+
+    with open("../parts", 'w') as out_f:
+        for sp in subs:
+            print("\n", file=out_f)
+            for line in sp:
+                print(line, file=out_f)
 
     # print("\nsimp \n")
     # for line in simplify1(sp):

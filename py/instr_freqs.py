@@ -44,28 +44,31 @@ def get_instr_freqs(fname):
     return freqs
 
 
-the_file = "../results/long/0_0_25000000_2500000_17/genos/iter0-fold0.txt"
-
-### for ops
-fr = get_op_freqs(the_file)
-sum = 0
-for f in fr:
-    sum += fr[f]
-s = list(fr.keys())
-s.sort()
-for f in s:
-    print(f, '{0:.0f}'.format(fr[f]*100/sum)) # as proportion of total
 
 
-print("\n\n\n")
+if __name__ == '__main__':
+    the_file = "../results/long/0_0_25000000_2500000_17/genos/iter0-fold0.txt"
 
-### for instrs
-ins_fr = get_instr_freqs(the_file)
-threash = 100
+    ### for ops
+    fr = get_op_freqs(the_file)
+    sum = 0
+    for f in fr:
+        sum += fr[f]
+    s = list(fr.keys())
+    s.sort()
+    for f in s:
+        print(f, '{0:.0f}'.format(fr[f]*100/sum)) # as proportion of total
 
-for ins in ins_fr:
-    if ins_fr[ins] >= threash:
-        print(ins_fr[ins], ins)
+
+    print("\n\n\n")
+
+    ### for instrs
+    ins_fr = get_instr_freqs(the_file)
+    threash = 100
+
+    for ins in ins_fr:
+        if ins_fr[ins] >= threash:
+            print(ins_fr[ins], ins)
 
 
 

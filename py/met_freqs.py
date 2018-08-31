@@ -67,21 +67,21 @@ def print_top_n_bad(freqs, n):
 #     return freqs
 
 
-the_file = "../results/long/0_0_25000000_2500000_17/genos/iter0-fold0.txt"
+if __name__ == '__main__':
+    the_file = "../results/long/0_0_25000000_2500000_17/genos/iter0-fold0.txt"
 
-### for ops
-fr = get_met_freqs(the_file)
+    ### for ops
+    fr = get_met_freqs(the_file)
 
-s = list(fr.keys())
-s.sort()
-for f in s:
-    print(f, fr[f])
-
-
-print("\n\n\n")
+    s = list(fr.keys())
+    s.sort()
+    for f in s:
+        print(f, fr[f])
 
 
-print_top_n_bad(fr, 10)
+    print("\n\n\n")
+
+    print_top_n_bad(fr, 10)
 # ### for instrs
 # ins_fr = get_instr_freqs(the_file)
 # threash = 100

@@ -23,7 +23,9 @@ def print_lines(prog_lines):
 
 
 # extract("results/aug2/0_0_250000_25000_0/genos/iter0-fold4.txt")
-extract("results/long/0_0_25000000_2500000_17/genos/iter0-fold0.txt")
+
+if __name__ == '__main__':
+    extract("results/long/0_0_25000000_2500000_17/genos/iter0-fold0.txt")
 
 
 # extract("../results/test/0_0_25000_1000_17/genos/iter0-fold2.txt")

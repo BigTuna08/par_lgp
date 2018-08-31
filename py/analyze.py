@@ -164,7 +164,10 @@ def print_lines(prog_lines):
         print(line)
     print("\n")
 
-anaylze("../results/aug2/0_0_250000_25000_0/genos/iter0-fold4.txt", "(4,10)")
+
+
+if __name__ == '__main__':
+    anaylze("../results/aug2/0_0_250000_25000_0/genos/iter0-fold4.txt", "(4,10)")
 
 
 
